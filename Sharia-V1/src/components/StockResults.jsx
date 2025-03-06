@@ -86,8 +86,7 @@ const StockResults = () => {
             } catch (err) {
                 console.error("Error fetching stock results:", err);
                 
-                if (err.response?.status === 403 && 
-                    err.response?.data?.message === "Stock view limit reached for free plan. Please subscribe to view more.") {
+                if (err.response?.status === 403) {
                     setViewLimitReached(true);
                     setShowSubscriptionModal(true);
                     // Important: Don't set stockData to null here
@@ -155,26 +154,26 @@ const StockResults = () => {
     );
 
     const MetricCard = ({ label, value, threshold }) => {
-        // Convert value and threshold to numbers for comparison, handle 'N/A'
+      
         const numericValue = value !== 'N/A' ? parseFloat(value) : NaN;
-        const numericThreshold = threshold && threshold !== 'N/A' ? parseFloat(threshold.split(' ')[3]) : NaN; // Extract threshold number
+        const numericThreshold = threshold && threshold !== 'N/A' ? parseFloat(threshold.split(' ')[3]) : NaN; 
     
         let bgColorClassName;
         const isHalal = stockData.Initial_Classification === 'Halal';
     
         if (isHalal) {
-            // Halal stock color logic (Green/Red)
+            
             if (!isNaN(numericValue) && !isNaN(numericThreshold) && numericValue > numericThreshold) {
-                bgColorClassName = 'bg-gradient-to-r from-red-50 to-pink-50/30'; // Red if above threshold for Halal
+                bgColorClassName = 'bg-gradient-to-r from-red-50 to-pink-50/30'; 
             } else {
-                bgColorClassName = 'bg-gradient-to-r from-green-50 to-emerald-50/30'; // Green if within threshold or N/A for Halal
+                bgColorClassName = 'bg-gradient-to-r from-green-50 to-emerald-50/30'; 
             }
         } else {
-            // Haram (Non-Halal) stock color logic (Blue/Orange)
+            
             if (!isNaN(numericValue) && !isNaN(numericThreshold) && numericValue > numericThreshold) {
-                bgColorClassName = 'bg-gradient-to-r from-red-50 to-pink-50/30'; // Orange if above threshold for Haram
+                bgColorClassName = 'bg-gradient-to-r from-red-50 to-pink-50/30'; 
             } else {
-                bgColorClassName = 'bg-gradient-to-r from-green-50 to-emerald-50/30'; // Blue if within threshold or N/A for Haram
+                bgColorClassName = 'bg-gradient-to-r from-green-50 to-emerald-50/30'; 
             }
         }
     

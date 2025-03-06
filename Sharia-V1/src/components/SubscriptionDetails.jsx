@@ -56,6 +56,7 @@ import Header from './Header';
 
 const SubscriptionDetails = () => {
     const email = localStorage.getItem('userEmail');
+    const [currentPlan, setCurrentPlan] = useState('free');
     const [selectedPlan, setSelectedPlan] = useState('free'); // 
     const [billingCycle, setBillingCycle] = useState('monthly');
     const [showConfirmation, setShowConfirmation] = useState(false);
@@ -83,8 +84,9 @@ const SubscriptionDetails = () => {
                 setPlanFeatures(plansData.planFeatures);
                 
                 // Get current user subscription
-                const userSubscription = await getCurrentSubscription();
+                const userSubscription = userData.subscription;
                 if (userSubscription && userSubscription.plan) {
+                    setCurrentPlan(userSubscription.plan)
                     setSelectedPlan(userSubscription.plan);
                     setBillingCycle(userSubscription.billingCycle || 'monthly');
                 }
@@ -137,40 +139,17 @@ const SubscriptionDetails = () => {
     };
 
     const handleSubscribe = async () => {
-        try {
-            // Call the backend to check if we need to process payment
-            const changeResponse = await changeSubscriptionPlan(selectedPlan, billingCycle);
-            
-            // If payment is required, navigate to payment page
-            if (changeResponse.nextStep === 'payment') {
-                navigate('/razorpay', {
-                    state: {
-                        selectedPlan: selectedPlan,
-                        billingCycle: billingCycle,
-                        totalPrice: getTotalPrice(selectedPlan),
-                        planPrice: getPlanPrice(selectedPlan),
-                        tax: getTax(getPlanPrice(selectedPlan)),
-                        planFeatures: getPlanFeatures(selectedPlan),
-                    },
-                });
-            } else if (changeResponse.nextStep === 'update') {
-                // This is for downgrading to free plan, no payment needed
-                alert('Your plan has been updated to Free.');
-                // Refresh subscription data
-                const userSubscription = await getCurrentSubscription();
-                if (userSubscription && userSubscription.plan) {
-                    setSelectedPlan(userSubscription.plan);
-                }
-            }
-        } catch (err) {
-            // Handle specific error cases
-            if (err.response && err.response.status === 400) {
-                alert(err.response.data.message);
-            } else {
-                alert('An error occurred while processing your request.');
-            }
-            console.error(err);
-        }
+       
+        navigate('/razorpay', {
+            state: {
+                selectedPlan: selectedPlan,
+                billingCycle: billingCycle,
+                totalPrice: getTotalPrice(selectedPlan),
+                planPrice: getPlanPrice(selectedPlan),
+                tax: getTax(getPlanPrice(selectedPlan)),
+                planFeatures: getPlanFeatures(selectedPlan),
+            },
+        });
     };
 
     if (loading) {
@@ -466,7 +445,7 @@ const SubscriptionDetails = () => {
 
             {/* Confirmation Modal */}
             {showConfirmation && (
-                <div className="fixed inset-0 bg-slate-900 bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0  bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 transform transition-all">
                         <div className="flex justify-between items-start mb-6">
                             <h3 className="text-xl font-bold text-slate-900">Confirm Subscription</h3>

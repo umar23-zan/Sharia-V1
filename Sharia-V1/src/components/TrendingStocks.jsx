@@ -65,8 +65,8 @@ const TrendingStocks = () => {
 
 
   const fetchUserPlan = async () => {
-    // Dummy user plan - you can adjust this as needed for testing different plan scenarios
-    setUserPlan('free'); // Or 'premium' for testing premium features
+   
+    setUserPlan(user.subscription.plan); 
   };
 
   useEffect(() => {
@@ -74,14 +74,7 @@ const TrendingStocks = () => {
     const fetchAllStocksAndFilterTrending = async () => {
       setLoading(true);
       try {
-        // Use dummyAllStocks instead of actual API call
-        // const response = await fetch('/api/stocks/all');
-        // if (!response.ok) {
-        //   throw new Error(`HTTP error! status: ${response.status}`);
-        // }
-        // const data = await response.json();
         const data = dummyAllStocks;
-
 
         const filteredTrendingStocks = data.filter(stock =>
           trendingStockSymbols.includes(stock.SYMBOL)
@@ -90,8 +83,7 @@ const TrendingStocks = () => {
         console.log("Filtered Trending Stocks (from dummy data):", filteredTrendingStocks)
         const transformedTrendingStocksPromises = filteredTrendingStocks.map(async (stock) => {
           try {
-            // Use dummyCompanyDetails instead of actual axios call
-            // const companyDetailsResponse = await axios.get(`http://13.201.131.141:5000/api/company-details/${stock.SYMBOL}.NS`);
+          
             const companyDetailsData = dummyCompanyDetails[`${stock.SYMBOL}.NS`];
             if (!companyDetailsData) {
               console.error(`No dummy company details found for ${stock.SYMBOL}.NS`);
@@ -99,7 +91,7 @@ const TrendingStocks = () => {
 
             return {
               symbol: stock.SYMBOL,
-              name: companyDetailsData?.company_name || stock.Company_Name, // Fallback to Company_Name if no dummy detail
+              name: companyDetailsData?.company_name || stock.Company_Name, 
               compliance: stock.Initial_Classification,
               sector: stock.Sector,
               complianceScore: stock.Sharia_Confidence_Percentage || 0,
@@ -110,7 +102,7 @@ const TrendingStocks = () => {
             };
           } catch (companyDetailsError) {
             console.error(`Error processing dummy company details for ${stock.SYMBOL}:`, companyDetailsError);
-            return { // Fallback in case of error in dummy data processing
+            return {
               symbol: stock.SYMBOL,
               name: stock.Company_Name,
               compliance: stock.Initial_Classification,
@@ -132,12 +124,12 @@ const TrendingStocks = () => {
       } catch (error) {
         console.error("Could not fetch and filter trending stocks (dummy data):", error);
         setLoading(false);
-        // Error handling if needed for dummy data processing errors
+        
       }
     };
 
     fetchAllStocksAndFilterTrending();
-  }, []); // Empty dependency array
+  }, []); 
 
   const getComplianceColor = (compliance) => {
     if (compliance === 'Halal') return 'bg-green-100 text-green-700';
@@ -155,17 +147,17 @@ const TrendingStocks = () => {
   const isFreePlan = userPlan === 'free';
 
   const handleUpgradeClick = () => {
-    navigate('/subscriptiondetails'); // Navigate to subscription page
+    navigate('/subscriptiondetails');
   };
 
-  // Show only first 2 stocks for free plan users
+ 
   const visibleStocks = isFreePlan ? trendingStocks.slice(0, 2) : trendingStocks;
   const hiddenStocks = isFreePlan ? trendingStocks.slice(2) : [];
 
   return (
     <div className="max-w-7xl mx-auto bg-white min-h-screen">
      <Header />
-      {/* Main content */}
+     
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">
           <div>
@@ -183,7 +175,7 @@ const TrendingStocks = () => {
           )}
         </div>
 
-        {/* Visible Stock List (first 2 for free users) */}
+       
         <div className="space-y-4">
           {visibleStocks.map((stock, index) => (
             <div key={index} className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
@@ -200,11 +192,9 @@ const TrendingStocks = () => {
                   </div>
                   <div className="flex gap-2">
                     <button className="text-gray-400 hover:text-gray-600">
-                      <Star className="w-5 h-5" />
+                      <Heart className="w-5 h-5" />
                     </button>
-                    <button className="text-gray-400 hover:text-gray-600">
-                      <Bookmark className="w-5 h-5" />
-                    </button>
+                    
                   </div>
                 </div>
 
@@ -258,10 +248,10 @@ const TrendingStocks = () => {
             </div>
           ))}
 
-          {/* Hidden Stocks Container with Single Blur Overlay */}
+          
           {isFreePlan && hiddenStocks.length > 0 && (
             <div className="relative mt-8 border-t pt-8">
-              {/* Deliberately showing a glimpse of additional stocks */}
+             
               <h3 className="text-lg font-semibold mb-4">More Trending Stocks</h3>
 
               <div className="space-y-4">
@@ -280,7 +270,7 @@ const TrendingStocks = () => {
                         </div>
                       </div>
 
-                      {/* Minimal content to show behind blur */}
+                     
                       <div className="flex items-baseline mb-4">
                         <span className="text-2xl font-bold">₹{stock.price.toFixed(2)}</span>
                       </div>
@@ -289,7 +279,7 @@ const TrendingStocks = () => {
                 ))}
               </div>
 
-              {/* Single blur overlay with upgrade message */}
+            
               <div className="absolute inset-0 bg-white/80 backdrop-blur-md flex flex-col justify-center items-center p-8 z-10">
                 <div className="text-center max-w-lg">
                   <div className="flex justify-center mb-6">
@@ -313,7 +303,7 @@ const TrendingStocks = () => {
           )}
         </div>
 
-        {/* Upgrade banner at the bottom */}
+       
         {isFreePlan && (
           <div className="mt-8 p-6 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg text-white shadow-lg">
             <div className="flex flex-col md:flex-row justify-between items-center">

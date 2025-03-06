@@ -5,6 +5,7 @@ const stockDataRoutes = require('./routes/stockDataRoutes');
 const watchlistRoutes = require('./routes/watchlist')
 const subscriptionRoutes = require('./routes/subscriptionRoutes')
 const paymentRoutes = require('./routes/paymentmethods')
+const transactionRoutes = require('./routes/transaction')
 
 const cors = require('cors');
 const app = express();
@@ -23,6 +24,7 @@ app.use('/api/stocks',stockDataRoutes);
 app.use('/api/subscribe',subscriptionRoutes);
 app.use('/api/watchlist', watchlistRoutes)
 app.use("/api/payments", paymentRoutes);
+app.use('/api/transaction', transactionRoutes)
 
 app.use('/uploads', express.static('uploads'));
 

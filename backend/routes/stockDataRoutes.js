@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { MongoClient, ObjectId } = require('mongodb');
+const User = require('../models/User');
 
 const MONGO_URI = "mongodb+srv://umar:umar444@authentication-app.ted5m.mongodb.net/";
 const DATABASE_NAME = "authdb";
@@ -8,7 +9,7 @@ const COLLECTION_NAME = "StockData";
 const USER_COLLECTION = "users";
 
 const checkSubscription = async (req, res, next) => {
-        const userId = req.query.userId; // Get user ID from request
+        const userId = req.query.userId; 
     
         if (!userId) {
             return res.status(401).json({ message: "User ID is required" });
@@ -24,18 +25,18 @@ const checkSubscription = async (req, res, next) => {
                 return res.status(404).json({ message: "User not found" });
             }
     
-            // Subscription check based on plan
-            const subscriptionPlan = user.subscription?.plan || 'free'; // Default to 'free' if no subscription info
+            
+            const subscriptionPlan = user.subscription?.plan || 'free';
     
             if (subscriptionPlan === 'basic' || subscriptionPlan === 'premium') {
-                // Basic and Premium plans have unlimited access, but we still check for subscription expiry
+               
                 if (user.subscription?.status === 'active' && user.subscription?.endDate && new Date(user.subscription.endDate) < new Date()) {
-                    // Subscription expired for basic/premium user
+                   
                     await db.collection(USER_COLLECTION).updateOne(
                         { _id: new ObjectId(userId) },
                         {
                             $set: {
-                                'subscription.status': 'inactive', // Update subscription status
+                                'subscription.status': 'inactive', 
                                 viewedStockIds: [],
                                 stockResultsViewsCount: 0
                             }
@@ -43,9 +44,9 @@ const checkSubscription = async (req, res, next) => {
                     );
                     return res.status(403).json({ message: "Subscription expired. Please renew to continue viewing stocks." });
                 }
-                return next(); // Unlimited access for basic/premium
+                return next();
             } else if (subscriptionPlan === 'free') {
-                // Free plan logic - limit to 3 stock views
+                
     
                 if (!user.viewedStockIds) {
                     await db.collection(USER_COLLECTION).updateOne(
@@ -56,9 +57,9 @@ const checkSubscription = async (req, res, next) => {
                 if (user.viewedStockIds.length >= 3) {
                     return res.status(403).json({ message: "Stock view limit reached for free plan. Please subscribe to view more." });
                 }
-                next(); // Allow access if within free limit
+                next();
             } else {
-                // Handle cases where plan is not recognized (optional - for robustness)
+               
                 return res.status(400).json({ message: "Invalid subscription plan." });
             }
     
@@ -70,7 +71,7 @@ const checkSubscription = async (req, res, next) => {
         }
     };
 
-// GET all stocks
+
 router.get('/all', async (req, res) => {
   let client;
   try {
@@ -86,9 +87,16 @@ router.get('/all', async (req, res) => {
   }
 });
 
-// GET stock by symbol
-router.get('/:symbol', checkSubscription, async (req, res) => {
+
+router.get('/:symbol', async (req, res) => {
       const { userId } = req.query;
+    const user = await User.findById(userId);
+  if (!user) return res.status(404).json({ error: "User not found" });
+
+  const planLimits = { free: 5, basic: Infinity, premium: Infinity };
+  if (user.stockSearchCount >= planLimits[user.subscription.plan]) {
+    return res.status(403).json({ error: "Search limit exceeded" });
+  }
 
       let client;
       try {
@@ -103,19 +111,8 @@ router.get('/:symbol', checkSubscription, async (req, res) => {
               
               return res.status(404).json({ message: 'Stock not found' });
           }
-          const user = await db.collection(USER_COLLECTION).findOne({ _id: new ObjectId(userId) });
-          const subscriptionPlan = user.subscription?.plan || 'free';
-    
-          if (subscriptionPlan === 'free' && !user.viewedStockIds.includes(stock.SYMBOL)) {
-            
-            await db.collection(USER_COLLECTION).updateOne(
-                { _id: new ObjectId(userId) },
-                { $push: { viewedStockIds: stock.SYMBOL }, $inc: { stockResultsViewsCount: 1 } }
-            );
-            
-          } else {
-            console.log("User already viewed stock:", stock.SYMBOL); 
-         }
+          user.stockSearchCount += 1;
+          await user.save();
     
           
           res.json(stock);
@@ -148,7 +145,7 @@ router.get('/filter/halal-high-confidence', async (req, res) => {
 });
 
 router.get('/filter/sector', async (req, res) => {
-  const { sector } = req.query; // Sector name
+  const { sector } = req.query; 
   let client;
 
   try {
@@ -166,9 +163,9 @@ router.get('/filter/sector', async (req, res) => {
   }
 });
 
-// GET stocks by Industry
+
 router.get('/filter/industries', async (req, res) => {
-    const { industries } = req.query; // Comma-separated industries
+    const { industries } = req.query;
     let client;
   
     try {
@@ -194,7 +191,7 @@ router.get('/filter/industries', async (req, res) => {
   });
 
   router.get('/filter/industries-sectors', async (req, res) => {
-    const { industries, sectors } = req.query; // Comma-separated industries & sectors
+    const { industries, sectors } = req.query; 
     let client;
   
     try {

@@ -21,6 +21,7 @@ import SubscriptionDetails from './components/SubscriptionDetails';
 import PaymentCheckout from './components/PaymentCheckout';
 import OAuthCallback from './components/OAuthCallback';
 import Razorpay from './components/razorpay';
+import SubscriptionSuccess from './components/SubscriptionSuccess';
 
 const App = () => {
   const userId = localStorage.getItem('userId');
@@ -145,6 +146,14 @@ const App = () => {
                     element={
                         <PrivateRoute>
                             <Razorpay />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/subscription-success"
+                    element={
+                        <PrivateRoute>
+                            <SubscriptionSuccess />
                         </PrivateRoute>
                     }
                 />

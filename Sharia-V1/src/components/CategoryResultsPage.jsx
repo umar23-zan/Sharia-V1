@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios'; // Keep axios import for potential conditional real API calls
 import { LoaderCircle, Star, Bookmark, BarChart, ArrowUpRight, ChevronDown, Filter, Info, Lock, Search, Bell, Heart } from 'lucide-react';
-import logo from '../images/ShariaStocks-logo/logo1.jpeg'
-import account from '../images/account-icon.svg';
 import Header from './Header';
 
 const StatusBadge = ({ status }) => {
@@ -28,7 +26,7 @@ const StockCard = ({ stock, index, isPremium, userPlan }) => {
   const navigate = useNavigate();
   const isBlurred = isPremium && userPlan === 'free';
   
-  // Format percentage change with arrow and color
+  
   const renderPercentChange = (change) => {
     const isPositive = change >= 0;
     const color = isPositive ? 'text-green-500' : 'text-red-500';
@@ -101,11 +99,9 @@ const StockCard = ({ stock, index, isPremium, userPlan }) => {
       <div className="flex mt-4 pt-4 border-t border-gray-100 justify-between">
         <div className="flex space-x-3">
           <button className="text-gray-400 hover:text-gray-600">
-            <Star className="w-5 h-5" />
+            <Heart className="w-5 h-5" />
           </button>
-          <button className="text-gray-400 hover:text-gray-600">
-            <Bookmark className="w-5 h-5" />
-          </button>
+          
         </div>
         <div className="flex space-x-3">
           <button className="text-gray-400 hover:text-gray-600">
@@ -131,7 +127,7 @@ const CategoryResultsPage = () => {
   const [selectedFilter, setSelectedFilter] = useState('All');
   const initialStockCount = 10;
 const location = useLocation();
-    const user = location.state?.user;
+const user = location.state?.user;
 const navigate = useNavigate()
 
   const halalcompanies = [
@@ -147,7 +143,7 @@ const navigate = useNavigate()
     'ADANIENT',
   ];
 
-  // Dummy data for category stock lists
+  
   const dummyCategoryStocks = {
     'halal-high-confidence': [
       { SYMBOL: 'RELIANCE', Company_Name: 'Reliance Industries Ltd', Initial_Classification: 'Halal', Sector: 'Energy', Sharia_Confidence_Percentage: 95 },
@@ -161,7 +157,7 @@ const navigate = useNavigate()
       { SYMBOL: 'SUNPHARMA', Company_Name: 'Sun Pharmaceutical Industries Ltd', Initial_Classification: 'Halal', Sector: 'Healthcare', Sharia_Confidence_Percentage: 91 },
       { SYMBOL: 'MARUTI', Company_Name: 'Maruti Suzuki India Ltd', Initial_Classification: 'Halal', Sector: 'Automotive', Sharia_Confidence_Percentage: 84 },
       { SYMBOL: 'WIPRO', Company_Name: 'Wipro Ltd', Initial_Classification: 'Halal', Sector: 'Technology', Sharia_Confidence_Percentage: 83 },
-      { SYMBOL: 'ADANIENT', Company_Name: 'Adani Enterprises Ltd', Initial_Classification: 'Doubtful', Sector: 'Conglomerates', Sharia_Confidence_Percentage: 60 }, // Included to test "Show More"
+      { SYMBOL: 'ADANIENT', Company_Name: 'Adani Enterprises Ltd', Initial_Classification: 'Doubtful', Sector: 'Conglomerates', Sharia_Confidence_Percentage: 60 },
     ],
     'technology': [
       { SYMBOL: 'TCS', Company_Name: 'Tata Consultancy Services Ltd', Initial_Classification: 'Halal', Sector: 'Technology', Sharia_Confidence_Percentage: 90 },
@@ -174,7 +170,7 @@ const navigate = useNavigate()
       { SYMBOL: 'ACN', Company_Name: 'Accenture plc', Initial_Classification: 'Doubtful', Sector: 'Technology', Sharia_Confidence_Percentage: 60 },
       { SYMBOL: 'SAP', Company_Name: 'SAP SE', Initial_Classification: 'Doubtful', Sector: 'Technology', Sharia_Confidence_Percentage: 55 },
       { SYMBOL: 'CTSH', Company_Name: 'Cognizant Technology Solutions', Initial_Classification: 'Doubtful', Sector: 'Technology', Sharia_Confidence_Percentage: 50 },
-      { SYMBOL: 'MSFT', Company_Name: 'Microsoft Corp', Initial_Classification: 'Haram', Sector: 'Technology', Sharia_Confidence_Percentage: 40 }, // Included for Haram filter testing
+      { SYMBOL: 'MSFT', Company_Name: 'Microsoft Corp', Initial_Classification: 'Haram', Sector: 'Technology', Sharia_Confidence_Percentage: 40 }, 
     ],
     'retail': [
       { SYMBOL: 'RETAIL1', Company_Name: 'Retail Company A', Initial_Classification: 'Halal', Sector: 'Retail', Sharia_Confidence_Percentage: 91 },
@@ -199,7 +195,7 @@ const navigate = useNavigate()
     ],
   };
 
-   // Reuse dummyCompanyDetails from TrendingStocks component or redefine if needed
+  
   const dummyCompanyDetails = {
     'RELIANCE.NS': { company_name: 'RELIANCE INDUSTRIES LTD', current_price: 2500.50, price_change: 15.20, pe_ratio: 25.6, volume: 5000000 },
     'ULTRACEMCO.NS': { company_name: 'ULTRATECH CEMENT LIMITED', current_price: 8000.00, price_change: 50.00, pe_ratio: 28.4, volume: 1500000 },
@@ -236,8 +232,8 @@ const navigate = useNavigate()
 
 
   const fetchUserPlan = async () => {
-    // Dummy user plan
-    setUserPlan('free'); // or 'premium'
+    
+    setUserPlan(user.subscription.plan); 
   };
 
   useEffect(() => {

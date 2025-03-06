@@ -18,8 +18,8 @@ const UserSchema = new mongoose.Schema({
     profilePicture: { type: String },
     resetPasswordToken: { type: String },
     resetPasswordExpire: { type: Date },
-    stockResultsViewsCount: { type: Number, default: 0 }, 
-    viewedStockIds: { type: [String], default: [] }, 
+    stockSearchCount: { type: Number, default: 0 }, 
+    watchlist: { type: [String], default: [] },
     subscription: {
       plan: {
         type: String,
@@ -34,7 +34,7 @@ const UserSchema = new mongoose.Schema({
       status: {
         type: String,
         enum: ['active', 'inactive', 'past_due', 'canceled'],
-        default: 'active'
+        default: 'inactive'
       },
       startDate: {
         type: Date,
@@ -48,25 +48,9 @@ const UserSchema = new mongoose.Schema({
         default: true
       }
     },
-    savedStocks: [{
-      symbol: String,
-      name: String,
-      dateAdded: {
-        type: Date,
-        default: Date.now
-      }
-    }],
 });
 
-UserSchema.methods.hasReachedStockLimit = function() {
-  const limits = {
-    free: 0,
-    basic: 10,
-    premium: 50
-  };
-  
-  return this.savedStocks.length >= limits[this.subscription.plan];
-};
+
 
 
 module.exports = mongoose.model('User', UserSchema);

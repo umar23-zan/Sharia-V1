@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const TransactionSchema = new mongoose.Schema({
+  transactionId: String,
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -8,14 +9,6 @@ const TransactionSchema = new mongoose.Schema({
   },
   amount: {
     type: Number,
-    required: true
-  },
-  currency: {
-    type: String,
-    default: 'INR'
-  },
-  description: {
-    type: String,
     required: true
   },
   status: {
@@ -41,10 +34,6 @@ const TransactionSchema = new mongoose.Schema({
   billingCycle: {
     type: String,
     enum: ['monthly', 'annual'],
-    required: true
-  },
-  taxAmount: {
-    type: Number,
     required: true
   },
   receiptUrl: String,

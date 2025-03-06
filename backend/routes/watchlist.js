@@ -1,32 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const Watchlist = require('../models/Watchlist'); // Create this model
+const User = require('../models/User');
 
-// Add stock to watchlist
-router.post('/', async (req, res) => {
-    try {
-        const { userId, symbol, companyName, stockData } = req.body;
-
-        // Check if the stock is already in the watchlist
-        const existingStock = await Watchlist.findOne({ userId, symbol });
-        if (existingStock) {
-            return res.status(400).json({ message: 'Stock already in watchlist' });
-        }
-
-        // Add new stock to watchlist
-        const newStock = new Watchlist({
-            userId,
-            symbol,
-            companyName,
-            stockData,
-        });
-        await newStock.save();
-        res.status(201).json({ message: 'Stock added to watchlist', data: newStock });
-    } catch (error) {
-        console.error('Error adding stock to watchlist:', error);
-        res.status(500).json({ message: 'Internal server error' });
+router.post("/", async (req, res) => {
+    const { userId, stockSymbol } = req.body;
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+  
+    const watchlistLimits = { free: 10, basic: 30, premium: 50 };
+    if (user.watchlist.length >= watchlistLimits[user.subscription.plan]) {
+      return res.status(403).json({ error: "Watchlist limit exceeded" });
     }
-});
+  
+    user.watchlist.push(stockSymbol);
+    await user.save();
+    res.json({ message: "Stock added to watchlist", watchlist: user.watchlist });
+  });
 
 router.get('/:userId', async (req, res) => {
   try {
