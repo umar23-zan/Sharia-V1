@@ -72,7 +72,7 @@ const Signup = () => {
       };
 
     return (
-        <div className="bg-gray-50 min-h-screen sm:p-6 ">
+        <div className=" min-h-screen sm:p-6 ">
             <div className="mx-auto max-w-md pt-8">
                 <div className="mb-10"> {/* Spacing for back arrow */}
                     <button className="text-black text-xl" onClick={() => navigate('/')}> <ArrowLeft /> </button>

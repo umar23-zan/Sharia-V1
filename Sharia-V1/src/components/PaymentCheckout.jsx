@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import Header from './Header';
 
 const PaymentCheckout = () => {
     const [selectedCard, setSelectedCard] = useState('visa');
@@ -118,8 +119,9 @@ const PaymentCheckout = () => {
 
 
     return (
-        <div className="font-sans max-w-3xl mx-auto">
+        <div className="font-sans max-w-7xl mx-auto">
             {/* Header */}
+            <Header />
             <div className="bg-purple-600 text-white p-6 ">
                 <h1 className="text-xl font-bold mb-6">Complete Your Purchase</h1>
 

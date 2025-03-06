@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Heart, ArrowLeft, TrendingUp, ArrowUpRight, ArrowDownRight, Clock, Filter, Star, Bookmark, Lock } from 'lucide-react';
-import axios from 'axios'; // Keep axios import for now, might be useful if you decide to conditionally use real API calls later
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Heart, ArrowLeft, TrendingUp, ArrowUpRight, ArrowDownRight, Clock, Filter, Star, Bookmark, Lock,Search, Bell } from 'lucide-react';
+import axios from 'axios'; 
 import logo from '../images/ShariaStocks-logo/logo1.jpeg'
+import account from '../images/account-icon.svg';
+import Header from './Header';
 
 const TrendingStocks = () => {
+  const location = useLocation();
+    const user = location.state?.user;
   const navigate = useNavigate();
   const [trendingStocks, setTrendingStocks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -151,7 +155,7 @@ const TrendingStocks = () => {
   const isFreePlan = userPlan === 'free';
 
   const handleUpgradeClick = () => {
-    navigate('/subscription'); // Navigate to subscription page
+    navigate('/subscriptiondetails'); // Navigate to subscription page
   };
 
   // Show only first 2 stocks for free plan users
@@ -160,32 +164,7 @@ const TrendingStocks = () => {
 
   return (
     <div className="max-w-7xl mx-auto bg-white min-h-screen">
-      {/* Header */}
-      <div className="flex justify-between items-center p-4 border-b">
-        <div className="flex items-center">
-          <div className="w-48 h-14 rounded-lg flex items-center justify-center overflow-hidden">
-            <img src={logo} onClick={()=>navigate('/dashboard')} alt="ShariaStock Logo" className="w-full h-full object-fill cursor-pointer" />
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search stocks..."
-              className="pl-10 pr-4 py-2 border rounded-full w-64 focus:outline-none"
-            />
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-            </div>
-          </div>
-          <div className="bg-purple-600 text-white px-2 py-1 rounded text-sm">
-            AI
-          </div>
-        </div>
-      </div>
-
+     <Header />
       {/* Main content */}
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">

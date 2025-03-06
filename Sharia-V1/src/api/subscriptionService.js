@@ -1,9 +1,9 @@
-// src/services/subscriptionService.js
+
 import axios from 'axios';
 
 const API_URL = '/api/subscribe';
 
-// Get all subscription plans
+
 export const getSubscriptionPlans = async () => {
   try {
     const response = await axios.get(`${API_URL}/plans`);
@@ -14,7 +14,7 @@ export const getSubscriptionPlans = async () => {
   }
 };
 const userId = localStorage.getItem('userId')
-// Get current user subscription
+
 export const getCurrentSubscription = async () => {
   try {
     const response = await axios.get(`${API_URL}/current?userId=${userId}`);

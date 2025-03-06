@@ -1,25 +1,18 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Camera, Plus, Trash2 } from 'lucide-react';
 import logo from '../images/ShariaStocks-logo/logo1.jpeg'
+import account from '../images/account-icon.svg';
+import Header from './Header';
 
 const PersonalDetails = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const user = location.state?.user;
 
   return (
-    <div className="max-w-7xl mx-auto min-h-screen bg-gray-50">
-      <div className="flex justify-between items-center p-4 border-b">
-              <div className="flex items-center">
-                <div className="w-48 h-14 rounded-lg flex items-center justify-center overflow-hidden">
-                  <img src={logo} onClick={()=>navigate('/dashboard')} alt="ShariaStock Logo" className="w-full h-full object-fill cursor-pointer" />
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="bg-purple-600 text-white px-2 py-1 rounded text-sm">
-                  AI
-                </div>
-              </div>
-            </div>
+    <div className="max-w-7xl mx-auto min-h-screen ">
+      <Header />
       <div className="max-w-7xl mx-auto">
         <div className="p-4 flex items-center gap-4">
           <ArrowLeft 

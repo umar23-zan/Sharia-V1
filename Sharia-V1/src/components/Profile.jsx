@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Camera, Settings, LogOut } from 'lucide-react';
 import account from '../images/account-icon.svg'
 import logo from '../images/ShariaStocks-logo/logo1.jpeg'
+import Header from './Header';
 
 const Profile = () => {
   const location = useLocation();
@@ -15,20 +16,8 @@ const Profile = () => {
   };
 
   return (
-    <div className=" max-w-7xl mx-auto min-h-screen bg-gray-50">
-      <div className="flex justify-between items-center p-4 border-b">
-              <div className="flex items-center">
-                <div className="w-48 h-14 rounded-lg flex items-center justify-center overflow-hidden">
-                  <img src={logo} onClick={()=>navigate('/dashboard')} alt="ShariaStock Logo" className="w-full h-full object-fill cursor-pointer" />
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                
-                <div className="bg-purple-600 text-white px-2 py-1 rounded text-sm">
-                  AI
-                </div>
-              </div>
-            </div>
+    <div className=" max-w-7xl mx-auto min-h-screen ">
+      <Header />
       <div className="max-w-7xl mx-auto">
         <div className="p-4">
           <ArrowLeft 
@@ -67,8 +56,8 @@ const Profile = () => {
               ].map((item) => (
                 <button
                   key={item.title}
-                  onClick={() => navigate(item.path)}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors"
+                  onClick={() => navigate(item.path, { state: { user } })}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors"
                 >
                   <span className="text-xl">{item.icon}</span>
                   <div className="flex-1 text-left">
@@ -96,11 +85,11 @@ const Profile = () => {
                     </div>
                     <div>
                       <h2 className="text-2xl font-semibold sm:text-md">Premium Plan</h2>
-                      <p className="text-white/80 sm:text-md">Unlock exclusive features</p>
+                      <p className="text-white/80 sm:text-md " >Unlock exclusive features</p>
                     </div>
                   </div>
                 </div>
-                <button className="px-6 py-2.5 bg-white text-blue-600 rounded-xl font-medium hover:bg-white/90 transition-colors">
+                <button className="px-6 py-2.5 bg-white text-blue-600 rounded-xl font-medium hover:bg-white/90 cursor-pointer transition-colors" onClick={()=>{navigate('/subscriptiondetails')}}>
                   Upgrade Now
                 </button>
               </div>

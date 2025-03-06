@@ -29,7 +29,7 @@ const ForgotPassword = () => {
     };
 
     return (
-        <div className=" bg-gray-50 p-4 sm:p-6 md:p-8 lg:p-10 "> {/* Center content vertically */}
+        <div className="  p-4 sm:p-6 md:p-8 lg:p-10 "> {/* Center content vertically */}
             <div className=" max-w-md mx-auto flex flex-col gap-20 lg:gap-10">
                 {/* Back Button */}
                 <div className="mb-8">

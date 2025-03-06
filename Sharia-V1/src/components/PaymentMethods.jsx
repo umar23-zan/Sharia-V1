@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, PlusCircle, Shield, CheckCircle, X, CreditCard } from 'lucide-react';
 import axios from 'axios';
-import {useNavigate} from 'react-router-dom'
+import {useNavigate, useLocation} from 'react-router-dom'
 import logo from '../images/ShariaStocks-logo/logo1.jpeg'
+import account from '../images/account-icon.svg';
+import Header from './Header';
 
 const PaymentMethodsPage = () => {
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const userId = localStorage.getItem('userId');
+  const location = useLocation();
+    const user = location.state?.user;
   const navigate = useNavigate()
   const [showCardForm, setShowCardForm] = useState(false);
   const [showUPIForm, setShowUPIForm] = useState(false);
@@ -166,18 +170,7 @@ const PaymentMethodsPage = () => {
 
   return (
     <div className="w-full max-w-7xl mx-auto bg-gray-50">
-      <div className="flex justify-between items-center p-4 border-b">
-              <div className="flex items-center">
-                <div className="w-48 h-14 rounded-lg flex items-center justify-center overflow-hidden">
-                  <img src={logo} onClick={()=>navigate('/dashboard')} alt="ShariaStock Logo" className="w-full h-full object-fill cursor-pointer" />
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="bg-purple-600 text-white px-2 py-1 rounded text-sm">
-                  AI
-                </div>
-              </div>
-            </div>
+      <Header />
       <div className="p-4">
         <button className="flex items-center text-gray-700 mb-5" onClick={() =>navigate(-1)}>
           <ChevronLeft className="w-5 h-5 mr-1" />

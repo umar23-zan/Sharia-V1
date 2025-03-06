@@ -71,7 +71,7 @@ const Login = () => {
       };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-4 sm:p-6 md:p-8 lg:p-10">
+        <div className="min-h-screen  p-4 sm:p-6 md:p-8 lg:p-10">
             <div className="max-w-md mx-auto pt-8">
                 {/* Back Arrow */}
                 <div className="mb-10">

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Shield, Sparkles, Heart, TrendingUp, ArrowLeft } from 'lucide-react';
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Header from "./Header";
 
 const WatchList = () => {
     const [activeTab, setActiveTab] = useState("all");
@@ -41,7 +42,7 @@ const WatchList = () => {
                 response.data.watchlist.forEach(async (stock) => {
                     try {
                         const companyDetailsResponse = await axios.get(
-                            `http://127.0.0.1:5000/api/company-details/${stock.symbol + ".NS"}`
+                            `http://13.201.131.141:5000/api/company-details/${stock.symbol + ".NS"}`
                         );
 
                         // Store details in state using stock symbol as key
@@ -95,35 +96,25 @@ const WatchList = () => {
     });
 
     return (
-        <div className="relative min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto relative min-h-screen ">
+            <Header />
             <div className={`${isDesktop ? 'h-[25vh]' : 'h-[27vh]'} absolute top-0 left-0 w-full bg-gradient-to-br from-blue-600 to-purple-600`} />
 
             <div className={`relative  mx-auto pt-6 px-6`}>
                 
-                <div className="flex justify-between items-center mb-5">
+                <div className="flex justify-start items-center mb-10">
                     <div>
-                    <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition mr-3"> {/* Back Button */}
+                    <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white/10 text-white hover:bg-white/20 cursor-pointer transition mr-3"> {/* Back Button */}
                             <ArrowLeft className="w-5 h-5" />
                         </button>
+                        </div>
+                        <div>
                         <h1 className="text-white text-2xl font-semibold">Watchlist</h1>
                         <p className="text-white/80 text-sm">Track your favorite stocks</p>
-                    </div>
-                    <div className="flex gap-3">
-                        <button className="p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                            </svg>
-                        </button>
-                        <button className="p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                            </svg>
-                        </button>
-                        
-                    </div>
+                        </div>
                 </div>
                 {/* Search Bar */}
-                <div className={`${isDesktop ? 'bg-white shadow' : 'bg-white/10'} rounded-full p-3 mb-4`}>
+                <div className={`${isDesktop ? 'bg-white shadow' : 'bg-white/10'} rounded-full p-3 mb-10`}>
                             <input
                                 type="text"
                                 placeholder="Search your stocks..."

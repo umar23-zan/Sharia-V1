@@ -20,7 +20,7 @@ export default function Design() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-around bg-gray-50 p-6 sm:p-8 lg:p-10">
+        <div className="min-h-screen flex flex-col items-center justify-around p-6 sm:p-8 lg:p-10">
             <div className="mb-10 flex flex-col items-center justify-center gap-6 sm:gap-8 md:gap-10">
                 <img
                     src={logo}

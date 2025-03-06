@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { LineChart, Shield, Sparkles, Heart, ArrowLeft, LoaderCircle } from 'lucide-react';
 import Card from './Card';
 import PriceChart from './PriceChart';
 import SubscriptionModal from './SubscriptionModal';
+import account from '../images/account-icon.svg';
+import logo from '../images/ShariaStocks-logo/logo1.jpeg'
+import Header from './Header'
 
 
 const StockResults = () => {
+    const location = useLocation();
+    const user = location.state?.user;
     const { symbol } = useParams();
     const [companyDetails, setCompanyDetails] = useState(null);
     const [stockData, setStockData] = useState(null);
@@ -149,29 +154,51 @@ const StockResults = () => {
         </div>
     );
 
-    const MetricCard = ({ label, value, threshold }) => (
-        <div className={`${
-            stockData.Initial_Classification === 'Halal'
-                ? 'bg-gradient-to-r from-green-50 to-emerald-50/30'
-                : 'bg-gradient-to-r from-red-50 to-pink-50/30'
-        } p-3 sm:p-4 rounded-xl hover:bg-gray-50 transition-all`}>
-            <div className="flex flex-col items-center text-center gap-2 sm:gap-3">
-                <div className="bg-green-50 p-1.5 sm:p-2 rounded-lg">
-                    <LineChart className={`w-3 h-3 sm:w-4 sm:h-4 ${stockData.Initial_Classification === 'Halal' ? 'text-green-600' : 'text-red-600'}`} />
-                </div>
-                <div>
-                    <p className="text-gray-600 text-sm">{label}</p>
-                    <p className="text-lg sm:text-xl font-semibold text-gray-900">{value}</p>
-                    <p className="text-xs sm:text-sm text-gray-500 mt-1">{threshold}</p>
+    const MetricCard = ({ label, value, threshold }) => {
+        // Convert value and threshold to numbers for comparison, handle 'N/A'
+        const numericValue = value !== 'N/A' ? parseFloat(value) : NaN;
+        const numericThreshold = threshold && threshold !== 'N/A' ? parseFloat(threshold.split(' ')[3]) : NaN; // Extract threshold number
+    
+        let bgColorClassName;
+        const isHalal = stockData.Initial_Classification === 'Halal';
+    
+        if (isHalal) {
+            // Halal stock color logic (Green/Red)
+            if (!isNaN(numericValue) && !isNaN(numericThreshold) && numericValue > numericThreshold) {
+                bgColorClassName = 'bg-gradient-to-r from-red-50 to-pink-50/30'; // Red if above threshold for Halal
+            } else {
+                bgColorClassName = 'bg-gradient-to-r from-green-50 to-emerald-50/30'; // Green if within threshold or N/A for Halal
+            }
+        } else {
+            // Haram (Non-Halal) stock color logic (Blue/Orange)
+            if (!isNaN(numericValue) && !isNaN(numericThreshold) && numericValue > numericThreshold) {
+                bgColorClassName = 'bg-gradient-to-r from-red-50 to-pink-50/30'; // Orange if above threshold for Haram
+            } else {
+                bgColorClassName = 'bg-gradient-to-r from-green-50 to-emerald-50/30'; // Blue if within threshold or N/A for Haram
+            }
+        }
+    
+        return (
+            <div className={`${bgColorClassName} p-3 sm:p-4 rounded-xl hover:bg-gray-50 transition-all`}>
+                <div className="flex flex-col items-center text-center gap-2 sm:gap-3">
+                    <div className="bg-green-50 p-1.5 sm:p-2 rounded-lg">
+                        <LineChart className={`w-3 h-3 sm:w-4 sm:h-4 ${isHalal ? 'text-green-600' : 'text-red-600'}`} />
+                    </div>
+                    <div>
+                        <p className="text-gray-600 text-sm">{label}</p>
+                        <p className="text-lg sm:text-xl font-semibold text-gray-900">{value}</p>
+                        <p className="text-xs sm:text-sm text-gray-500 mt-1">{threshold}</p>
+                    </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    };
 
-    const Header = () => {
+    const Headers = () => {
         const [isTooltipVisible, setIsTooltipVisible] = useState(false);
         return (
-            <div className="sticky top-0 bg-white p-3 sm:p-4 border-b z-10">
+            
+    <div className="  sticky top-0 bg-white p-3 sm:p-4  z-10">
                 <div className="container mx-auto flex items-center justify-between">
                     <div className="flex items-center flex-1 min-w-0">
                         <ArrowLeft className="w-5 h-5 text-gray-700 mr-3 sm:mr-4 cursor-pointer flex-shrink-0" onClick={() => navigate(-1)} />
@@ -201,9 +228,10 @@ const StockResults = () => {
 
     if (viewLimitReached) {
         return (
-            <div className="min-h-screen">
+            <div className="max-w-7xl mx-auto  min-h-screen">
                 <Header />
-                <div className="max-w-7xl mx-auto p-4">
+                <Headers />
+                <div className="p-4">
                     <div className="bg-white rounded-lg shadow-lg p-6 text-center">
                         <h2 className="text-xl font-semibold mb-4">View Limit Reached</h2>
                         <p className="text-gray-600 mb-6">You've reached the limit for viewing stock details. Subscribe to continue viewing more stocks.</p>
@@ -265,6 +293,7 @@ const StockResults = () => {
                                             <span className="text-xs sm:text-sm font-medium text-gray-600">
                                                 {stockData.Shariah_Confidence_Percentage ? stockData.Shariah_Confidence_Percentage.toFixed(0) + '%' : 'N/A'} Confidence
                                             </span>
+                                            <span>{stockData.Haram_Reason? stockData.Haram_Reason : 'N/A'}</span>
                                         </div>
                                     </div>
                                 </div>

@@ -1,30 +1,12 @@
 import React, { useState } from 'react';
+import Header from './Header';
 
 const Razorpay = () => {
   const [selectedPayment, setSelectedPayment] = useState('debit');
 
   return (
     <div className="flex flex-col h-screen">
-      {/* Header */}
-      <div className="bg-blue-500 p-4 text-white">
-        <div className="max-w-4xl mx-auto flex items-center">
-          <button className="mr-4">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-          </button>
-          <div className="flex items-center">
-            <div className="bg-white w-10 h-10 rounded flex items-center justify-center mr-3">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b52d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                <circle cx="12" cy="10" r="4" fill="#3b52d4"></circle>
-              </svg>
-            </div>
-            <span className="text-xl font-medium">ShariaStocks</span>
-          </div>
-        </div>
-      </div>
+      <Header />
 
       
       <div className="bg-gray-100 flex-grow flex justify-center items-start p-4">

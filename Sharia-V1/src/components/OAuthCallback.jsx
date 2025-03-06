@@ -22,7 +22,7 @@ const OAuthCallback = () => {
   }, [location, navigate]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <div className="flex items-center justify-center min-h-screen ">
       <div className="p-8 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-semibold text-center">Processing your login...</h2>
         <div className="mt-4 flex justify-center">

@@ -6,6 +6,10 @@ import {
     getCurrentSubscription, 
     changeSubscriptionPlan 
   } from '../api/subscriptionService';
+  import logo from '../images/ShariaStocks-logo/logo1.jpeg'
+  import account from '../images/account-icon.svg';
+  import { getUserData } from '../api/auth';
+import Header from './Header';
 
 
 // const planPrices = {
@@ -51,7 +55,7 @@ import {
 
 
 const SubscriptionDetails = () => {
-    
+    const email = localStorage.getItem('userEmail');
     const [selectedPlan, setSelectedPlan] = useState('free'); // 
     const [billingCycle, setBillingCycle] = useState('monthly');
     const [showConfirmation, setShowConfirmation] = useState(false);
@@ -64,12 +68,15 @@ const SubscriptionDetails = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const [user, setUser] = useState({});
 
   
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
+                const userData = await getUserData(email);
+                setUser(userData);
                 // Get subscription plans
                 const plansData = await getSubscriptionPlans();
                 setPlanPrices(plansData.planPrices);
@@ -175,35 +182,16 @@ const SubscriptionDetails = () => {
     }
 
     return (
-        <div className="bg-slate-50 min-h-screen font-sans text-slate-900">
-            {/* Header */}
-            <header className="bg-white backdrop-blur-sm bg-opacity-90 sticky top-0 z-10 border-b border-slate-200">
-                <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-                    <div className="flex items-center">
-                        <div className="h-10 w-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center mr-3 shadow-sm">
-                            <span className="text-white font-bold">S</span>
-                        </div>
-                        <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">ShariaStock</h1>
-                    </div>
-                    <div className="flex items-center space-x-5">
-                        <button className="relative">
-                            <Bell size={20} className="text-slate-600" />
-                            <span className="absolute -top-1 -right-1 h-2 w-2 bg-purple-500 rounded-full"></span>
-                        </button>
-                        <div className="h-10 w-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-medium shadow-sm">
-                            AI
-                        </div>
-                    </div>
-                </div>
-            </header>
+        <div className="max-w-7xl mx-auto   min-h-screen font-sans text-slate-900">
+           <Header />
 
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-6 py-12">
                 <div className="mb-10">
-                    <button className="flex items-center text-slate-600 hover:text-slate-900 mb-3 font-medium">
+                    {/* <button className="flex items-center text-slate-600 hover:text-slate-900 mb-3 font-medium">
                         <ChevronLeft size={20} className="mr-1" />
                         <span>Back to Dashboard</span>
-                    </button>
+                    </button> */}
                     <h2 className="text-3xl font-bold text-slate-900 mb-2">Choose your plan</h2>
                     <p className="text-slate-600 max-w-2xl">Select the perfect plan to enhance your Islamic investment journey. All plans come with Shariah compliance verification.</p>
                 </div>
@@ -314,7 +302,7 @@ const SubscriptionDetails = () => {
                                     : 'bg-white border border-slate-300 text-slate-600 hover:border-purple-500 hover:text-purple-500'
                                     }`}
                             >
-                                {selectedPlan === 'basic' ? 'Current Plan' : 'Select Plan'}
+                                {selectedPlan === 'basic' ? 'Selected Plan' : 'Select Plan'}
                             </button>
                         </div>
                     </div>
@@ -363,7 +351,7 @@ const SubscriptionDetails = () => {
                                     : 'bg-purple-600 bg-opacity-90 text-white hover:bg-opacity-100'
                                     }`}
                             >
-                                {selectedPlan === 'premium' ? 'Current Plan' : 'Select Plan'}
+                                {selectedPlan === 'premium' ? 'Selected Plan' : 'Select Plan'}
                             </button>
                         </div>
                     </div>

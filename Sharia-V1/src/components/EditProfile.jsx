@@ -4,6 +4,7 @@ import { ArrowLeft, Camera, UserRound } from 'lucide-react';
 import { getUserData, updateUserData, uploadProfilePicture } from '../api/auth';
 import account from '../images/account-icon.svg'
 import logo from '../images/ShariaStocks-logo/logo1.jpeg'
+import Header from './Header';
 
 const EditProfile = () => {
   const [user, setUser] = useState({});
@@ -148,20 +149,8 @@ const handleCameraClick = () => {
 };
 
   return (
-    <div className="max-w-7xl mx-auto min-h-screen bg-gray-50">
-            <div className="flex justify-between items-center p-4 border-b">
-                    <div className="flex items-center">
-                      <div className="w-48 h-14 rounded-lg flex items-center justify-center overflow-hidden">
-                        <img src={logo} onClick={()=>navigate('/dashboard')} alt="ShariaStock Logo" className="w-full h-full object-fill cursor-pointer" />
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      
-                      <div className="bg-purple-600 text-white px-2 py-1 rounded text-sm">
-                        AI
-                      </div>
-                    </div>
-                  </div>
+    <div className="max-w-7xl mx-auto min-h-screen ">                 
+        <Header />
       <div>
         <div className="p-4 flex items-center gap-4">
           <ArrowLeft 
@@ -174,7 +163,7 @@ const handleCameraClick = () => {
         <div className="p-4">
           <div className="bg-white rounded-2xl shadow-sm p-6">
             <div className="flex flex-col items-center mb-6">
-              <div className="relative w-32 h-32 mb-4">
+              <div className="relative w-32 h-32 mb-4 ">
                 <img 
                   src={profilePreview? profilePreview : account}
                   alt="profile" 

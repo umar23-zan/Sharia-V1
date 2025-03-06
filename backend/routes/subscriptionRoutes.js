@@ -4,37 +4,68 @@ const router = express.Router();
 const User = require('../models/User');
 const PlanConfig = require('../models/PlanConfig');
 
-// @route   GET api/subscriptions/plans
-// @desc    Get all subscription plans
-// @access  Public
 router.get('/plans', async (req, res) => {
   try {
     const plans = await PlanConfig.find({ isActive: true });
-    
-    // Format plans for frontend consumption
+
+    // Create a lookup map for quick access
+    const planMap = plans.reduce((acc, plan) => {
+      acc[plan.planId] = plan;
+      return acc;
+    }, {});
+
+    // Format plans with default values if missing
     const formattedPlans = {
       free: {
-        monthly: plans.find(p => p.planId === 'free')?.prices.monthly || 0,
-        annual: plans.find(p => p.planId === 'free')?.prices.annual || 0,
+        monthly: planMap.free?.prices?.monthly || 0,
+        annual: planMap.free?.prices?.annual || 0,
       },
       basic: {
-        monthly: plans.find(p => p.planId === 'basic')?.prices.monthly || 299,
-        annual: plans.find(p => p.planId === 'basic')?.prices.annual || 3048,
+        monthly: planMap.basic?.prices?.monthly || 299,
+        annual: planMap.basic?.prices?.annual || 3048,
       },
       premium: {
-        monthly: plans.find(p => p.planId === 'premium')?.prices.monthly || 599,
-        annual: plans.find(p => p.planId === 'premium')?.prices.annual || 6110,
+        monthly: planMap.premium?.prices?.monthly || 599,
+        annual: planMap.premium?.prices?.annual || 6110,
       }
     };
 
-    const planFeatures = {};
-    plans.forEach(plan => {
-      planFeatures[plan.planId] = plan.features;
-    });
+    // Default plan features (fallback if database doesn't provide them)
+    const defaultFeatures = {
+      free: [
+        'Search up to 3 stocks',
+        'Basic Shariah compliance details',
+        'Limited market insights',
+        'No stock storage',
+        'No notifications',
+      ],
+      basic: [
+        'Search and analyze all stocks',
+        'Store up to 10 stocks',
+        'News notifications for stored stocks',
+        'Detailed Shariah compliance metrics',
+        'Basic portfolio analytics',
+      ],
+      premium: [
+        'Search and analyze all stocks',
+        'Store up to 50 stocks',
+        'Priority news notifications',
+        'Advanced portfolio analytics',
+        'Expert Shariah compliance insights',
+        'Zakat calculation tool',
+      ],
+    };
 
-    res.json({ 
+    // Map plan features from DB, use defaults if missing
+    const planFeatures = {
+      free: planMap.free?.features || defaultFeatures.free,
+      basic: planMap.basic?.features || defaultFeatures.basic,
+      premium: planMap.premium?.features || defaultFeatures.premium,
+    };
+
+    res.json({
       planPrices: formattedPlans,
-      planFeatures
+      planFeatures,
     });
   } catch (err) {
     console.error(err.message);
@@ -42,9 +73,8 @@ router.get('/plans', async (req, res) => {
   }
 });
 
-// @route   GET api/subscriptions/current
-// @desc    Get current user subscription
-// @access  Private
+
+
 router.get('/current', async (req, res) => {
   console.log(req.body)
   try {
@@ -61,14 +91,12 @@ router.get('/current', async (req, res) => {
   }
 });
 
-// @route   POST api/subscriptions/change
-// @desc    Change subscription plan
-// @access  Private
+
 router.post('/change', async (req, res) => {
   try {
     const { plan, billingCycle } = req.body;
     
-    // Validate inputs
+   
     if (!['free', 'basic', 'premium'].includes(plan)) {
       return res.status(400).json({ message: 'Invalid plan selected' });
     }
@@ -77,26 +105,26 @@ router.post('/change', async (req, res) => {
       return res.status(400).json({ message: 'Invalid billing cycle' });
     }
     
-    // Find user
+   
     const user = await User.findById(req.query.userId);
     
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
     
-    // If downgrading to free, check stock limits
+    
     if (plan === 'free' && user.savedStocks.length > 0) {
       return res.status(400).json({ 
         message: 'Cannot downgrade to free plan with saved stocks. Please remove saved stocks first.' 
       });
     }
     
-    // If current plan is already the requested plan with same billing cycle
+    
     if (user.subscription.plan === plan && user.subscription.billingCycle === billingCycle) {
       return res.status(400).json({ message: 'You are already subscribed to this plan' });
     }
     
-    // Return the next steps (for payment processing)
+
     res.json({
       currentPlan: user.subscription.plan,
       newPlan: plan,
@@ -110,9 +138,7 @@ router.post('/change', async (req, res) => {
   }
 });
 
-// @route   POST api/subscriptions/cancel
-// @desc    Cancel subscription
-// @access  Private
+
 router.post('/cancel', async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -140,15 +166,12 @@ router.post('/cancel', async (req, res) => {
   }
 });
 
-// @route   POST api/subscriptions/update
-// @desc    Update subscription after payment
-// @access  Private
+
 router.post('/update', async (req, res) => {
   try {
     const { plan, billingCycle, transactionId } = req.body;
     
-    // This route would be called after successful payment
-    // It should be protected and potentially called only by a webhook or internal service
+   
     
     const user = await User.findById(req.user.id);
     

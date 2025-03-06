@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios'; // Keep axios import for potential conditional real API calls
-import { LoaderCircle, Star, Bookmark, BarChart, ArrowUpRight, ChevronDown, Filter, Info, Lock } from 'lucide-react';
+import { LoaderCircle, Star, Bookmark, BarChart, ArrowUpRight, ChevronDown, Filter, Info, Lock, Search, Bell, Heart } from 'lucide-react';
 import logo from '../images/ShariaStocks-logo/logo1.jpeg'
+import account from '../images/account-icon.svg';
+import Header from './Header';
 
 const StatusBadge = ({ status }) => {
   let badgeClasses = "text-xs font-medium px-2 py-1 rounded-full";
@@ -46,7 +48,7 @@ const StockCard = ({ stock, index, isPremium, userPlan }) => {
           <Lock className="w-12 h-12 text-purple-500 mb-2" />
           <p className="text-lg font-medium text-gray-800 mb-1">Premium Content</p>
           <p className="text-sm text-gray-600 mb-3">Upgrade to view all stocks</p>
-          <button className="bg-purple-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-purple-700">
+          <button className="bg-purple-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-purple-700 cursor-pointer" onClick={() => {navigate('/subscriptiondetails')}}>
             Upgrade Now
           </button>
         </div>
@@ -71,7 +73,7 @@ const StockCard = ({ stock, index, isPremium, userPlan }) => {
       
       <div className="mb-4">
         <div className="flex items-baseline">
-          <span className="text-2xl font-bold">${Number(stock.price).toFixed(2)}</span>
+          <span className="text-2xl font-bold">₹{Number(stock.price).toFixed(2)}</span>
           {renderPercentChange(stock.priceChange)}
         </div>
       </div>
@@ -109,7 +111,7 @@ const StockCard = ({ stock, index, isPremium, userPlan }) => {
           <button className="text-gray-400 hover:text-gray-600">
             <BarChart className="w-5 h-5" />
           </button>
-          <button className="text-purple-600 hover:text-purple-700 flex items-center">
+          <button className="text-purple-600 hover:text-purple-700 cursor-pointer flex items-center" onClick={() =>{navigate(`/stockresults/${stock.symbol}`)}}>
             <span className="mr-1 text-sm font-medium">Details</span>
             <ArrowUpRight className="w-4 h-4" />
           </button>
@@ -128,6 +130,10 @@ const CategoryResultsPage = () => {
   const [userPlan, setUserPlan] = useState('free'); // Default to free
   const [selectedFilter, setSelectedFilter] = useState('All');
   const initialStockCount = 10;
+const location = useLocation();
+    const user = location.state?.user;
+const navigate = useNavigate()
+
   const halalcompanies = [
     'RELIANCE',
     'TCS',
@@ -355,31 +361,8 @@ const CategoryResultsPage = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto bg-gray-50 min-h-screen pb-12">
-      <div className="flex justify-between items-center p-4 border-b">
-              <div className="flex items-center">
-                <div className="w-48 h-14 rounded-lg flex items-center justify-center overflow-hidden">
-                  <img src={logo} onClick={()=>navigate('/dashboard')} alt="ShariaStock Logo" className="w-full h-full object-fill cursor-pointer" />
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="relative">
-                  <input 
-                    type="text" 
-                    placeholder="Search stocks..." 
-                    className="pl-10 pr-4 py-2 border rounded-full w-64 focus:outline-none"
-                  />
-                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                  </div>
-                </div>
-                <div className="bg-purple-600 text-white px-2 py-1 rounded text-sm">
-                  AI
-                </div>
-              </div>
-            </div>
+    <div className="max-w-7xl mx-auto  min-h-screen pb-12">
+      <Header />
       <div className="container mx-auto px-4 pt-6">
         {/* Header */}
         <div className="mb-6">
@@ -461,7 +444,7 @@ const CategoryResultsPage = () => {
           <div className="bg-purple-50 border border-purple-100 rounded-xl p-6 mt-8 text-center">
             <h3 className="text-xl font-bold text-purple-800 mb-2">Unlock Full Access to ShariaStock </h3>
             <p className="text-purple-700 mb-4">This is a placeholder upgrade message when using . Get unlimited stock listings, advanced filtering, and real-time compliance alerts</p>
-            <button className="bg-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-purple-700">
+            <button className="bg-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-purple-700 cursor-pointer" onClick={() =>{navigate('/subscriptiondetails')}}>
               Upgrade to Premium
             </button>
           </div>
