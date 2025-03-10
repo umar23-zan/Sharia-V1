@@ -196,7 +196,7 @@ const Dashboard = () => {
       
       {/* Footer */}
       <div className="mt-8 text-center text-gray-500 text-sm">
-        © 2025 Your Company Name. All rights reserved.
+        © 2025 Zansphere. All rights reserved.
       </div>
     </div>
     </div>

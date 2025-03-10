@@ -4,9 +4,6 @@ import axios from 'axios';
 import { LineChart, Shield, Sparkles, Heart, ArrowLeft, LoaderCircle } from 'lucide-react';
 import Card from './Card';
 import PriceChart from './PriceChart';
-import SubscriptionModal from './SubscriptionModal';
-import account from '../images/account-icon.svg';
-import logo from '../images/ShariaStocks-logo/logo1.jpeg'
 import Header from './Header'
 
 
@@ -91,10 +88,10 @@ const StockResults = () => {
                 if (err.response?.status === 403) {
                     setViewLimitReached(true);
                     setShowSubscriptionModal(true);
-                    // Important: Don't set stockData to null here
+                   
                 } else {
                     setError("Could not load stock results. Please check the symbol and try again.");
-                    setStockData(null); // Only set stockData to null for non-view-limit errors
+                    setStockData(null); 
                 }
             }  finally {
                 setLoading(false);
@@ -330,7 +327,7 @@ const StockResults = () => {
                             <div className="mb-6">
                                     <div className="flex justify-between items-center mb-2">
                                         <h2 className="text-base sm:text-lg font-semibold text-gray-800">About company</h2>
-                                        <a href="#" className="text-blue-600 text-xs sm:text-sm hover:underline">See all</a>
+                                        {/* <a href="#" className="text-blue-600 text-xs sm:text-sm hover:underline">See all</a> */}
                                     </div>
                                     <p className="text-xs sm:text-sm text-gray-600 line-clamp-4">
                                     {companyDetails.company_description || 'Company description not available.'}
@@ -358,7 +355,7 @@ const StockResults = () => {
                                 <div>
                                     <div className="flex justify-between items-center mb-4">
                                         <h2 className="text-base sm:text-lg font-semibold text-gray-800">Related news</h2>
-                                        <a href="#" className="text-blue-600 text-xs sm:text-sm hover:underline">See all</a>
+                                        {/* <a href="#" className="text-blue-600 text-xs sm:text-sm hover:underline">See all</a> */}
                                     </div>
                                     <div className="space-y-4">
                                         {newsArticles.length > 0 ? (

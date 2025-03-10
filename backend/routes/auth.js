@@ -15,10 +15,6 @@ const jwt = require("jsonwebtoken");
 const session = require('express-session');
 
 
-
-// routes/auth.js - Add these routes to your existing auth routes file
-
-// Add Google authentication routes
 router.get('/google', 
     passport.authenticate('google', { scope: ['profile', 'email'] })
   );
@@ -26,8 +22,7 @@ router.get('/google',
   router.get('/google/callback', 
     passport.authenticate('google', { failureRedirect: '/login' }),
     (req, res) => {
-      // Successful authentication
-      // Create a JWT token for the user
+    
       const payload = {
         user: {
           id: req.user.id,
@@ -43,15 +38,13 @@ router.get('/google',
         (err, token) => {
           if (err) throw err;
           
-          // Redirect to frontend with token
-          // In production, use a more secure method to transfer the token
           res.redirect(`${process.env.FRONTEND_URL}/oauth-callback?token=${token}&email=${req.user.email}&id=${req.user.id}`);
         }
       );
     }
   );
 
-// Signup Route
+
 router.post('/signup', async (req, res) => {
     const { name, email, password, confirmPassword } = req.body;
 
@@ -63,12 +56,31 @@ router.post('/signup', async (req, res) => {
         let user = await User.findOne({ email });
         if (user) return res.status(400).json({ msg: 'User already exists' });
 
-        // Hash the password manually
+        
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        user = new User({ name, email, password: hashedPassword });
+        const verificationToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "1d" });
+
+        user = new User({ name, email, password: hashedPassword, verificationToken: verificationToken });
         await user.save();
+
+        const verificationUrl = `${process.env.FRONTEND_URL}/verify/${verificationToken}`;
+
+        const message = `
+            <p>Thank you for registering with our service!</p>
+            <p>Please verify your email address by clicking on the following link:</p>
+            <p><a href="${verificationUrl}">Verify Email Address</a></p>
+            <p>This link will expire in 24 hours.</p>
+        `;
+
+        await transporter.sendMail({ 
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'Verify Your Email Address',
+            html: message, 
+        });
+
         res.status(201).json({ msg: 'User registered successfully' });
     } catch (error) {
         console.error("Signup error:", error);
@@ -76,13 +88,103 @@ router.post('/signup', async (req, res) => {
     }
 });
 
-// Login Route
+
+router.get("/verify/:token", async (req, res) => {
+    try {
+      const { token } = req.params;
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  
+      const user = await User.findOne({ email: decoded.email });
+      if (!user) return res.status(400).json({ msg: "Invalid or expired token" });
+      if (user.isVerified) return res.status(400).json({ msg: "Email is already verified." });
+
+      res.status(200).json({ msg: "Token is valid." });
+    } catch (error) {
+      res.status(500).json({ msg: "Invalid or expired token" });
+    }
+  });
+
+  router.post("/verify/:token", async (req, res) => {
+    try {
+        const { token } = req.params;
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        const user = await User.findOne({ email: decoded.email });
+
+        if (!user) return res.status(400).json({ msg: "Invalid or expired token" });
+        if (user.isVerified) return res.status(400).json({ msg: "Email is already verified." });
+
+        user.isVerified = true;
+        user.verificationToken = null;
+        await user.save();
+
+        res.status(200).json({ msg: "Email verified successfully!" });
+    } catch (error) {
+        res.status(400).json({ msg: "Invalid or expired token" });
+    }
+});
+
+router.post('/resend-verification', async (req, res) => {
+const { email } = req.body;
+
+if (!email) {
+    return res.status(400).json({ msg: 'Email is required' });
+}
+
+try {
+    // Find the user by email
+    const user = await User.findOne({ email });
+    
+    // Check if user exists
+    if (!user) {
+    return res.status(404).json({ msg: 'User not found' });
+    }
+    
+    // Check if already verified
+    if (user.isVerified) {
+    return res.status(400).json({ msg: 'Email is already verified' });
+    }
+
+    // Generate a new verification token
+    const verificationToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "1d" });
+
+    // Create verification URL
+    const verificationUrl = `${process.env.FRONTEND_URL}/verify/${verificationToken}`;
+
+    // Email content
+    const message = `
+    <p>You requested a new verification link.</p>
+    <p>Please verify your email address by clicking on the following link:</p>
+    <p><a href="${verificationUrl}">Verify Email Address</a></p>
+    <p>This link will expire in 24 hours.</p>
+    `;
+
+    // Send email
+    await transporter.sendMail({ 
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: 'Verify Your Email Address',
+    html: message, 
+    });
+
+    res.status(200).json({ msg: 'Verification email resent successfully' });
+} catch (error) {
+    console.error("Resend verification error:", error);
+    res.status(500).json({ msg: 'Server error' });
+}
+});
+
+
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
         let user = await User.findOne({ email });
         if (!user) return res.status(400).json({ msg: 'Invalid credentials' });
+
+        if (!user.isVerified) {
+            return res.status(400).json({ msg: 'Email not verified. Please check your inbox to verify your email address.' });
+        }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ msg: 'Invalid credentials' });
@@ -97,8 +199,8 @@ router.post('/login', async (req, res) => {
 const transporter = nodemailer.createTransport({
   service: 'Gmail',
   auth: {
-      user: 'umar.zangroups@gmail.com',
-      pass: 'qjkr qdzj nrwt suqe',
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
   },
 });
 

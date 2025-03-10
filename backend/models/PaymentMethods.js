@@ -5,7 +5,7 @@ const PaymentMethodSchema = new mongoose.Schema({
   type: { type: String, enum: ["Visa", "Mastercard", "UPI"], required: true },
   category: { type: String, enum: ["card", "upi"], required: true },
   label: { type: String },
-  number: { type: String }, // Store only the last 4 digits for security
+  number: { type: String },
   expires: { type: String },
   upiId: { type: String },
   isDefault: { type: Boolean, default: false },

@@ -95,9 +95,11 @@ router.get('/:symbol', async (req, res) => {
     if (!user) return res.status(404).json({ error: "User not found" });
   
     const planLimits = { free: 3, basic: Infinity, premium: Infinity };
-    if (user.stockSearchCount >= planLimits[user.subscription.plan]) {
-      return res.status(403).json({ error: "Search limit exceeded" });
-    }
+    if (user.subscription.plan === 'free') {
+      if (user.searchedStocks.length >= planLimits.free && !user.searchedStocks.includes(symbol)) {
+          return res.status(403).json({ error: "Search limit exceeded" });
+      }
+  }
   
     let client;
     try {
@@ -111,13 +113,10 @@ router.get('/:symbol', async (req, res) => {
         return res.status(404).json({ message: 'Stock not found' });
       }
       
-      // Only increment if this is a new symbol the user hasn't searched before
-      // or if it's not the most recent symbol they searched
-      if (!user.lastSearchedSymbol || user.lastSearchedSymbol !== symbol) {
-        user.stockSearchCount += 1;
-        user.lastSearchedSymbol = symbol; // Track the last symbol searched
+      if (!user.searchedStocks.includes(symbol)) {
+        user.searchedStocks.push(symbol);
         await user.save();
-      }
+    }
       
       res.json(stock);
     } catch (error) {

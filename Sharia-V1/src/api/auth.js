@@ -17,6 +17,67 @@ export const signup = async (formData) => {
     return res.data;
 };
 
+export const tokenverify = async (token) => {
+  try {
+    const response = await fetch(`/api/auth/verify/${token}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.msg || 'Verification failed');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const verify = async (token) => {
+  try {
+    const response = await fetch(`/api/auth/verify/${token}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.msg || 'Verification failed');
+    }
+    
+    return await response.text();
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const resendVerification = async (email) => {
+  try {
+    const response = await fetch('/api/auth/resend-verification', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.msg || 'Failed to resend verification email');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const login = async (formData) => {
     const res = await axios.post('/api/auth/login', formData);
     return res.data;

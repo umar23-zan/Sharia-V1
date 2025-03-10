@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const PaymentMethod = require("../models/PaymentMethods");
 
-// Get payment methods for a user
+const MAX_PAYMENT_METHODS = 5;
+
 router.get("/:userId", async (req, res) => {
   try {
     const paymentMethods = await PaymentMethod.find({ userId: req.params.userId });
@@ -12,18 +13,29 @@ router.get("/:userId", async (req, res) => {
   }
 });
 
-// Add a new payment method
+
 router.post("/", async (req, res) => {
   try {
+  const userId = req.body.userId;
+
+  const paymentMethodsCount = await PaymentMethod.countDocuments({ userId: userId });
+
+  if (paymentMethodsCount >= MAX_PAYMENT_METHODS) {
+          return res.status(400).json({
+            error: `You can only add up to ${MAX_PAYMENT_METHODS} payment methods.`
+          });
+        }
+
     const newPayment = new PaymentMethod(req.body);
     await newPayment.save();
     res.status(201).json(newPayment);
   } catch (error) {
+    console.error("Error adding payment method:", error);
     res.status(500).json({ error: "Failed to add payment method" });
   }
 });
 
-// Set a default payment method
+
 router.put("/default/:id", async (req, res) => {
   try {
     await PaymentMethod.updateMany({ userId: req.body.userId }, { isDefault: false });
@@ -35,7 +47,7 @@ router.put("/default/:id", async (req, res) => {
   }
 });
 
-// Delete a payment method
+
 router.delete("/:id", async (req, res) => {
   try {
     await PaymentMethod.findByIdAndDelete(req.params.id);

@@ -9,6 +9,14 @@ const UserSchema = new mongoose.Schema({
         type: String,
         sparse: true
       },
+      isVerified: { 
+        type: Boolean,
+        default: false
+    },
+    verificationToken: { 
+        type: String,
+        default: null
+    },
     contactNumber: { type: String },
     doorNumber: { type: String },        
     streetName: { type: String },
@@ -18,8 +26,7 @@ const UserSchema = new mongoose.Schema({
     profilePicture: { type: String },
     resetPasswordToken: { type: String },
     resetPasswordExpire: { type: Date },
-    stockSearchCount: { type: Number, default: 0 }, 
-    lastSearchedSymbol: { type: String, default: null },
+    searchedStocks: [{ type: String }],
     watchlist: [{ 
       symbol: { type: String, required: true },
       companyName: { type: String, required: true },

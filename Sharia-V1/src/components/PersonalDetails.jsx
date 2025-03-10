@@ -12,6 +12,8 @@ const PersonalDetails = () => {
   const userEmail = localStorage.getItem('userEmail')
   const [deactivated, setDeactivated] = useState(false);
   const [showDeactivateModal, setShowDeactivateModal] = useState(false);
+  const memberSince = new Date(user.createdAt)
+  const formattedDate = memberSince.toLocaleDateString();
 
   const handleDeactivationSuccess = () => {
     setDeactivated(true);
@@ -43,7 +45,7 @@ const PersonalDetails = () => {
               <div className="space-y-4">
                 <div className="flex justify-between py-3 border-b">
                   <span className="text-gray-600">Member Since</span>
-                  <span className="font-medium">january 2024</span>
+                  <span className="font-medium">{formattedDate}</span>
                 </div>
                 <div className="flex justify-between py-3 border-b">
                   <span className="text-gray-600">Account Status</span>

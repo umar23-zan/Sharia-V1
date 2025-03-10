@@ -45,7 +45,7 @@ const Signup = () => {
         setLoading(true);
         try {
             const res = await signup(formData);
-            setAlert({ type: 'success', message: 'Signup successful!' });
+            setAlert({ type: 'success', message: 'Signup successful! Please check your email to verify your account.' });
             console.log(res);
             setError('');
             setFormData({
@@ -55,10 +55,10 @@ const Signup = () => {
                 confirmPassword: '',
             });
 
-            setTimeout(() => {
-                setAlert(null);
-                navigate('/login');
-            }, 1500);
+            // setTimeout(() => {
+            //     setAlert(null);
+            //     navigate('/login');
+            // }, 1500);
         } catch (err) {
             console.error('Signup error:', err.response?.data || err.message);
             setError(err.response?.data?.msg || err.response?.data?.errors?.[0]?.msg || 'Failed to create account');

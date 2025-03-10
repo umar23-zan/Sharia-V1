@@ -51,7 +51,7 @@ const Profile = () => {
               <h3 className="font-semibold mb-4">Quick Settings</h3>
               {[
                 { icon: '👤', title: 'Personal Info', subtitle: 'Complete your profile', path: '/personaldetails' },
-                { icon: '🔔', title: 'Notifications', subtitle: 'Customize your alerts', badge: '4 new', path: '/notificationpage' },
+                { icon: '🔔', title: 'Notifications', subtitle: 'Customize your alerts', badge: '', path: '/notificationpage' },
                 { icon: '💳', title: 'Payment Methods', subtitle: 'Manage your payments', path: '/paymentmethods' }
               ].map((item) => (
                 <button
