@@ -43,11 +43,15 @@ const PersonalDetails = () => {
               <div className="space-y-4">
                 <div className="flex justify-between py-3 border-b">
                   <span className="text-gray-600">Member Since</span>
-                  <span className="font-medium">January 2024</span>
+                  <span className="font-medium">january 2024</span>
                 </div>
                 <div className="flex justify-between py-3 border-b">
                   <span className="text-gray-600">Account Status</span>
                   <span className="px-2 py-1 bg-green-100 text-green-600 rounded-full text-sm">Active</span>
+                </div>
+                <div className="flex justify-between py-3 border-b">
+                  <span className="text-gray-600">Plan Details</span>
+                  <span className="px-2 py-1 bg-green-100 text-green-600 rounded-full text-sm">{user.subscription.plan}</span>
                 </div>
                 <div className="flex justify-between py-3 border-b">
                   <span className="text-gray-600">Deactivate Account</span>
