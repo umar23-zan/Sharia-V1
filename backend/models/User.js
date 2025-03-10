@@ -19,7 +19,12 @@ const UserSchema = new mongoose.Schema({
     resetPasswordToken: { type: String },
     resetPasswordExpire: { type: Date },
     stockSearchCount: { type: Number, default: 0 }, 
-    watchlist: { type: [String], default: [] },
+    lastSearchedSymbol: { type: String, default: null },
+    watchlist: [{ 
+      symbol: { type: String, required: true },
+      companyName: { type: String, required: true },
+      stockData: { type: Object, required: true }
+  }],
     subscription: {
       plan: {
         type: String,
@@ -48,6 +53,10 @@ const UserSchema = new mongoose.Schema({
         default: true
       }
     },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
 });
 
 

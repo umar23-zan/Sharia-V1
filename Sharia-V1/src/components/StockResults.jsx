@@ -13,6 +13,7 @@ import Header from './Header'
 const StockResults = () => {
     const location = useLocation();
     const user = location.state?.user;
+    
     const { symbol } = useParams();
     const [companyDetails, setCompanyDetails] = useState(null);
     const [stockData, setStockData] = useState(null);
@@ -29,6 +30,7 @@ const StockResults = () => {
     const [viewLimitReached, setViewLimitReached] = useState(false);
     const userId = localStorage.getItem('userId')
     const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+    const isFreePlan = user.subscription.plan === 'free';
     
     useEffect(() => {
         const handleResize = () => {
@@ -120,6 +122,15 @@ const StockResults = () => {
     const addToWatchlist = async () => {
         try {
             const userId = localStorage.getItem('userId');
+            const symbolToAdd = symbol; 
+
+        
+        const isDuplicate = watchlist.some(item => item.symbol === symbolToAdd);
+        if (isDuplicate) {
+            setAlertMessage("Stock is already in your watchlist.");
+            setTimeout(() => setAlertMessage(""), 2000);
+            return; 
+        }
             const response = await axios.post('/api/watchlist', {
                 userId,
                 symbol,
@@ -205,19 +216,22 @@ const StockResults = () => {
                             <span className="text-base sm:text-lg font-semibold text-gray-900 truncate">{companyDetails.company_name}</span>
                         </div>
                     </div>
+                    {!isFreePlan && 
                     <div className="relative ml-4" onMouseEnter={() => setIsTooltipVisible(true)} onMouseLeave={() => setIsTooltipVisible(false)}>
-                        <Heart className={`w-5 h-5 cursor-pointer ${isInWatchlist ? 'text-red-500 fill-current' : 'text-gray-700'}`} onClick={addToWatchlist} />
-                        {alertMessage && (
-                            <div className="alert bg-red-500 text-white p-2 absolute right-0 mt-2 w-48 sm:w-52 rounded-md z-20 shadow-md text-sm">
-                                {alertMessage}
-                            </div>
-                        )}
-                        {isTooltipVisible && (
-                            <div className="absolute right-0 mt-2 w-28 sm:w-32 bg-gray-800 text-white text-xs sm:text-sm rounded-md p-2 z-20 shadow-md">
-                                Add to watchlist
-                            </div>
-                        )}
-                    </div>
+                    <Heart className={`w-5 h-5 cursor-pointer ${isInWatchlist ? 'text-red-500 fill-current' : 'text-gray-700'}`} onClick={addToWatchlist} />
+                    {alertMessage && (
+                        <div className="alert bg-red-500 text-white p-2 absolute right-0 mt-2 w-48 sm:w-52 rounded-md z-20 shadow-md text-sm">
+                            {alertMessage}
+                        </div>
+                    )}
+                    {isTooltipVisible && (
+                        <div className="absolute right-0 mt-2 w-28 sm:w-32 bg-gray-800 text-white text-xs sm:text-sm rounded-md p-2 z-20 shadow-md">
+                            Add to watchlist
+                        </div>
+                    )}
+                </div>
+                    }
+                    
                 </div>
             </div>
         );
@@ -262,11 +276,11 @@ const StockResults = () => {
     ];
 
     return (
-        <div className="w-full min-h-screen">
+        <div className="max-w-7xl mx-auto min-h-screen">
             <Header />
+            <Headers />
             
-            
-            <div className="max-w-7xl mx-auto p-3 sm:p-4 lg:p-6">
+            <div className=" p-3 sm:p-4 lg:p-6">
                 {/* Desktop Layout */}
                 <div className="lg:grid lg:grid-cols-3 lg:gap-6">
                     {/* Left Column - Chart and Metrics */}
@@ -283,7 +297,7 @@ const StockResults = () => {
                                         <div>
                                             <div className="flex items-center gap-2">
                                                 <Sparkles className={`w-4 h-4 sm:w-5 sm:h-5 ${stockData.Initial_Classification === 'Halal' ? 'text-green-500' : 'text-red-500'}`} />
-                                                <h1 className="text-lg sm:text-xl font-bold text-gray-900">{companyDetails.symbol}</h1>
+                                                <h1 className="text-lg sm:text-xl font-bold text-gray-900">{companyDetails.symbol.replace(".NS", "")}</h1>
                                             </div>
                                             <p className="text-xs sm:text-sm text-gray-500 mt-1">{companyDetails.company_name || "Company Name N/A"}</p>
                                         </div>

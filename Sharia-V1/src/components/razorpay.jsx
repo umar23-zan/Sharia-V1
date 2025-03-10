@@ -80,9 +80,9 @@ const Razorpay = () => {
     checkUserStatus();
   }, [userId, location.state]);
 
-  // Function to initiate a transaction
+  
   const initiateTransaction = async () => {
-    // If there's already a pending transaction, no need to initiate a new one
+    // If we already have a pending transaction, return its ID
     if (pendingTransaction) return pendingTransaction.transactionId;
     
     try {
@@ -100,8 +100,9 @@ const Razorpay = () => {
       });
 
       const data = await response.json();
+      console.log("Initiate response:", data);
       
-      // Handle different response types
+      // Handle subscription already active response
       if (response.status === 400 && data.error === "Subscription already active") {
         setCurrentSubscription({
           hasActiveSubscription: true,
@@ -128,6 +129,14 @@ const Razorpay = () => {
         throw new Error(data.error || 'Failed to initiate transaction');
       }
       
+      // Successfully initiated a new transaction
+      setPendingTransaction({
+        transactionId: data.transactionId,
+        plan: planDetails.selectedPlan,
+        amount: planDetails.totalPrice,
+        billingCycle: planDetails.billingCycle,
+      });
+      
       return data.transactionId;
     } catch (error) {
       console.error('Error initiating transaction:', error);
@@ -142,12 +151,16 @@ const Razorpay = () => {
 
     try {
       // First initiate or get transaction ID
-      const transactionId = await initiateTransaction();
+      let transactionId = await initiateTransaction();
       
       // If we get no transaction ID and an upgrade is required
       if (!transactionId && showUpgradeConfirm) {
-        setIsPaying(false);
-        return;
+        // Try to confirm the upgrade
+        transactionId = await confirmUpgradeAndGetTransactionId();
+        if (!transactionId) {
+          setIsPaying(false);
+          return;
+        }
       }
       
       // If no transaction ID for other reasons
@@ -199,42 +212,61 @@ const Razorpay = () => {
     }
   };
 
+  // New function that confirms upgrade and returns the transaction ID
+  const confirmUpgradeAndGetTransactionId = async () => {
+    setIsUpgrade(true);
+    
+    try {
+      const response = await fetch('/api/transaction/initiate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          plan: planDetails.selectedPlan,
+          amount: planDetails.totalPrice,
+          billingCycle: planDetails.billingCycle,
+          confirmUpgrade: true // Add flag to indicate this is a confirmed upgrade
+        }),
+      });
+
+      const data = await response.json();
+      console.log("Upgrade response:", data);
+
+      if (response.ok && data.transactionId) {
+        setPendingTransaction({
+          transactionId: data.transactionId,
+          plan: planDetails.selectedPlan,
+          amount: planDetails.totalPrice,
+          billingCycle: planDetails.billingCycle,
+        });
+        return data.transactionId;
+      } else {
+        throw new Error(data.error || 'Failed to initiate upgrade transaction');
+      }
+    } catch (error) {
+      console.error('Error initiating upgrade:', error);
+      setPaymentError('Failed to start subscription change. Please try again.');
+      return null;
+    }
+  };
+
   const confirmUpgrade = async () => {
     setIsUpgrade(true);
     setShowUpgradeConfirm(false);
-
+    
     try {
-        const response = await fetch('/api/transaction/initiate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                userId,
-                plan: planDetails.selectedPlan,
-                amount: planDetails.totalPrice,
-                billingCycle: planDetails.billingCycle,
-            }),
-        });
-
-        const data = await response.json();
-        console.log("Server response:", data); // Log the response
-
-        if (response.ok && data.transactionId) {
-            setPendingTransaction({
-                transactionId: data.transactionId,
-                plan: planDetails.selectedPlan,
-                amount: planDetails.totalPrice,
-                billingCycle: planDetails.billingCycle,
-            });
-        } else {
-            throw new Error(data.error || 'Failed to initiate upgrade transaction');
-        }
+      const transactionId = await confirmUpgradeAndGetTransactionId();
+      if (transactionId) {
+        // Continue with the payment flow or show the payment form
+        // This function no longer needs to handle the transaction creation directly
+      }
     } catch (error) {
-        console.error('Error initiating upgrade:', error);
-        setPaymentError('Failed to start subscription change. Please try again.');
+      console.error('Error during confirmation:', error);
+      setPaymentError('Failed to confirm the subscription change. Please try again.');
     }
-};
+  };
 
   const cancelPendingTransaction = async () => {
     if (!pendingTransaction) return;
@@ -397,7 +429,7 @@ const Razorpay = () => {
           )}
 
           <div className="flex flex-col md:flex-row gap-6">
-            {/* Rest of the component (payment methods and payment form) remains the same */}
+            {/* Payment method selection column */}
             <div className="w-full md:w-1/2 border-r pr-6">
               <div className="mb-6">
                 <p className="font-medium mb-4">Select a payment method</p>

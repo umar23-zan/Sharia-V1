@@ -87,43 +87,46 @@ router.get('/all', async (req, res) => {
   }
 });
 
-
 router.get('/:symbol', async (req, res) => {
-      const { userId } = req.query;
+    const { userId } = req.query;
+    const symbol = req.params.symbol.toUpperCase();
+    
     const user = await User.findById(userId);
-  if (!user) return res.status(404).json({ error: "User not found" });
-
-  const planLimits = { free: 5, basic: Infinity, premium: Infinity };
-  if (user.stockSearchCount >= planLimits[user.subscription.plan]) {
-    return res.status(403).json({ error: "Search limit exceeded" });
-  }
-
-      let client;
-      try {
-          client = await MongoClient.connect(MONGO_URI);
-          const db = client.db(DATABASE_NAME);
-          
-          const stock = await db.collection(COLLECTION_NAME)
-              .findOne({ SYMBOL: req.params.symbol.toUpperCase() });
-          
-    
-          if (!stock) {
-              
-              return res.status(404).json({ message: 'Stock not found' });
-          }
-          user.stockSearchCount += 1;
-          await user.save();
-    
-          
-          res.json(stock);
-      } catch (error) {
-          console.error('Error fetching stock:', error);
-          res.status(500).json({ message: 'Error fetching stock data' });
-      } finally {
-          
-          if (client) client.close();
-      }
-    });
+    if (!user) return res.status(404).json({ error: "User not found" });
+  
+    const planLimits = { free: 3, basic: Infinity, premium: Infinity };
+    if (user.stockSearchCount >= planLimits[user.subscription.plan]) {
+      return res.status(403).json({ error: "Search limit exceeded" });
+    }
+  
+    let client;
+    try {
+      client = await MongoClient.connect(MONGO_URI);
+      const db = client.db(DATABASE_NAME);
+      
+      const stock = await db.collection(COLLECTION_NAME)
+        .findOne({ SYMBOL: symbol });
+      
+      if (!stock) {
+        return res.status(404).json({ message: 'Stock not found' });
+      }
+      
+      // Only increment if this is a new symbol the user hasn't searched before
+      // or if it's not the most recent symbol they searched
+      if (!user.lastSearchedSymbol || user.lastSearchedSymbol !== symbol) {
+        user.stockSearchCount += 1;
+        user.lastSearchedSymbol = symbol; // Track the last symbol searched
+        await user.save();
+      }
+      
+      res.json(stock);
+    } catch (error) {
+      console.error('Error fetching stock:', error);
+      res.status(500).json({ message: 'Error fetching stock data' });
+    } finally {
+      if (client) client.close();
+    }
+  });
 
 
 router.get('/filter/halal-high-confidence', async (req, res) => {

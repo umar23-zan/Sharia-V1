@@ -38,7 +38,7 @@ const PriceChart = ({ symbol }) => {
     fetchPriceHistory();
   }, [symbol, timeframe]);
 
-  const timeframes = ['1D', '1W', '1M', '3M', '6M', '1Y'];
+  const timeframes = ['1D','1M', '3M', '6M', '1Y'];
 
   if (loading) {
     return <div className="h-48 flex items-center justify-center">Loading chart...</div>;
@@ -46,8 +46,17 @@ const PriceChart = ({ symbol }) => {
 
   const isPositive = metaData.priceChange >= 0;
 
+  const getPreviousHour = () => {
+    const now = new Date();
+    now.setHours(now.getHours() - 1);
+    return now.toLocaleString();
+  };
+
   return (
     <div className="bg-white">
+       <div className="text-xs text-gray-500 p-2">
+        Last Updated: {getPreviousHour()}
+      </div>
       <div className="flex gap-3 mb-4 text-sm">
         {timeframes.map((tf) => (
           <button

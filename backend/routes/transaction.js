@@ -3,6 +3,7 @@ const router = express.Router();
 const Transaction = require('../models/Transaction');
 const User = require('../models/User');
 const { v4: uuidv4 } = require("uuid");
+const SubscriptionChangeLog = require('../models/SubscriptionChangeLog')
 
 const dummyCard = {
   cardNumber: "4242 4242 4242 4242",
@@ -10,9 +11,8 @@ const dummyCard = {
   cvv: "123",
 };
 
-// Check subscription status before initiating
 router.post("/initiate", async (req, res) => {
-  const { userId, plan, amount, billingCycle } = req.body;
+  const { userId, plan, amount, billingCycle, confirmUpgrade } = req.body;
 
   try {
     const user = await User.findById(userId);
@@ -43,14 +43,19 @@ router.post("/initiate", async (req, res) => {
         });
       }
       
-      // If trying to subscribe to a different plan or cycle, allow upgrade/downgrade
-      return res.status(200).json({
-        status: 'upgrade_available',
-        currentPlan,
-        currentCycle,
-        endDate: formattedEndDate,
-        message: `You currently have an active ${currentPlan} ${currentCycle} plan. Proceeding will change your subscription.`
-      });
+      // If trying to subscribe to a different plan or cycle
+      // And they haven't confirmed the upgrade yet
+      if (!confirmUpgrade) {
+        return res.status(200).json({
+          status: 'upgrade_available',
+          currentPlan,
+          currentCycle,
+          endDate: formattedEndDate,
+          message: `You currently have an active ${currentPlan} ${currentCycle} plan. Proceeding will change your subscription.`
+        });
+      }
+      
+      // If they confirmed the upgrade, proceed to create a new transaction
     }
     
     // Check for existing pending transactions
@@ -81,6 +86,7 @@ router.post("/initiate", async (req, res) => {
       status: "pending",
       paymentMethod: "card", // Default, will be updated when payment completes
       billingCycle,
+      isUpgrade: user.subscription && user.subscription.status === 'active'
     });
     
     await newTransaction.save();

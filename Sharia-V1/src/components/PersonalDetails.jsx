@@ -1,14 +1,28 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Camera, Plus, Trash2 } from 'lucide-react';
-import logo from '../images/ShariaStocks-logo/logo1.jpeg'
-import account from '../images/account-icon.svg';
+import DeactivateAccount from './DeactivateAccount'
 import Header from './Header';
 
 const PersonalDetails = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const user = location.state?.user;
+  console.log(user)
+  const userEmail = localStorage.getItem('userEmail')
+  const [deactivated, setDeactivated] = useState(false);
+  const [showDeactivateModal, setShowDeactivateModal] = useState(false);
+
+  const handleDeactivationSuccess = () => {
+    setDeactivated(true);
+    console.log("Account deactivated correctly");
+    localStorage.clear();
+    navigate('/signup');
+  };
+
+  if (deactivated) {
+    return <div>Account deactivated successfully.</div>;
+  }
 
   return (
     <div className="max-w-7xl mx-auto min-h-screen ">
@@ -36,44 +50,30 @@ const PersonalDetails = () => {
                   <span className="px-2 py-1 bg-green-100 text-green-600 rounded-full text-sm">Active</span>
                 </div>
                 <div className="flex justify-between py-3 border-b">
-                  <span className="text-gray-600">Two-Factor Auth</span>
-                  <span className="px-2 py-1 bg-red-100 text-red-600 rounded-full text-sm">Disabled</span>
+                  <span className="text-gray-600">Deactivate Account</span>
+                  <span className="px-2 py-1 bg-red-100 text-red-600 rounded-full text-sm cursor-pointer" onClick={() => setShowDeactivateModal(true)}>
+                    Deactivate
+                  </span>
                 </div>
               </div>
             </div>
 
-            <div>
-              <h2 className="text-lg font-semibold mb-4">Preferences</h2>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium">Email Notifications</h3>
-                    <p className="text-sm text-gray-500">Receive updates and alerts via email</p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" defaultChecked />
-                    <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                  </label>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium">SMS Notifications</h3>
-                    <p className="text-sm text-gray-500">Get instant alerts via SMS</p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" />
-                    <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <button className="w-80 py-2.5 px-4 bg-blue-600  text-white rounded-xl hover:bg-blue-700 transition-colors">
-              Update Preferences
-            </button>
+            
           </div>
         </div>
       </div>
+      {showDeactivateModal && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg">
+            <DeactivateAccount
+              userEmail={userEmail}
+              onDeactivationSuccess={handleDeactivationSuccess}
+              onCancel={() => setShowDeactivateModal(false)}
+            />
+            
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,19 +1,15 @@
 import axios from 'axios';
 
-// api/auth.js - Add these functions to your existing auth API file
-
-// Function to handle OAuth callback
 export const handleOAuthCallback = (token, email, id) => {
-  // Store token and user data in localStorage
   localStorage.setItem('token', token);
   localStorage.setItem('userEmail', email);
   localStorage.setItem('userId', id);
   return { token, email, id };
 };
 
-// Function to initiate Google Sign-in
+
 export const initiateGoogleSignIn = () => {
-  window.location.href = `${process.env.REACT_APP_API_URL}/api/auth/google`;
+  window.location.href = `http://localhost:5001/api/auth/google`;
 };
 
 export const signup = async (formData) => {

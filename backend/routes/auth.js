@@ -326,4 +326,40 @@ router.post('/contact-us', async (req, res) => {
     }
 });
 
+router.delete('/deactivate/:email', async (req, res) => {
+    const { email } = req.params;
+    const { password } = req.body; // Expect the password in the request body
+
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        // Verify the password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ msg: 'Incorrect password' });
+        }
+
+        // Delete the profile picture from S3 (if exists)
+        if (user.profilePicture) {
+            try {
+                await deleteFromS3(user.profilePicture);
+            } catch (error) {
+                console.error('Error deleting profile picture:', error);
+                // Consider whether to proceed with deactivation even if picture deletion fails
+            }
+        }
+
+        // Delete the user from the database
+        await User.findOneAndDelete({ email });
+
+        res.status(200).json({ msg: 'Account deactivated successfully' });
+    } catch (error) {
+        console.error('Error deactivating account:', error);
+        res.status(500).json({ msg: 'Server error' });
+    }
+});
+
 module.exports = router;

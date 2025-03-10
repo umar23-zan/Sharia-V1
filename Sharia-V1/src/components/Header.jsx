@@ -60,7 +60,6 @@ const Header = () => {
       <header className="sticky top-0 z-30 bg-white rounded-2xl p-4 shadow-sm mb-6">
         <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-                {/* Mobile Profile Icon - Visible on small screens (sm and below) */}
                 <div
                     className="sm:hidden items-center gap-2 cursor-pointer transition-transform hover:scale-105"
                     onClick={() => navigate('/profile', { state: { user } })}
@@ -124,7 +123,7 @@ const Header = () => {
             <div className="flex gap-3">
                 <button
                     className="relative flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                    onClick={() => navigate('/watchlist')}
+                    onClick={() => navigate('/watchlist', { state: { user} })}
                     aria-label="Watchlist"
                 >
                     <Heart className="w-5 h-5 text-gray-700" />

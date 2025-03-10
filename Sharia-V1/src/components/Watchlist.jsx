@@ -1,23 +1,31 @@
 import React, { useState, useEffect } from "react";
-import { Shield, Sparkles, Heart, TrendingUp, ArrowLeft } from 'lucide-react';
+import { Shield, Sparkles, Heart, TrendingUp, ArrowLeft, X, Search, Star, StarOff, Filter, BarChart3 } from 'lucide-react';
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import Header from "./Header";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const WatchList = () => {
     const [activeTab, setActiveTab] = useState("all");
+    const location = useLocation();
+    const user = location.state?.user;
     const [stocks, setStocks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [companyDetails, setCompanyDetails] = useState(null);
+    const [showFilters, setShowFilters] = useState(false);
+    const [view, setView] = useState("grid"); // grid or list view
+    const [favorites, setFavorites] = useState([]);
     const userId = localStorage.getItem('userId');
     const navigate = useNavigate();
     const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+    const isFreePlan = user.subscription.plan === 'free';
 
     useEffect(() => {
         const handleResize = () => {
             setIsDesktop(window.innerWidth >= 1024);
+            if (window.innerWidth < 1024) {
+                setShowFilters(false);
+            }
         };
 
         window.addEventListener('resize', handleResize);
@@ -37,6 +45,12 @@ const WatchList = () => {
                 const response = await axios.get(`/api/watchlist/${userId}`);
                 console.log(response.data);
                 setStocks(response.data.watchlist);
+                
+                // Populate initial favorites from localStorage if available
+                const savedFavorites = localStorage.getItem('favorites');
+                if (savedFavorites) {
+                    setFavorites(JSON.parse(savedFavorites));
+                }
 
                 // Fetch company details separately
                 response.data.watchlist.forEach(async (stock) => {
@@ -66,230 +80,400 @@ const WatchList = () => {
         fetchWatchlist();
     }, [userId]);
     
+    const toggleFavorite = (symbol, e) => {
+        e.stopPropagation();
+        
+        setFavorites(prev => {
+            const newFavorites = prev.includes(symbol)
+                ? prev.filter(s => s !== symbol)
+                : [...prev, symbol];
+                
+            // Save to localStorage
+            localStorage.setItem('favorites', JSON.stringify(newFavorites));
+            return newFavorites;
+        });
+    };
 
     const getStatusColor = (status) => {
-        switch (status) {
-            case "Halal":
-                return "bg-green-100 text-green-800";
-            case "Haram":
-                return "bg-red-100 text-red-800";
-            case "Doubtful":
-                return "bg-yellow-100 text-yellow-800";
+        switch (status?.toLowerCase()) {
+            case "halal":
+                return "bg-green-100 text-green-800 border-green-200";
+            case "haram":
+                return "bg-red-100 text-red-800 border-red-200";
+            case "doubtful":
+                return "bg-yellow-100 text-yellow-800 border-yellow-200";
             default:
-                return "";
+                return "bg-gray-100 text-gray-800 border-gray-200";
+        }
+    };
+
+    const getStatusIcon = (status) => {
+        switch (status?.toLowerCase()) {
+            case "halal":
+                return <Shield className="w-3 h-3" />;
+            case "haram":
+                return <X className="w-3 h-3" />;
+            case "doubtful":
+                return <Sparkles className="w-3 h-3" />;
+            default:
+                return null;
         }
     };
 
     const getStatusPill = (status) => {
         return (
-            <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(status)}`}>
+            <span className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${getStatusColor(status)} border`}>
+                {getStatusIcon(status)}
                 {status}
             </span>
         );
     };
 
-    console.log(companyDetails);
     const filteredStocks = stocks.filter((stock) => {
         const matchesTab = activeTab === "all" || stock.stockData?.Initial_Classification?.toLowerCase() === activeTab.toLowerCase();
-        const matchesSearch = stock.companyName.toLowerCase().includes(searchQuery.toLowerCase()) || stock.symbol.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSearch = stock.companyName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                             stock.symbol.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesTab && matchesSearch;
     });
 
-    return (
-        <div className="max-w-7xl mx-auto relative min-h-screen ">
-            <Header />
-            <div className={`${isDesktop ? 'h-[25vh]' : 'h-[27vh]'} absolute top-0 left-0 w-full bg-gradient-to-br from-blue-600 to-purple-600`} />
+    // Sort stocks - favorites first, then alphabetically
+    const sortedStocks = [...filteredStocks].sort((a, b) => {
+        if (favorites.includes(a.symbol) && !favorites.includes(b.symbol)) return -1;
+        if (!favorites.includes(a.symbol) && favorites.includes(b.symbol)) return 1;
+        return a.companyName.localeCompare(b.companyName);
+    });
 
-            <div className={`relative  mx-auto pt-6 px-6`}>
+    const renderStockCard = (stock) => {
+        const details = companyDetails?.[stock.symbol];
+        const isFavorite = favorites.includes(stock.symbol);
+        
+        return (
+            <div 
+                key={stock.symbol} 
+                className="bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition cursor-pointer border border-gray-100"
+                onClick={() => {navigate(`/stockresults/${stock.symbol}`)}}
+            >
+                <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-gray-800">{stock.companyName}</h3>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <p className="text-gray-500 text-sm">{stock.symbol}</p>
+                            {getStatusPill(stock.stockData?.Initial_Classification)}
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <div className="flex items-center justify-between mb-4">
+                    <span className="text-2xl font-bold text-gray-900">₹{details?.current_price || "—"}</span>
+                    <div className="flex items-center gap-2">
+                        <span className={`px-2 py-1 rounded-lg text-sm font-medium ${details?.price_change >= 0 ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"}`}>
+                            {details?.price_change >= 0 ? "+" : ""}
+                            {details?.price_change || "—"}%
+                        </span>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${details?.price_change >= 0 ? "bg-green-50" : "bg-red-50"}`}>
+                            <svg className={`w-5 h-5 ${details?.price_change >= 0 ? "text-green-500 rotate-0" : "text-red-500 rotate-180"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                {stock.stockData.Haram_Reason && (
+                    <div className="mb-4 p-3  rounded-lg text-sm">
+                        <p className="line-clamp-2">{stock.stockData.Haram_Reason}</p>
+                    </div>
+                )}
+
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                    <div className="p-2 bg-gray-50 rounded-lg">
+                        <p className="text-gray-500 text-xs mb-1">24h High</p>
+                        <p className="font-medium text-gray-900">₹{details?.high24 || "—"}</p>
+                    </div>
+                    <div className="p-2 bg-gray-50 rounded-lg">
+                        <p className="text-gray-500 text-xs mb-1">24h Low</p>
+                        <p className="font-medium text-gray-900">₹{details?.low24 || "—"}</p>
+                    </div>
+                    <div className="p-2 bg-gray-50 rounded-lg">
+                        <p className="text-gray-500 text-xs mb-1">Volume</p>
+                        <p className="font-medium text-gray-900">{details?.volume 
+                            ? (details.volume > 1000000 
+                                ? (details.volume/1000000).toFixed(1) + 'M'
+                                : (details.volume/1000).toFixed(1) + 'K')
+                            : "—"}</p>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderStockRow = (stock) => {
+        const details = companyDetails?.[stock.symbol];
+        const isFavorite = favorites.includes(stock.symbol);
+        
+        return (
+            <div 
+                key={stock.symbol} 
+                className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition cursor-pointer border border-gray-100 flex items-center"
+                onClick={() => {navigate(`/stockresults/${stock.symbol}`)}}
+            >
                 
-                <div className="flex justify-start items-center mb-10">
-                    <div>
-                    <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white/10 text-white hover:bg-white/20 cursor-pointer transition mr-3"> {/* Back Button */}
+                
+                <div className="flex-1">
+                    <div className="flex flex-col md:flex-row md:items-center md:gap-3">
+                        <h3 className="font-semibold text-gray-800">{stock.companyName}</h3>
+                        <div className="flex items-center gap-2">
+                            <p className="text-gray-500 text-sm">{stock.symbol}</p>
+                            {getStatusPill(stock.stockData?.Initial_Classification)}
+                        </div>
+                    </div>
+                    
+                    {stock.stockData.Haram_Reason && (
+                        <p className="text-xs  mt-1 line-clamp-1">{stock.stockData.Haram_Reason}</p>
+                    )}
+                </div>
+                
+                <div className="flex items-center gap-4 ml-4">
+                    <div className="text-right">
+                        <p className="font-bold text-gray-900">₹{details?.current_price || "—"}</p>
+                        <span className={`text-sm ${details?.price_change >= 0 ? "text-green-600" : "text-red-600"}`}>
+                            {details?.price_change >= 0 ? "+" : ""}
+                            {details?.price_change || "—"}%
+                        </span>
+                    </div>
+                    
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${details?.price_change >= 0 ? "bg-green-50" : "bg-red-50"}`}>
+                        <svg className={`w-5 h-5 ${details?.price_change >= 0 ? "text-green-500 rotate-0" : "text-red-500 rotate-180"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    return (
+        <div className="relative min-h-screen bg-gray-50">
+            {/* Header Background */}
+            <div className="absolute  top-0 left-0 w-full h-[20vh] bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600" />
+
+            <div className="relative max-w-6xl mx-auto pt-6 px-4 sm:px-6">
+                {/* Header with Navigation */}
+                <div className="flex justify-between items-center mb-6">
+                    <div className="flex items-center gap-3">
+                        <button 
+                            onClick={() => navigate(-1)} 
+                            className="p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition"
+                            aria-label="Go back"
+                        >
                             <ArrowLeft className="w-5 h-5" />
                         </button>
-                        </div>
                         <div>
-                        <h1 className="text-white text-2xl font-semibold">Watchlist</h1>
-                        <p className="text-white/80 text-sm">Track your favorite stocks</p>
+                            <h1 className="text-white text-2xl font-bold">Watchlist</h1>
+                            <p className="text-white/80 text-sm">Track your favorite stocks</p>
                         </div>
+                    </div>
+                    
+                    {/* View Toggle */}
+                    <div className="flex items-center gap-2">
+                        <button 
+                            onClick={() => setView('grid')} 
+                            className={`p-2 rounded-lg ${view === 'grid' ? 'bg-white/20 text-white' : 'bg-white/10 text-white/70'}`}
+                            aria-label="Grid view"
+                        >
+                            <div className="grid grid-cols-2 gap-0.5">
+                                <div className="w-1.5 h-1.5 bg-current rounded-sm"></div>
+                                <div className="w-1.5 h-1.5 bg-current rounded-sm"></div>
+                                <div className="w-1.5 h-1.5 bg-current rounded-sm"></div>
+                                <div className="w-1.5 h-1.5 bg-current rounded-sm"></div>
+                            </div>
+                        </button>
+                        <button 
+                            onClick={() => setView('list')} 
+                            className={`p-2 rounded-lg ${view === 'list' ? 'bg-white/20 text-white' : 'bg-white/10 text-white/70'}`}
+                            aria-label="List view"
+                        >
+                            <BarChart3 className="w-4 h-4" />
+                        </button>
+                    </div>
                 </div>
-                {/* Search Bar */}
-                <div className={`${isDesktop ? 'bg-white shadow' : 'bg-white/10'} rounded-full p-3 mb-10`}>
+                
+                {/* Search & Filter Bar */}
+                <div className="bg-white rounded-2xl shadow-lg p-4 mb-6">
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="relative flex-1">
+                            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                <Search className="w-5 h-5 text-gray-400" />
+                            </div>
                             <input
                                 type="text"
-                                placeholder="Search your stocks..."
-                                className={`w-full ${isDesktop ? 'bg-transparent text-gray-700 placeholder-gray-400' : 'bg-transparent text-white placeholder-white/70'} outline-none`}
+                                placeholder="Search stocks by name or symbol..."
+                                className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-
-                <div className={`flex ${isDesktop ? 'flex-row gap-8' : 'flex-col'}`}>
-                    {/* Sidebar for desktop */}
-                    {isDesktop && (
-                        <div className="w-64 bg-white rounded-xl shadow-md p-4 h-fit">
-                            <h2 className="font-semibold mb-4">Filters</h2>
-                            <ul className="space-y-3">
-                                <li>
-                                    <button 
-                                        className={`flex items-center w-full p-2 rounded-lg ${activeTab === 'all' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}`}
-                                        onClick={() => setActiveTab('all')}
-                                    >
-                                        <TrendingUp className="w-5 h-5 mr-3" />
-                                        <span>All Stocks</span>
-                                        <span className="ml-auto bg-gray-100 px-2 py-1 rounded-full text-xs">
-                                            {stocks.length}
-                                        </span>
-                                    </button>
-                                </li>
-                                <li>
-                                    <button 
-                                        className={`flex items-center w-full p-2 rounded-lg ${activeTab === 'halal' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}`}
-                                        onClick={() => setActiveTab('halal')}
-                                    >
-                                        <Shield className="w-5 h-5 mr-3" />
+                        <button 
+                            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border ${showFilters ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-gray-50 text-gray-700 border-gray-200'} hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition`}
+                            onClick={() => setShowFilters(!showFilters)}
+                        >
+                            <Filter className="w-5 h-5" />
+                            <span>Filters</span>
+                            {activeTab !== 'all' && (
+                                <span className="flex items-center justify-center w-5 h-5 bg-blue-100 text-blue-600 text-xs rounded-full">1</span>
+                            )}
+                        </button>
+                    </div>
+                    
+                    {/* Filter Options */}
+                    {showFilters && (
+                        <div className="mt-4 pt-4 border-t border-gray-100">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                <button 
+                                    className={`flex items-center gap-2 p-3 rounded-xl transition ${activeTab === 'all' ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'bg-gray-50 text-gray-700 border border-gray-100 hover:bg-gray-100'}`}
+                                    onClick={() => setActiveTab('all')}
+                                >
+                                    <TrendingUp className="w-5 h-5" />
+                                    <div className="flex-1 text-left">
+                                        <span>All</span>
+                                        <span className="ml-2 text-xs px-1.5 py-0.5 bg-gray-200 text-gray-700 rounded-full">{stocks.length}</span>
+                                    </div>
+                                </button>
+                                <button 
+                                    className={`flex items-center gap-2 p-3 rounded-xl transition ${activeTab === 'halal' ? 'bg-green-50 text-green-600 border border-green-200' : 'bg-gray-50 text-gray-700 border border-gray-100 hover:bg-gray-100'}`}
+                                    onClick={() => setActiveTab('halal')}
+                                >
+                                    <Shield className="w-5 h-5" />
+                                    <div className="flex-1 text-left">
                                         <span>Halal</span>
-                                        <span className="ml-auto bg-gray-100 px-2 py-1 rounded-full text-xs">
+                                        <span className="ml-2 text-xs px-1.5 py-0.5 bg-gray-200 text-gray-700 rounded-full">
                                             {stocks.filter(s => s.stockData?.Initial_Classification?.toLowerCase() === 'halal').length}
                                         </span>
-                                    </button>
-                                </li>
-                                <li>
-                                    <button 
-                                        className={`flex items-center w-full p-2 rounded-lg ${activeTab === 'doubtful' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}`}
-                                        onClick={() => setActiveTab('doubtful')}
-                                    >
-                                        <Sparkles className="w-5 h-5 mr-3" />
+                                    </div>
+                                </button>
+                                <button 
+                                    className={`flex items-center gap-2 p-3 rounded-xl transition ${activeTab === 'doubtful' ? 'bg-yellow-50 text-yellow-600 border border-yellow-200' : 'bg-gray-50 text-gray-700 border border-gray-100 hover:bg-gray-100'}`}
+                                    onClick={() => setActiveTab('doubtful')}
+                                >
+                                    <Sparkles className="w-5 h-5" />
+                                    <div className="flex-1 text-left">
                                         <span>Doubtful</span>
-                                        <span className="ml-auto bg-gray-100 px-2 py-1 rounded-full text-xs">
+                                        <span className="ml-2 text-xs px-1.5 py-0.5 bg-gray-200 text-gray-700 rounded-full">
                                             {stocks.filter(s => s.stockData?.Initial_Classification?.toLowerCase() === 'doubtful').length}
                                         </span>
-                                    </button>
-                                </li>
-                                <li>
-                                    <button 
-                                        className={`flex items-center w-full p-2 rounded-lg ${activeTab === 'haram' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50'}`}
-                                        onClick={() => setActiveTab('haram')}
-                                    >
-                                        <Heart className="w-5 h-5 mr-3" />
+                                    </div>
+                                </button>
+                                <button 
+                                    className={`flex items-center gap-2 p-3 rounded-xl transition ${activeTab === 'haram' ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-gray-50 text-gray-700 border border-gray-100 hover:bg-gray-100'}`}
+                                    onClick={() => setActiveTab('haram')}
+                                >
+                                    <Heart className="w-5 h-5" />
+                                    <div className="flex-1 text-left">
                                         <span>Haram</span>
-                                        <span className="ml-auto bg-gray-100 px-2 py-1 rounded-full text-xs">
+                                        <span className="ml-2 text-xs px-1.5 py-0.5 bg-gray-200 text-gray-700 rounded-full">
                                             {stocks.filter(s => s.stockData?.Initial_Classification?.toLowerCase() === 'haram').length}
                                         </span>
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
-                    )}
-
-                    <div className={`flex-1 ${isDesktop ? 'mt-0' : 'mt-4'}`}>
-                        {/* Mobile Tabs */}
-                        {!isDesktop && (
-                            <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-                                {['all', 'halal', 'doubtful', 'haram'].map((tab) => (
-                                    <button
-                                        key={tab}
-                                        onClick={() => setActiveTab(tab)}
-                                        className={`px-4 py-2 rounded-full text-sm whitespace-nowrap ${activeTab === tab ? 'bg-white text-blue-600 shadow' : 'bg-white/10 text-white'}`}
-                                    >
-                                        {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                                        <span className="ml-1 text-xs">
-                                            {stocks.filter(s => tab === 'all' ? true : s.stockData?.Initial_Classification?.toLowerCase() === tab).length}
-                                        </span>
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-
-                        
-
-                        {/* Stock Grid/List */}
-                        {loading ? (
-                            <div className="flex justify-center items-center h-64">
-                                <p className="text-center text-gray-500">Loading watchlist...</p>
-                            </div>
-                        ) : error ? (
-                            <p className="text-center text-red-500">{error}</p>
-                        ) : filteredStocks.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center h-64 bg-white rounded-xl p-8 shadow">
-                                <p className="text-center text-gray-500 mb-4">No stocks found in your watchlist.</p>
-                                <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-                                    Add Your First Stock
+                                    </div>
                                 </button>
                             </div>
-                        ) : (
-                            <div className={`${isDesktop ? 'grid grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-3'} mb-8`}>
-                                {filteredStocks.map((stock) => {
-                                    const details = companyDetails?.[stock.symbol];
-                                    return (
-                                        <div 
-                                            key={stock.symbol} 
-                                            className="bg-white rounded-xl p-4 shadow hover:shadow-md transition cursor-pointer"
-                                            onClick={() => {navigate(`/stockresults/${stock.symbol}`)}}
-                                        >
-                                            <div className="flex justify-between items-start mb-3">
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <h3 className="font-semibold">{stock.companyName}</h3>
-                                                        {getStatusPill(stock.stockData.Initial_Classification)}
-                                                    </div>
-                                                    <p className="text-gray-600 text-sm">{stock.symbol}</p>
-                                                </div>
-                                                <button 
-                                                    className="text-gray-400 hover:text-gray-600"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        // Add to favorites logic
-                                                    }}
-                                                >
-                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-
-                                            <div className="flex items-end gap-2 mb-3">
-                                                <span className="text-2xl font-semibold">₹{details?.current_price || "N/A"}</span>
-                                                <span className={`text-sm ${details?.price_change >= 0 ? "text-green-500" : "text-red-500"}`}>
-                                                    {details?.price_change >= 0 ? "+" : ""}
-                                                    {details?.price_change || "N/A"}%
-                                                </span>
-                                                <span className="ml-auto">
-                                                    <svg className={`w-6 h-6 ${details?.price_change >= 0 ? "text-green-500 rotate-0" : "text-red-500 rotate-180"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                                                    </svg>
-                                                </span>
-                                            </div>
-
-                                            {stock.stockData.Haram_Reason && (
-                                                <p className="text-sm text-gray-600 mb-3 line-clamp-2">{stock.stockData.Haram_Reason}</p>
-                                            )}
-
-                                            <div className="grid grid-cols-3 gap-4 text-sm">
-                                                <div>
-                                                    <p className="text-gray-500">24h High</p>
-                                                    <p className="font-medium">₹{details?.high24 || "N/A"}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-gray-500">24h Low</p>
-                                                    <p className="font-medium">₹{details?.low24 || "N/A"}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-gray-500">Volume</p>
-                                                    <p className="font-medium">{details?.volume 
-                                                        ? (details.volume > 1000000 
-                                                            ? (details.volume/1000000).toFixed(1) + 'M'
-                                                            : (details.volume/1000).toFixed(1) + 'K')
-                                                        : "N/A"}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
+
+                {/* Content Area */}
+                {loading ? (
+                    <div className="bg-white rounded-2xl shadow p-8 flex flex-col items-center justify-center h-64">
+                        <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+                        <p className="text-gray-600">Loading your watchlist...</p>
+                    </div>
+                ) : error ? (
+                    <div className="bg-red-50 rounded-2xl shadow p-8 text-center">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 text-red-500 mb-4">
+                            <X className="w-8 h-8" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Watchlist</h3>
+                        <p className="text-red-600 mb-4">{error}</p>
+                        <button 
+                            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
+                            onClick={() => window.location.reload()}
+                        >
+                            Try Again
+                        </button>
+                    </div>
+                ) : (isFreePlan && sortedStocks.length === 0) ? ( // Conditionally render for free plan users
+                        <div className="bg-white rounded-2xl shadow p-8 flex flex-col items-center justify-center h-64">
+                            <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-500 mb-4">
+                                <StarOff className="w-8 h-8" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-gray-800 mb-2">Unlock Watchlist Feature</h3>
+                            <p className="text-gray-600 mb-6 text-center max-w-md">Watchlist feature is available for Basic and Premium plans. Upgrade to track your favorite stocks.</p>
+                            <button
+                                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow transition"
+                                onClick={() => navigate('/subscriptiondetails')}
+                            >
+                                Upgrade Now
+                            </button>
+                        </div>
+                    ) : sortedStocks.length === 0 ? (
+                        <div className="bg-white rounded-2xl shadow p-8 flex flex-col items-center justify-center h-64">
+                            <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mb-4">
+                                <TrendingUp className="w-8 h-8" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-gray-800 mb-2">Your watchlist is empty</h3>
+                            <p className="text-gray-600 mb-6 text-center max-w-md">Add stocks to your watchlist to track their performance and compliance status.</p>
+                            <button 
+                                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow transition"
+                                onClick={() => navigate('/dashboard')}
+                            >
+                                Discover Stocks
+                            </button>
+                        </div>
+                ) : (
+                    <div className={view === 'grid' 
+                        ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" 
+                        : "space-y-3"
+                    }>
+                        {sortedStocks.map(stock => (
+                            view === 'grid' ? renderStockCard(stock) : renderStockRow(stock)
+                        ))}
+                    </div>
+                )}
+                
+                {/* Stats Summary */}
+                {sortedStocks.length > 0 && !loading && !error && (
+                    <div className="mt-8 bg-white rounded-2xl shadow p-4">
+                        <h3 className="font-semibold text-gray-800 mb-4">Watchlist Summary</h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            <div className="p-4 bg-blue-50 rounded-xl">
+                                <p className="text-sm text-blue-600 mb-1">Total Stocks</p>
+                                <p className="text-2xl font-bold text-blue-800">{sortedStocks.length}</p>
+                            </div>
+                            <div className="p-4 bg-green-50 rounded-xl">
+                                <p className="text-sm text-green-600 mb-1">Halal</p>
+                                <p className="text-2xl font-bold text-green-800">
+                                    {sortedStocks.filter(s => s.stockData?.Initial_Classification?.toLowerCase() === 'halal').length}
+                                </p>
+                            </div>
+                            <div className="p-4 bg-yellow-50 rounded-xl">
+                                <p className="text-sm text-yellow-600 mb-1">Doubtful</p>
+                                <p className="text-2xl font-bold text-yellow-800">
+                                    {sortedStocks.filter(s => s.stockData?.Initial_Classification?.toLowerCase() === 'doubtful').length}
+                                </p>
+                            </div>
+                            <div className="p-4 bg-red-50 rounded-xl">
+                                <p className="text-sm text-red-600 mb-1">Haram</p>
+                                <p className="text-2xl font-bold text-red-800">
+                                    {sortedStocks.filter(s => s.stockData?.Initial_Classification?.toLowerCase() === 'haram').length}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                
+                {/* Padding at bottom */}
+                <div className="h-24"></div>
             </div>
         </div>
     );
