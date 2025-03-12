@@ -212,7 +212,6 @@ const Razorpay = () => {
     }
   };
 
-  // New function that confirms upgrade and returns the transaction ID
   const confirmUpgradeAndGetTransactionId = async () => {
     setIsUpgrade(true);
     

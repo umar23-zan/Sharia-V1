@@ -6,60 +6,19 @@ import {
     getCurrentSubscription, 
     changeSubscriptionPlan 
   } from '../api/subscriptionService';
-  import logo from '../images/ShariaStocks-logo/logo1.jpeg'
-  import account from '../images/account-icon.svg';
-  import { getUserData } from '../api/auth';
+import axios from "axios";
+import { getUserData } from '../api/auth';
 import Header from './Header';
-
-
-// const planPrices = {
-//     free: {
-//         monthly: 0,
-//         annual: 0, 
-//     },
-//     basic: {
-//         monthly: 299,
-//         annual: Math.round(299 * 12 * 0.85), 
-//     },
-//     premium: {
-//         monthly: 599,
-//         annual: Math.round(599 * 12 * 0.85), 
-//     },
-// };
-
-
-// const planFeatures = {
-//     free: [
-//         'Search up to 3 stocks',
-//         'Basic Shariah compliance details',
-//         'Limited market insights',
-//         'No stock storage',
-//         'No notifications',
-//     ],
-//     basic: [
-//         'Search and analyze all stocks',
-//         'Store up to 10 stocks',
-//         'News notifications for stored stocks',
-//         'Detailed Shariah compliance metrics',
-//         'Basic portfolio analytics',
-//     ],
-//     premium: [
-//         'Search and analyze all stocks',
-//         'Store up to 50 stocks',
-//         'Priority news notifications',
-//         'Advanced portfolio analytics',
-//         'Expert Shariah compliance insights',
-//         'Zakat calculation tool',
-//     ],
-// };
-
 
 const SubscriptionDetails = () => {
     const email = localStorage.getItem('userEmail');
+    const userId = localStorage.getItem('userId')
     const [currentPlan, setCurrentPlan] = useState('free');
-    const [selectedPlan, setSelectedPlan] = useState('free'); // 
+    const [selectedPlan, setSelectedPlan] = useState('free'); 
     const [billingCycle, setBillingCycle] = useState('monthly');
     const [showConfirmation, setShowConfirmation] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showUpgradeConfirmation, setShowUpgradeConfirmation] = useState(false);
     const [planPrices, setPlanPrices] = useState({
         free: { monthly: 0, annual: 0 },
         basic: { monthly: 299, annual: 3048 },
@@ -67,9 +26,93 @@ const SubscriptionDetails = () => {
     });
     const [planFeatures, setPlanFeatures] = useState({});
     const [loading, setLoading] = useState(true);
+    const [paymentLoading, setPaymentLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [paymentError, setPaymentError] = useState(null);
+    const [showCancelPendingPayment, setShowCancelPendingPayment] = useState(false);
+    const [currentTransactionId, setCurrentTransactionId] = useState(null); 
     const navigate = useNavigate();
     const [user, setUser] = useState({});
+
+    const handlePayment = async () => {
+        try {
+            setPaymentLoading(true);
+            setPaymentError(null);
+            
+            // Get the total price with tax
+            const totalAmount = getTotalPrice(selectedPlan);
+            
+            // Create order through backend API
+            const { data } = await axios.post("/api/transaction/create-order", { 
+                amount: totalAmount.toFixed(2),
+                plan: selectedPlan,
+                billingCycle: billingCycle,
+                userId: userId
+            });
+            console.log(data)
+
+            setCurrentTransactionId(data.transactionId);
+            console.log(currentTransactionId)
+
+            const options = {
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+                amount: data.order.amount,
+                currency: data.order.currency || "INR",
+                name: "ShariaStock",
+                description: `${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} Plan - ${billingCycle}`,
+                order_id: data.order.id,
+                handler: async function(response) {
+                    try {
+                        // Verify payment on backend
+                        const verificationResponse = await axios.post("/api/transaction/verify-payment", response);
+                        
+                        if (verificationResponse.data.status === 'success') {
+                            // Update local state with new subscription info
+                            setCurrentPlan(selectedPlan);
+                            setUser({
+                                ...user,
+                                subscription: verificationResponse.data.user.subscription
+                            });
+                            
+                            setShowConfirmation(false);
+                            setShowSuccessModal(true);
+                        } else {
+                            setPaymentError("Payment verification failed. Please contact support.");
+                        }
+                    } catch (error) {
+                        setPaymentError(`Verification error: ${error.response?.data?.message || error.message}`);
+                    }
+                },
+                prefill: {
+                    name: user.name || "",
+                    email: user.email || "",
+                    contact: user.phone || ""
+                },
+                theme: { color: "#528FF0" },
+                modal: {
+                    ondismiss: function() {
+                        setPaymentLoading(false);
+                    }
+                }
+            };
+
+            const razorpay = new window.Razorpay(options);
+            razorpay.on('payment.failed', function(response) {
+                setPaymentError(`Payment failed: ${response.error.description}`);
+                setPaymentLoading(false);
+            });
+            
+            razorpay.open();
+        } catch (error) {
+            setPaymentLoading(false);
+            if (error.response?.data?.pendingOrderId) {
+                setPaymentError("You already have a pending payment for this plan. Please complete or cancel that payment first.");
+                setShowCancelPendingPayment(true);
+            } else {
+                setPaymentError(`Payment initialization error: ${error.response?.data?.error || error.message}`);
+            }
+        }
+    };
 
   
     useEffect(() => {
@@ -101,6 +144,34 @@ const SubscriptionDetails = () => {
         fetchData();
     }, []);
 
+    
+
+    const handleCancelPendingPayment = async () => {
+        setPaymentLoading(true);
+        setPaymentError(null);
+        setShowCancelPendingPayment(false);
+
+        try {
+            await axios.post("/api/transaction/cancel-pending-order", {
+                userId: userId,
+                plan: selectedPlan,
+                billingCycle: billingCycle
+            });
+
+            setPaymentError("Pending payment cancelled successfully. Try to create new order");
+            setTimeout(() => {
+                setShowConfirmation(false);
+                setPaymentError(null)
+            }, 2000);
+            
+
+        } catch (cancelError) {
+            setPaymentError(`Failed to cancel pending payment: ${cancelError.response?.data?.message || cancelError.message}`);
+            setShowCancelPendingPayment(true); 
+        } finally {
+            setPaymentLoading(false);
+        }
+    };
    
     const getPlanPrice = (plan) => {
         return planPrices[plan]?.[billingCycle] || 0;
@@ -123,33 +194,78 @@ const SubscriptionDetails = () => {
         return planFeatures[plan] || []; 
     };
 
+    const isDowngrade = (planToCheck) => {
+        const planValues = { 'free': 0, 'basic': 1, 'premium': 2 };
+        return planValues[planToCheck] < planValues[currentPlan];
+    };
 
     const handlePlanSelect = (plan) => {
+        if (currentPlan === 'premium' && plan !== 'premium') {
+            alert("You're currently on our Premium plan. Please contact customer support if you wish to downgrade.");
+            return;
+        }
+        if (currentPlan === 'basic' && plan === 'free') {
+            alert("You're currently on our Basic plan. Please contact customer support if you wish to downgrade to Free.");
+            return;
+        }
         setSelectedPlan(plan);
+
+        if (currentPlan === 'basic' && plan === 'premium') {
+            setShowUpgradeConfirmation(true);
+            return;
+        }
+
+        if (plan !== currentPlan && plan !== 'free') {
+            setShowConfirmation(true);
+        }
     };
 
    
     const handleUpgrade = () => {
-        setSelectedPlan('premium'); 
-        setShowConfirmation(true);
+        if (currentPlan === 'premium') {
+            alert("You're already on our Premium plan.");
+            return;
+        }
+        
+        setSelectedPlan('premium');
+        
+        if (currentPlan === 'basic') {
+            setShowUpgradeConfirmation(true);
+        } else {
+            setShowConfirmation(true);
+        }
     };
 
     const handleConfirmationClose = () => {
         setShowConfirmation(false);
+        setPaymentError(null);
+    };
+
+    const handleSuccessModalClose = () => {
+        setShowSuccessModal(false);
+    };
+    
+    const handleUpgradeConfirmationClose = () => {
+        setShowUpgradeConfirmation(false);
+    };
+    
+    const handleConfirmUpgrade = () => {
+        setShowUpgradeConfirmation(false);
+        setShowConfirmation(true);
     };
 
     const handleSubscribe = async () => {
-       
-        navigate('/razorpay', {
-            state: {
-                selectedPlan: selectedPlan,
-                billingCycle: billingCycle,
-                totalPrice: getTotalPrice(selectedPlan),
-                planPrice: getPlanPrice(selectedPlan),
-                tax: getTax(getPlanPrice(selectedPlan)),
-                planFeatures: getPlanFeatures(selectedPlan),
-            },
-        });
+        if (selectedPlan === currentPlan) {
+            alert("You are already subscribed to this plan.");
+            return;
+        }
+
+        if (isDowngrade(selectedPlan)) {
+            alert("Please contact customer support to downgrade your subscription.");
+            return;
+        }
+        
+        setShowConfirmation(true);
     };
 
     if (loading) {
@@ -161,16 +277,12 @@ const SubscriptionDetails = () => {
     }
 
     return (
-        <div className="max-w-7xl mx-auto   min-h-screen font-sans text-slate-900">
+        <div className="max-w-7xl mx-auto min-h-screen font-sans text-slate-900">
            <Header />
 
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-6 py-12">
                 <div className="mb-10">
-                    {/* <button className="flex items-center text-slate-600 hover:text-slate-900 mb-3 font-medium">
-                        <ChevronLeft size={20} className="mr-1" />
-                        <span>Back to Dashboard</span>
-                    </button> */}
                     <h2 className="text-3xl font-bold text-slate-900 mb-2">Choose your plan</h2>
                     <p className="text-slate-600 max-w-2xl">Select the perfect plan to enhance your Islamic investment journey. All plans come with Shariah compliance verification.</p>
                 </div>
@@ -202,6 +314,8 @@ const SubscriptionDetails = () => {
                         className={`bg-white rounded-2xl overflow-hidden transition-all duration-300 ${selectedPlan === 'free'
                             ? 'ring-2 ring-purple-500 shadow-lg transform scale-[1.02]'
                             : 'border border-slate-200 shadow-sm hover:shadow-md'
+                            } ${
+                                (currentPlan === 'basic' || currentPlan === 'premium') ? 'opacity-50' : ''
                             }`}
                     >
                         <div className={`h-2 ${selectedPlan === 'free' ? 'bg-purple-500' : 'bg-slate-200'}`}></div>
@@ -236,8 +350,9 @@ const SubscriptionDetails = () => {
                                     ? 'bg-purple-600 text-white hover:bg-purple-700'
                                     : 'bg-white border border-slate-300 text-slate-600 hover:border-purple-500 hover:text-purple-500'
                                     }`}
+                                    disabled={currentPlan === 'basic' || currentPlan === 'premium'}
                             >
-                                {selectedPlan === 'free' ? 'Current Plan' : 'Select Plan'}
+                                {currentPlan === 'free' ? 'Current Plan' : (currentPlan === 'basic' || currentPlan === 'premium') ? 'Contact Support to Downgrade' : 'Select Plan'}
                             </button>
                         </div>
                     </div>
@@ -247,6 +362,8 @@ const SubscriptionDetails = () => {
                         className={`bg-white rounded-2xl overflow-hidden transition-all duration-300 ${selectedPlan === 'basic'
                             ? 'ring-2 ring-purple-500 shadow-lg transform scale-[1.02]'
                             : 'border border-slate-200 shadow-sm hover:shadow-md'
+                            } ${
+                                currentPlan === 'premium' ? 'opacity-50' : ''
                             }`}
                     >
                         <div className={`h-2 ${selectedPlan === 'basic' ? 'bg-purple-500' : 'bg-slate-200'}`}></div>
@@ -272,16 +389,14 @@ const SubscriptionDetails = () => {
                             <button
                                 onClick={() => {
                                     handlePlanSelect('basic');
-                                    if (selectedPlan === 'basic') {
-                                        setShowConfirmation(true);
-                                    }
                                 }}
                                 className={`w-full py-3 rounded-xl font-medium transition-all ${selectedPlan === 'basic'
                                     ? 'bg-purple-600 text-white hover:bg-purple-700'
                                     : 'bg-white border border-slate-300 text-slate-600 hover:border-purple-500 hover:text-purple-500'
                                     }`}
+                                    disabled={currentPlan === 'premium'}
                             >
-                                {selectedPlan === 'basic' ? 'Selected Plan' : 'Select Plan'}
+                                {currentPlan === 'basic' ? 'Current Plan' : currentPlan === 'premium' ? 'Contact Support to Downgrade' : 'Select Plan'}
                             </button>
                         </div>
                     </div>
@@ -321,16 +436,14 @@ const SubscriptionDetails = () => {
                             <button
                                 onClick={() => {
                                     handlePlanSelect('premium');
-                                    if (selectedPlan === 'premium') {
-                                        setShowConfirmation(true);
-                                    }
                                 }}
                                 className={`w-full py-3 rounded-xl font-medium transition-all ${selectedPlan === 'premium'
                                     ? 'bg-purple-600 text-white hover:bg-purple-700'
                                     : 'bg-purple-600 bg-opacity-90 text-white hover:bg-opacity-100'
                                     }`}
+                                    disabled={currentPlan === 'premium'}
                             >
-                                {selectedPlan === 'premium' ? 'Selected Plan' : 'Select Plan'}
+                                {currentPlan === 'premium' ? 'Current Plan' : 'Select Plan'}
                             </button>
                         </div>
                     </div>
@@ -434,14 +547,95 @@ const SubscriptionDetails = () => {
                         </div>
                         <button
                             onClick={handleUpgrade}
-                            className="px-8 py-4 bg-white text-purple-600 rounded-xl font-medium hover:bg-purple-50 flex items-center justify-center flex-shrink-0 shadow-lg transition-all transform hover:scale-105"
+                            className={`px-8 py-4 bg-white text-purple-600 rounded-xl font-medium hover:bg-purple-50 flex items-center justify-center flex-shrink-0 shadow-lg transition-all transform hover:scale-105 ${
+                                currentPlan === 'premium' ? 'opacity-50 cursor-not-allowed' : ''
+                            }`}
+                            disabled={currentPlan === 'premium'}
                         >
-                            Upgrade Now
+                            {currentPlan === 'premium' ? 'You Have Premium' : 'Upgrade Now'}
                             <ArrowRight size={18} className="ml-2" />
                         </button>
                     </div>
                 </div>
             </main>
+            {showSuccessModal && (
+                <div className="fixed inset-0  bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 transform transition-all">
+                        <div className="flex justify-end">
+                            <button onClick={handleSuccessModalClose} className="text-slate-400 hover:text-slate-600">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="flex flex-col items-center justify-center text-center mb-6">
+                            <div className="h-20 w-20 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                                <CheckCircle size={40} className="text-green-500" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-slate-900 mb-2">Payment Successful!</h3>
+                            <p className="text-slate-600">
+                                Your subscription has been updated to the {selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} plan.
+                                You now have access to all {selectedPlan} features.
+                            </p>
+                        </div>
+                        <div className="bg-purple-50 border-l-4 border-purple-400 p-4 flex items-start rounded-r-md mb-6">
+                            <div className="text-purple-500 mr-3 flex-shrink-0 mt-0.5">
+                                <Bell size={18} />
+                            </div>
+                            <p className="text-sm text-purple-700">
+                                Your subscription will automatically renew each {billingCycle}. You can manage your subscription anytime from your account settings.
+                            </p>
+                        </div>
+                        <button
+                            onClick={handleSuccessModalClose}
+                            className="w-full px-6 py-3 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 flex items-center justify-center"
+                        >
+                            Got it, thanks!
+                        </button>
+                    </div>
+                </div>
+            )}
+
+
+            {showUpgradeConfirmation && (
+            <div className="fixed inset-0  bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 transform transition-all">
+                <div className="flex justify-between items-start mb-6">
+                    <h3 className="text-xl font-bold text-slate-900">Upgrade Confirmation</h3>
+                    <button onClick={handleUpgradeConfirmationClose} className="text-slate-400 hover:text-slate-600">
+                    <X size={20} />
+                    </button>
+                </div>
+                
+                <div className="mb-8">
+                    <p className="text-slate-700 mb-4">
+                    You are currently subscribed to the <span className="font-medium capitalize">{currentPlan}</span> plan.
+                    Are you sure you want to upgrade to the <span className="font-medium capitalize">{selectedPlan}</span> plan?
+                    </p>
+                    
+                    <div className="bg-purple-50 border-l-4 border-purple-400 p-4 flex items-start rounded-r-md">
+                    <div className="text-purple-500 mr-3 flex-shrink-0 mt-0.5">ℹ️</div>
+                    <p className="text-sm text-purple-700">
+                        Your current billing cycle will be canceled and you'll be charged the full amount for the new plan immediately.
+                    </p>
+                    </div>
+                </div>
+                
+                <div className="flex flex-col space-y-3">
+                    <button
+                    onClick={handleConfirmUpgrade}
+                    className="px-6 py-3 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 flex items-center justify-center"
+                    >
+                    Confirm Upgrade
+                    </button>
+                    <button
+                    onClick={handleUpgradeConfirmationClose}
+                    className="px-6 py-3 border border-slate-200 text-slate-700 rounded-xl font-medium hover:bg-slate-50"
+                    >
+                    Cancel
+                    </button>
+                </div>
+                </div>
+            </div>
+            )}
 
             {/* Confirmation Modal */}
             {showConfirmation && (
@@ -458,6 +652,26 @@ const SubscriptionDetails = () => {
                                 You're about to subscribe to the {selectedPlan === 'basic' ? 'Basic' : 'Premium'} plan at
                                 ₹{getPlanPrice(selectedPlan).toFixed(0)} per {billingCycle}.
                             </p>
+                            
+                            {/* Show any payment errors */}
+                            {paymentError && (
+                                <div className="bg-red-50 border-l-4 border-red-400 p-4 flex items-start rounded-r-md mb-4">
+                                    <div className="text-red-500 mr-3 flex-shrink-0 mt-0.5">⚠️</div>
+                                    <p className="text-sm text-red-700">{paymentError}</p>
+                                    {showCancelPendingPayment && (
+                                        <button
+                                        className="ml-4 px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 text-sm"
+
+                                            onClick={handleCancelPendingPayment}
+                                            disabled={paymentLoading}
+                                        >
+                                            Cancel Pending Payment
+                                        </button>
+                                    )}
+                                    
+                                </div>
+                            )}
+                            
                             <div className="bg-purple-50 border-l-4 border-purple-400 p-4 flex items-start rounded-r-md">
                                 <div className="text-purple-500 mr-3 flex-shrink-0 mt-0.5">⚠️</div>
                                 <p className="text-sm text-purple-700">
@@ -482,15 +696,29 @@ const SubscriptionDetails = () => {
                         </div>
                         <div className="mt-8 flex flex-col space-y-3">
                             <button
-                                onClick={handleSubscribe}
-                                className="px-6 py-3 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 flex items-center justify-center"
+                                onClick={handlePayment}
+                                disabled={paymentLoading}
+                                className={`px-6 py-3 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 flex items-center justify-center ${paymentLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                             >
-                                <CreditCard size={18} className="mr-2" />
-                                Confirm Payment
+                                {paymentLoading ? (
+                                    <>
+                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Processing...
+                                    </>
+                                ) : (
+                                    <>
+                                        <CreditCard size={18} className="mr-2" />
+                                        Confirm Payment
+                                    </>
+                                )}
                             </button>
                             <button
                                 onClick={handleConfirmationClose}
                                 className="px-6 py-3 border border-slate-200 text-slate-700 rounded-xl font-medium hover:bg-slate-50"
+                                disabled={paymentLoading}
                             >
                                 Cancel
                             </button>

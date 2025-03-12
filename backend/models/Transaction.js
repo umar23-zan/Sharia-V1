@@ -1,46 +1,62 @@
 const mongoose = require('mongoose');
 
 const TransactionSchema = new mongoose.Schema({
-  transactionId: String,
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+  userId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User', 
+    required: true 
   },
-  amount: {
-    type: Number,
-    required: true
+  orderId: { 
+    type: String, 
+    required: true 
   },
-  status: {
-    type: String,
-    enum: ['pending', 'completed', 'failed', 'refunded'],
-    default: 'pending'
+  paymentId: { 
+    type: String 
   },
-  paymentMethod: {
-    type: String,
-    enum: ['card', 'upi'],
-    required: true
+  amount: { 
+    type: Number, 
+    required: true 
   },
-  paymentDetails: {
-    cardBrand: String,
-    last4: String,
-    upiId: String
+  currency: { 
+    type: String, 
+    default: 'INR' 
   },
-  subscriptionPlan: {
-    type: String,
-    enum: ['basic', 'premium'],
-    required: true
+  status: { 
+    type: String, 
+    enum: ['created', 'authorized', 'captured', 'failed', 'pending', 'refunded', 'cancelled'],
+    default: 'created' 
   },
-  billingCycle: {
-    type: String,
-    enum: ['monthly', 'annual'],
-    required: true
+  paymentMethod: { 
+    type: String 
   },
-  receiptUrl: String,
-  createdAt: {
-    type: Date,
-    default: Date.now
+  subscriptionDetails: {
+    plan: { 
+      type: String, 
+      enum: ['free', 'basic', 'premium'] 
+    },
+    billingCycle: { 
+      type: String, 
+      enum: ['monthly', 'annual'] 
+    },
+    isUpgrade: { 
+      type: Boolean,
+      default: false 
+    },
+    previousPlan: { 
+      type: String 
+    }
+  },
+  notes: { 
+    type: Object 
+  },
+  createdAt: { 
+    type: Date, 
+    default: Date.now 
+  },
+  updatedAt: { 
+    type: Date 
   }
 });
 
-module.exports = mongoose.model('Transaction', TransactionSchema);
+const Transaction = mongoose.model('Transaction', TransactionSchema);
+module.exports = Transaction;
