@@ -15,6 +15,8 @@ const Profile = () => {
     navigate('/login');
   };
 
+  const isFree = user?.subscription?.plan === 'free';
+
   return (
     <div className=" max-w-7xl mx-auto min-h-screen ">
       <Header />
@@ -76,7 +78,60 @@ const Profile = () => {
 
           {/* Right Column - Premium Plan */}
           <div className="lg:col-span-2">
+            {isFree ? (
             <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-8 text-white">
+            <div className="flex justify-between items-start mb-8">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 bg-white/20 rounded-xl">
+                    <Settings className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-semibold sm:text-md">Premium Plan</h2>
+                    <p className="text-white/80 sm:text-md " >Unlock exclusive features</p>
+                  </div>
+                </div>
+              </div>
+              <button className="px-6 py-2.5 bg-white text-blue-600 rounded-xl font-medium hover:bg-white/90 cursor-pointer transition-colors" onClick={()=>{navigate('/subscriptiondetails')}}>
+                Upgrade Now
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6">
+              {[
+                {
+                  number: 1,
+                  title: 'Real-time Alerts',
+                  description: 'Get instant notifications for price changes and market movements',
+                  icon: '⚡'
+                },
+                {
+                  number: 2,
+                  title: 'Portfolio Analytics',
+                  description: 'Advanced insights and performance tracking with detailed metrics',
+                  icon: '📊'
+                },
+                {
+                  number: 3,
+                  title: 'Expert Reports',
+                  description: 'Comprehensive shariah compliance analysis and recommendations',
+                  icon: '📑'
+                }
+              ].map((feature) => (
+                <div key={feature.number} className="flex gap-4 p-4 bg-white/10 rounded-xl">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-xl">
+                    {feature.icon}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-medium mb-1">{feature.title}</h3>
+                    <p className="text-white/80">{feature.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div> 
+            ) : (
+              <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-8 text-white">
               <div className="flex justify-between items-start mb-8">
                 <div>
                   <div className="flex items-center gap-3 mb-2">
@@ -84,36 +139,33 @@ const Profile = () => {
                       <Settings className="w-6 h-6" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-semibold sm:text-md">Premium Plan</h2>
-                      <p className="text-white/80 sm:text-md " >Unlock exclusive features</p>
+                      <h2 className="text-2xl font-semibold sm:text-md">Plan Details</h2>
                     </div>
                   </div>
                 </div>
-                <button className="px-6 py-2.5 bg-white text-blue-600 rounded-xl font-medium hover:bg-white/90 cursor-pointer transition-colors" onClick={()=>{navigate('/subscriptiondetails')}}>
-                  Upgrade Now
-                </button>
+                
               </div>
 
               <div className="grid grid-cols-1 gap-6">
                 {[
                   {
                     number: 1,
-                    title: 'Real-time Alerts',
-                    description: 'Get instant notifications for price changes and market movements',
+                    title: 'Plan',
+                    description: `${user.subscription.plan}`,
                     icon: '⚡'
                   },
                   {
                     number: 2,
-                    title: 'Portfolio Analytics',
-                    description: 'Advanced insights and performance tracking with detailed metrics',
+                    title: 'Status',
+                    description: `${user.subscription.status}`,
                     icon: '📊'
                   },
                   {
                     number: 3,
-                    title: 'Expert Reports',
-                    description: 'Comprehensive shariah compliance analysis and recommendations',
+                    title: 'Billing Cycle',
+                    description:`${user.subscription.billingCycle}`,
                     icon: '📑'
-                  }
+                  },
                 ].map((feature) => (
                   <div key={feature.number} className="flex gap-4 p-4 bg-white/10 rounded-xl">
                     <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-xl">
@@ -127,6 +179,9 @@ const Profile = () => {
                 ))}
               </div>
             </div>
+            )
+            }
+            
 
             <button 
               onClick={handleLogout}
