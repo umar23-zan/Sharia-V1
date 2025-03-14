@@ -44,15 +44,14 @@ router.get('/plans', async (req, res) => {
         'Store up to 10 stocks',
         'News notifications for stored stocks',
         'Detailed Shariah compliance metrics',
-        'Basic portfolio analytics',
+        
       ],
       premium: [
         'Search and analyze all stocks',
-        'Store up to 50 stocks',
+        'Store up to 25 stocks',
         'Priority news notifications',
-        'Advanced portfolio analytics',
         'Expert Shariah compliance insights',
-        'Zakat calculation tool',
+        
       ],
     };
 

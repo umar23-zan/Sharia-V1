@@ -73,7 +73,7 @@ const Dashboard = () => {
                                 </div>
                             </div>
                         </div>
-                        <img src={logo} onClick={() => navigate('/dashboard')} alt="ShariaStock Logo" className="w-48 h-14 object-fill cursor-pointer" />
+                        <img src={logo} onClick={() => navigate('/dashboard')} alt="ShariaStock Logo" className="w-52 h-14 object-fill cursor-pointer" />
                     </div>
 
                     <div className="flex gap-3">
@@ -131,7 +131,13 @@ const Dashboard = () => {
         </div>
         
         {/* Enhanced Search Bar */}
-        <form  className="relative mx-auto max-w-xl">
+        <form  className="relative mx-auto max-w-xl" onSubmit={(e) => {
+    e.preventDefault(); // Prevent default form submission
+    if (suggestions.length > 0) {
+      setSearchSymbol(suggestions[0].SYMBOL);
+      navigate(`/stockresults/${suggestions[0].SYMBOL}`, { state: { user } });
+    }
+  }}>
           <div className="relative group">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl blur opacity-30 group-hover:opacity-100 transition duration-500"></div>
             <div className="relative bg-white rounded-xl">

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import account from '../images/account-icon.svg';
-import logo from '../images/ShariaStocks-logo/ShariaStocks.svg'
+import logo from '../images/ShariaStocks-logo/logo1.jpeg'
 import { getUserData } from '../api/auth';
 import { Search, Bell, Heart } from 'lucide-react';
 import niftyCompanies from '../nifty_symbols.json';
@@ -70,7 +70,7 @@ const Header = () => {
                         </div>
                     </div>
                 </div>
-                <img src={logo} onClick={() => navigate('/dashboard')} alt="ShariaStock Logo" className="w-48 h-14 object-cover cursor-pointer" />
+                <img src={logo} onClick={() => navigate('/dashboard')} alt="ShariaStock Logo" className="w-52 h-12 object-fill cursor-pointer" />
             </div>
             <div className="flex-1 max-w-lg mx-4 hidden sm:block">
                 <div className="relative">
@@ -82,7 +82,14 @@ const Header = () => {
                         ref={searchInputRef}
                         onChange={handleInputChange}
                         value={searchSymbol}
-                        // onKeyDown={(e) => e.key === 'Enter' && handleSearch(e)}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter" && suggestions.length > 0) {
+                              const firstSuggestion = suggestions[0];
+                              setSearchSymbol(firstSuggestion.SYMBOL);
+                              navigate(`/stockresults/${firstSuggestion.SYMBOL}`, { state: { user } });
+                              setIsSearchActive(false);
+                            }
+                          }}
                     />
                     {isSearchActive && suggestions.length > 0 && (
                         <ul className="absolute w-full mt-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-20">

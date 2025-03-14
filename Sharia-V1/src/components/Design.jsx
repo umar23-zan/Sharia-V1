@@ -100,14 +100,12 @@ export default function LandingPage() {
       description: "Basic halal screening for casual investors",
       popular: false,
       features: [
-        { name: "Basic stock screening", included: true },
-        { name: "Limited search (10/day)", included: true },
-        { name: "Basic compliance filters", included: true },
-        { name: "Single watchlist (up to 5 stocks)", included: true },
-        { name: "Community forum access", included: true },
+        { name: "Stock search limit (3 stocks)", included: true },
+        { name: "Sharia compliance Details (3 stocks)", included: true },
+        { name: "Basic compliance filters", included: false },
+        { name: "watchlist access", included: false },
+        { name: "News Notification", included: false },
         { name: "Advanced filtering", included: false },
-        { name: "Detailed financial analysis", included: false },
-        { name: "Email alerts", included: false }
       ],
       buttonText: "Sign Up Free",
       onClick: handleSignupClick,
@@ -115,19 +113,17 @@ export default function LandingPage() {
     },
     {
       name: "Basic",
-      price: "$9.99",
+      price: "₹ 299",
       period: "/mo",
       description: "Enhanced features for serious investors",
       popular: true,
       features: [
-        { name: "Everything in Free plan", included: true },
-        { name: "Unlimited stock screening", included: true },
-        { name: "Advanced compliance filters", included: true },
-        { name: "Multiple watchlists", included: true },
-        { name: "Email Alerts for compliance changes", included: true },
-        { name: "Portfolio Analysis", included: true },
-        { name: "Priority customer support", included: false },
-        { name: "API Access", included: false }
+        { name: "Unlimited Stock search limit", included: true },
+        { name: "Unlimited Sharia compliance Details", included: true },
+        { name: "Basic compliance filters", included: true },
+        { name: "watchlist access (upto 10 stocks)", included: true },
+        { name: "News Notification (basic)", included: true },
+        { name: "Advanced filtering", included: true },
       ],
       buttonText: "Get Started",
       onClick: handleSignupClick,
@@ -135,19 +131,17 @@ export default function LandingPage() {
     },
     {
       name: "Premium",
-      price: "$19.99",
+      price: "₹ 599",
       period: "/mo",
       description: "Complete Solution for Professional investors",
       popular: false,
       features: [
-        { name: "Everything in Basic plan", included: true },
-        { name: "Advanced Portfolio Analysis", included: true },
-        { name: "Custom Screening Criteria", included: true },
-        { name: "Realtime Compliance Alerts", included: true },
-        { name: "Export Data to Excel/PDF", included: true },
-        { name: "Priority Customer Support", included: true },
-        { name: "API Access for integration", included: true },
-        { name: "Personalized Investment Advice", included: true }
+        { name: "Unlimited Stock search limit", included: true },
+        { name: "Unlimited Sharia compliance Details", included: true },
+        { name: "Basic compliance filters", included: true },
+        { name: "watchlist access (25 stocks)", included: true },
+        { name: "News Notification (Priority)", included: true },
+        { name: "Advanced filtering", included: true },
       ],
       buttonText: "Get Premium",
       onClick: handleSignupClick,
@@ -853,16 +847,16 @@ export default function LandingPage() {
             >
               <h3 className="text-lg font-bold mb-6">Quick Links</h3>
               <ul className="space-y-3">
-                {['Features', 'How It Works', 'Pricing', 'FAQ'].map((link, i) => (
+                {['features', 'how-it-works', 'pricing', 'faq'].map((link, i) => (
                   <motion.li key={i} whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 400 }}>
-                    <a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">{link}</a>
+                    <a href={`#${link}`} className="text-gray-300 hover:text-white transition-colors duration-300">{link}</a>
                   </motion.li>
                 ))}
               </ul>
             </motion.div>
 
             {/* Resources */}
-            <motion.div
+            {/* <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -876,7 +870,7 @@ export default function LandingPage() {
                   </motion.li>
                 ))}
               </ul>
-            </motion.div>
+            </motion.div> */}
 
             {/* Contact */}
             <motion.div
@@ -888,9 +882,9 @@ export default function LandingPage() {
               <h3 className="text-lg font-bold mb-6">Contact Us</h3>
               <ul className="space-y-5">
                 {[
-                  { icon: 'email', text: 'support@shariastocks.com' },
+                  { icon: 'email', text: 'support@zansphere.com' },
                   { icon: 'phone', text: '+1 (555) 123-4567' },
-                  { icon: 'location', text: '123 Finance St, New York, NY 10001' }
+                  { icon: 'location', text: 'Alwarpet, Chennai' }
                 ].map((item, i) => (
                   <motion.li key={i} className="flex items-start" whileHover={{ x: 5 }}>
                     <svg className="h-6 w-6 text-green-400 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -912,7 +906,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.8 }}
           >
-            © 2025 Shariastocks. All rights reserved.
+            © 2025 Zansphere. All rights reserved.
           </motion.div>
         </div>
       </footer>

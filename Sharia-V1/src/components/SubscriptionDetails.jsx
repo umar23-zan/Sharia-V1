@@ -482,7 +482,7 @@ const SubscriptionDetails = () => {
                                     </td>
                                     <td className="px-8 py-6 text-center text-slate-800">—</td>
                                     <td className="px-8 py-6 text-center text-slate-800">10 stocks</td>
-                                    <td className="px-8 py-6 text-center text-slate-800">50 stocks</td>
+                                    <td className="px-8 py-6 text-center text-slate-800">25 stocks</td>
                                 </tr>
                                 <tr className="border-b border-slate-100">
                                     <td className="px-8 py-6 text-slate-800 flex items-center">
@@ -502,37 +502,7 @@ const SubscriptionDetails = () => {
                                     <td className="px-8 py-6 text-center text-slate-800">Detailed</td>
                                     <td className="px-8 py-6 text-center text-slate-800">Expert</td>
                                 </tr>
-                                <tr className="border-b border-slate-100">
-                                    <td className="px-8 py-6 text-slate-800 flex items-center">
-                                        <FileText size={16} className="mr-3 text-purple-300" />
-                                        Portfolio analytics
-                                    </td>
-                                    <td className="px-8 py-6 text-center text-slate-800">—</td>
-                                    <td className="px-8 py-6 text-center text-slate-800">Basic</td>
-                                    <td className="px-8 py-6 text-center text-slate-800">Advanced</td>
-                                </tr>
-                                <tr className="border-b border-slate-100 bg-slate-50">
-                                    <td className="px-8 py-6 text-slate-800 flex items-center">
-                                        <Zap size={16} className="mr-3 text-purple-300" />
-                                        Zakat calculation
-                                    </td>
-                                    <td className="px-8 py-6 text-center text-slate-800">—</td>
-                                    <td className="px-8 py-6 text-center text-slate-800">—</td>
-                                    <td className="px-8 py-6 text-center text-slate-800">
-                                        <div className="inline-flex items-center justify-center h-6 w-6 bg-purple-100 text-purple-500 rounded-full">
-                                            <CheckCircle size={14} />
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td className="px-8 py-6 text-slate-800 flex items-center">
-                                        <Clock size={16} className="mr-3 text-purple-300" />
-                                        Historical data
-                                    </td>
-                                    <td className="px-8 py-6 text-center text-slate-800">1 month</td>
-                                    <td className="px-8 py-6 text-center text-slate-800">1 year</td>
-                                    <td className="px-8 py-6 text-center text-slate-800">5 years</td>
-                                </tr>
+                                
                             </tbody>
                         </table>
                     </div>

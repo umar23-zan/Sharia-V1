@@ -167,21 +167,26 @@ const StockResults = () => {
         const numericThreshold = threshold && threshold !== 'N/A' ? parseFloat(threshold.split(' ')[3]) : NaN; 
     
         let bgColorClassName;
+        let lineChartColorName;
         const isHalal = stockData.Initial_Classification === 'Halal';
     
         if (isHalal) {
             
             if (!isNaN(numericValue) && !isNaN(numericThreshold) && numericValue > numericThreshold) {
                 bgColorClassName = 'bg-gradient-to-r from-red-50 to-pink-50/30'; 
+                lineChartColorName = 'text-red-600'
             } else {
                 bgColorClassName = 'bg-gradient-to-r from-green-50 to-emerald-50/30'; 
+                lineChartColorName = 'text-green-600'
             }
         } else {
             
             if (!isNaN(numericValue) && !isNaN(numericThreshold) && numericValue > numericThreshold) {
                 bgColorClassName = 'bg-gradient-to-r from-red-50 to-pink-50/30'; 
+                lineChartColorName = 'text-red-600'
             } else {
                 bgColorClassName = 'bg-gradient-to-r from-green-50 to-emerald-50/30'; 
+                lineChartColorName = 'text-green-600'
             }
         }
     
@@ -189,7 +194,7 @@ const StockResults = () => {
             <div className={`${bgColorClassName} p-3 sm:p-4 rounded-xl hover:bg-gray-50 transition-all`}>
                 <div className="flex flex-col items-center text-center gap-2 sm:gap-3">
                     <div className="bg-green-50 p-1.5 sm:p-2 rounded-lg">
-                        <LineChart className={`w-3 h-3 sm:w-4 sm:h-4 ${isHalal ? 'text-green-600' : 'text-red-600'}`} />
+                        <LineChart className={`w-3 h-3 sm:w-4 sm:h-4 ${lineChartColorName}`} />
                     </div>
                     <div>
                         <p className="text-gray-600 text-sm">{label}</p>
