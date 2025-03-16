@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence  } from 'framer-motion';
 import logo from '../images/ShariaStocks-logo/ShariaStocks.png'
+import land from '../images/land.png'
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -127,7 +128,7 @@ export default function LandingPage() {
       ],
       buttonText: "Get Started",
       onClick: handleSignupClick,
-      color: "gradient-to-r from-blue-900 to-green-900"
+      color: "gradient-to-r from-teal-500 to-blue-500"
     },
     {
       name: "Premium",
@@ -175,14 +176,14 @@ export default function LandingPage() {
           
           <div className="flex items-center space-x-4">
             <motion.button 
-              className="text-gray-600 hover:text-green-600 transition-colors hidden md:block"
+              className="bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent transition-colors hidden md:block"
               whileHover={{ scale: 1.05 }}
               onClick={handleLoginClick}
             >
               Log in
             </motion.button>
             <motion.button 
-              className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-lg transition-colors hidden md:block"
+              className="bg-gradient-to-r from-teal-600 to-blue-600 text-white px-5 py-2 rounded-lg transition-colors hidden md:block"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleSignupClick}
@@ -215,59 +216,197 @@ export default function LandingPage() {
             <a href="#pricing" className="block text-gray-600 hover:text-green-600 transition-colors">Pricing</a>
             <a href="#faq" className="block text-gray-600 hover:text-green-600 transition-colors">FAQ</a>
             <div className="pt-4 flex flex-col space-y-3">
-              <button className="text-gray-600 hover:text-green-600 transition-colors text-left" onClick={handleLoginClick}>Log in</button>
-              <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors text-center" onClick={handleSignupClick}>Sign Up</button>
+              <button className="bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent transition-colors text-left" onClick={handleLoginClick}>Log in</button>
+              <button className="bg-gradient-to-r from-teal-600 to-blue-600  text-white px-4 py-2 rounded-lg transition-colors text-center" onClick={handleSignupClick}>Sign Up</button>
             </div>
           </div>
         </motion.div>
       </header>
 
-      {/* Hero Section - With animation */}
-      <motion.section 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1 }}
-        className="pt-32 pb-16 px-6 bg-gradient-to-r from-blue-900 to-green-800 text-white"
+      <section className="bg-[#f0f7ff] w-full overflow-hidden">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-24 flex flex-col md:flex-row items-center justify-between">
+          {/* Left Content */}
+          <div className="w-full md:w-1/2 mb-10 md:mb-0 pr-0 md:pr-8">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 leading-tight">
+              <span className="bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent">Ethical Investing Made Simple</span>
+            </h1>
+            <p className="text-gray-700 mb-8 text-base sm:text-lg max-w-lg">
+              Build your halal investment portfolio with confidence. Screen 
+              stocks according to Islamic principles and make informed 
+              investment decisions.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <a 
+                href="#start-investing" 
+                className="bg-gradient-to-r from-teal-600 to-blue-600 text-white px-6 py-3 rounded-full font-medium hover:from-teal-700 hover:to-blue-700 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1"
+              >
+                Start Investing
+              </a>
+              <a 
+                href="#learn-more" 
+                className="border-2 border-teal-500 text-teal-600 hover:bg-teal-50 px-6 py-3 rounded-full font-medium transition duration-300 hover:shadow-md transform hover:-translate-y-1"
+              >
+                Learn More
+              </a>
+            </div>
+          </div>
+          
+          {/* Right Content - Image */}
+          <div className="w-full md:w-1/2 flex justify-center md:justify-end animate-float">
+            <div className="relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-teal-500 to-blue-500 rounded-xl blur opacity-30 group-hover:opacity-40 transition duration-1000"></div>
+              <img 
+                src={land} 
+                alt="Ethical Investing" 
+                className="relative rounded-xl w-full max-w-md sm:max-w-lg md:max-w-xl object-cover shadow-2xl hover:shadow-3xl transition duration-300" 
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+     {/* Combined Features Section */}
+<section id="features" className="py-20 px-6 bg-gradient-to-b from-[#f0f7ff] to-white">
+  <div className="max-w-6xl mx-auto">
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+      variants={containerVariants}
+      className="text-center mb-16"
+    >
+      <motion.h2 
+        variants={itemVariants} 
+        className="text-3xl sm:text-4xl font-bold mb-4 bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent"
       >
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.h1 
-            className="text-4xl md:text-5xl font-bold mb-4"
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.7 }}
-          >
-            Ethical Investing Made <span className="text-yellow-400 inline-block transform hover:scale-105 transition-transform">Simple</span>
-          </motion.h1>
-          <motion.p 
-            className="text-lg mb-8 text-gray-100"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.7 }}
-          >
-            Screen stocks according to Islamic principles and build a halal
-            investment portfolio with confidence.
-          </motion.p>
-          <motion.div 
-            className="max-w-md mx-auto"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.6, duration: 0.7 }}
-          >
-            <motion.button 
-              className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-lg text-lg shadow-lg transition-all"
-              whileHover={{ scale: 1.05, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleSignupClick}
-            >
-              Get Started Free
-            </motion.button>
-          </motion.div>
-        </div>
-      </motion.section>
+        Powerful Features for Halal Investing
+      </motion.h2>
+      <motion.p 
+        variants={itemVariants} 
+        className="text-lg text-gray-600 max-w-2xl mx-auto"
+      >
+        Everything you need to build and manage a Sharia-compliant investment portfolio
+      </motion.p>
+    </motion.div>
 
-      {/* Features Section 1 */}
-      <section id="features" className="py-20 px-6 bg-gray-50">
-        <div className="max-w-5xl mx-auto">
+    <motion.div 
+      className="grid md:grid-cols-3 gap-6 lg:gap-8"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+      variants={containerVariants}
+    >
+      {/* Feature 1 */}
+      <motion.div 
+        className="bg-gradient-to-r from-teal-50 to-blue-50 p-6 rounded-xl shadow-md hover:shadow-lg transition-all border border-gray-100"
+        variants={itemVariants}
+        whileHover={{ y: -5, transition: { duration: 0.2 } }}
+      >
+        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-teal-500 to-blue-500 flex items-center justify-center text-white mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <h3 className="font-bold text-lg mb-2 text-gray-800">Stock Search</h3>
+        <p className="text-gray-600">
+          Search thousands of global stocks with comprehensive financial data and metrics.
+        </p>
+      </motion.div>
+
+      {/* Feature 2 */}
+      <motion.div 
+        className="bg-gradient-to-r from-teal-50 to-blue-50 p-6 rounded-xl shadow-md hover:shadow-lg transition-all border border-gray-100"
+        variants={itemVariants}
+        whileHover={{ y: -5, transition: { duration: 0.2 } }}
+      >
+        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-teal-500 to-blue-500 flex items-center justify-center text-white mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+        </div>
+        <h3 className="font-bold text-lg mb-2 text-gray-800">Halal Screening</h3>
+        <p className="text-gray-600">
+          Screen stocks according to Islamic principles including financial ratios and business activities.
+        </p>
+      </motion.div>
+
+      {/* Feature 3 */}
+      <motion.div 
+        className="bg-gradient-to-r from-teal-50 to-blue-50 p-6 rounded-xl shadow-md hover:shadow-lg transition-all border border-gray-100"
+        variants={itemVariants}
+        whileHover={{ y: -5, transition: { duration: 0.2 } }}
+      >
+        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-teal-500 to-blue-500 flex items-center justify-center text-white mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        </div>
+        <h3 className="font-bold text-lg mb-2 text-gray-800">Watchlist</h3>
+        <p className="text-gray-600">
+          Save and monitor your favorite halal-compliant stocks in a personalized watchlist.
+        </p>
+      </motion.div>
+
+      {/* Feature 4 */}
+      <motion.div 
+        className="bg-gradient-to-r from-teal-50 to-blue-50 p-6 rounded-xl shadow-md hover:shadow-lg transition-all border border-gray-100"
+        variants={itemVariants}
+        whileHover={{ y: -5, transition: { duration: 0.2 } }}
+      >
+        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-teal-500 to-blue-500 flex items-center justify-center text-white mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+        </div>
+        <h3 className="font-bold text-lg mb-2 text-gray-800">Financial Analytics</h3>
+        <p className="text-gray-600">
+          Access detailed financial analysis and performance metrics for informed decisions.
+        </p>
+      </motion.div>
+
+      {/* Feature 5 */}
+      <motion.div 
+        className="bg-gradient-to-r from-teal-50 to-blue-50 p-6 rounded-xl shadow-md hover:shadow-lg transition-all border border-gray-100"
+        variants={itemVariants}
+        whileHover={{ y: -5, transition: { duration: 0.2 } }}
+      >
+        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-teal-500 to-blue-500 flex items-center justify-center text-white mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <h3 className="font-bold text-lg mb-2 text-gray-800">Compliance Alerts</h3>
+        <p className="text-gray-600">
+          Receive notifications when a stock's compliance status changes.
+        </p>
+      </motion.div>
+
+      {/* Feature 6 */}
+      <motion.div 
+        className="bg-gradient-to-r from-teal-50 to-blue-50 p-6 rounded-xl shadow-md hover:shadow-lg transition-all border border-gray-100"
+        variants={itemVariants}
+        whileHover={{ y: -5, transition: { duration: 0.2 } }}
+      >
+        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-teal-500 to-blue-500 flex items-center justify-center text-white mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          </svg>
+        </div>
+        <h3 className="font-bold text-lg mb-2 text-gray-800">Market Trends</h3>
+        <p className="text-gray-600">
+          Stay updated with market trends and analysis of halal investment opportunities.
+        </p>
+      </motion.div>
+    </motion.div>
+    
+    
+  </div>
+</section>
+
+      {/* How It Works Section */}
+      <section id="how-it-works" className="py-20 px-6 bg-[#f0f7ff]">
+        <div className="max-w-6xl mx-auto">
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -275,137 +414,69 @@ export default function LandingPage() {
             variants={containerVariants}
             className="text-center mb-16"
           >
-            <motion.h2 variants={itemVariants} className="text-3xl font-bold mb-4">
-              Powerful Features for <span className="text-blue-600">Halal Investing</span>
+            <motion.h2 
+              variants={itemVariants} 
+              className="text-3xl font-bold mb-12"
+            >
+              How It Works
             </motion.h2>
-            <motion.p variants={itemVariants} className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Everything you need to build and manage a Sharia-compliant investment portfolio
-            </motion.p>
-          </motion.div>
-
-          <motion.div 
-            className="grid md:grid-cols-3 gap-8"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={containerVariants}
-          >
-            <motion.div 
-              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow"
-              variants={itemVariants}
-              whileHover={{ y: -5, transition: { duration: 0.2 } }}
-            >
-              <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <h3 className="font-bold text-lg mb-2">Stock Search</h3>
-              <p className="text-gray-600">
-                Search thousands of global stocks with comprehensive financial data and metrics.
-              </p>
-            </motion.div>
-
-            <motion.div 
-              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow"
-              variants={itemVariants}
-              whileHover={{ y: -5, transition: { duration: 0.2 } }}
-            >
-              <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
-              <h3 className="font-bold text-lg mb-2">Halal Screening</h3>
-              <p className="text-gray-600">
-                Screen stocks according to Islamic principles including financial ratios and business activities.
-              </p>
-            </motion.div>
-
-            <motion.div 
-              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow"
-              variants={itemVariants}
-              whileHover={{ y: -5, transition: { duration: 0.2 } }}
-            >
-              <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              </div>
-              <h3 className="font-bold text-lg mb-2">Watchlist</h3>
-              <p className="text-gray-600">
-                Save and monitor your favorite halal-compliant stocks in a personalized watchlist.
-              </p>
-            </motion.div>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              {/* Step 1: Search */}
+              <motion.div 
+                variants={itemVariants}
+                className="flex flex-col items-center"
+              >
+                <div className="h-16 w-16 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <h3 className="font-bold text-xl mb-3">1. Search</h3>
+                <p className="text-gray-600 text-center">
+                  Enter company names or ticker symbols to begin your halal investment journey.
+                </p>
+              </motion.div>
+              
+              {/* Step 2: Screen */}
+              <motion.div 
+                variants={itemVariants}
+                className="flex flex-col items-center"
+              >
+                <div className="h-16 w-16 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                  </svg>
+                </div>
+                <h3 className="font-bold text-xl mb-3">2. Screen</h3>
+                <p className="text-gray-600 text-center">
+                  View detailed compliance reports and financial metrics for each stock.
+                </p>
+              </motion.div>
+              
+              {/* Step 3: Monitor */}
+              <motion.div 
+                variants={itemVariants}
+                className="flex flex-col items-center"
+              >
+                <div className="h-16 w-16 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <h3 className="font-bold text-xl mb-3">3. Monitor</h3>
+                <p className="text-gray-600 text-center">
+                  Add compliant stocks to watchlists and receive real-time alerts.
+                </p>
+              </motion.div>
+            </div>
           </motion.div>
         </div>
       </section>
-
-      {/* Features Section 2 */}
-      <section className="py-20 px-6 bg-white">
-        <div className="max-w-5xl mx-auto">
-          <motion.div 
-            className="grid md:grid-cols-3 gap-8"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={containerVariants}
-          >
-            <motion.div 
-              className="bg-gray-50 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow"
-              variants={itemVariants}
-              whileHover={{ y: -5, transition: { duration: 0.2 } }}
-            >
-              <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-              <h3 className="font-bold text-lg mb-2">Financial Analytics</h3>
-              <p className="text-gray-600">
-                Access detailed financial analysis and performance metrics for informed decisions.
-              </p>
-            </motion.div>
-
-            <motion.div 
-              className="bg-gray-50 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow"
-              variants={itemVariants}
-              whileHover={{ y: -5, transition: { duration: 0.2 } }}
-            >
-              <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <h3 className="font-bold text-lg mb-2">Compliance Alerts</h3>
-              <p className="text-gray-600">
-                Receive notifications when a stock's compliance status changes.
-              </p>
-            </motion.div>
-
-            <motion.div 
-              className="bg-gray-50 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow"
-              variants={itemVariants}
-              whileHover={{ y: -5, transition: { duration: 0.2 } }}
-            >
-              <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-              </div>
-              <h3 className="font-bold text-lg mb-2">Market Trends</h3>
-              <p className="text-gray-600">
-                Stay updated with market trends and analysis of halal investment opportunities.
-              </p>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section id="how-it-works" className="py-20 px-6 bg-gray-50">
-        <div className="max-w-5xl mx-auto">
+      
+      {/* Why Choose ShariaStocks Section */}
+      <section id="why-choose" className="py-20 px-6 bg-white">
+        <div className="max-w-6xl mx-auto">
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -413,209 +484,79 @@ export default function LandingPage() {
             variants={containerVariants}
             className="text-center mb-16"
           >
-            <motion.h2 variants={itemVariants} className="text-3xl font-bold mb-4">How It Works</motion.h2>
-            <motion.p variants={itemVariants} className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Three simple steps to find and monitor halal-compliant stocks
-            </motion.p>
+            <motion.h2 
+              variants={itemVariants} 
+              className="text-3xl font-bold mb-12"
+            >
+              Why Choose ShariaStocks
+            </motion.h2>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              {/* Reason 1: Thorough Screening */}
+              <motion.div 
+                variants={itemVariants}
+                className="bg-gradient-to-r from-teal-50 to-blue-50 p-8 rounded-xl flex flex-col items-center"
+              >
+                <div className="h-16 w-16 text-teal-500 mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-full w-full" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="font-bold text-xl mb-3">Thorough Screening</h3>
+                <p className="text-gray-600 text-center">
+                  Comprehensive methodology based on Islamic principles ensuring complete compliance.
+                </p>
+              </motion.div>
+              
+              {/* Reason 2: Global Coverage */}
+              <motion.div 
+                variants={itemVariants}
+                className="bg-gradient-to-r from-teal-50 to-blue-50 p-8 rounded-xl flex flex-col items-center"
+              >
+                <div className="h-16 w-16 text-teal-500 mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-full w-full" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="font-bold text-xl mb-3">Global Coverage</h3>
+                <p className="text-gray-600 text-center">
+                  Access to stocks from markets worldwide for diverse investment opportunities.
+                </p>
+              </motion.div>
+              
+              {/* Reason 3: Easy to Use */}
+              <motion.div 
+                variants={itemVariants}
+                className="bg-gradient-to-r from-teal-50 to-blue-50 p-8 rounded-xl flex flex-col items-center"
+              >
+                <div className="h-16 w-16 text-teal-500 mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-full w-full" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <h3 className="font-bold text-xl mb-3">Easy to Use</h3>
+                <p className="text-gray-600 text-center">
+                  Intuitive interface designed for investors of all experience levels.
+                </p>
+              </motion.div>
+            </div>
           </motion.div>
-
+          
+          {/* CTA Button */}
           <motion.div 
-            className="grid md:grid-cols-3 gap-8"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={containerVariants}
-          >
-            <motion.div 
-              className="text-center relative"
-              variants={itemVariants}
-              whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
-            >
-              <div className="h-16 w-16 rounded-full bg-blue-500 text-white flex items-center justify-center mx-auto mb-6 text-xl font-bold shadow-md relative z-10">
-                1
-              </div>
-              {/* Line connecting to next step - visible on desktop */}
-              <div className="hidden md:block absolute top-8 left-1/2 w-full h-1 bg-blue-200"></div>
-              <h3 className="font-bold text-xl mb-3">Search</h3>
-              <p className="text-gray-600">
-                Enter a company name or ticker symbol to find stocks that interest you
-              </p>
-            </motion.div>
-
-            <motion.div 
-              className="text-center relative"
-              variants={itemVariants}
-              whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
-            >
-              <div className="h-16 w-16 rounded-full bg-blue-500 text-white flex items-center justify-center mx-auto mb-6 text-xl font-bold shadow-md relative z-10">
-                2
-              </div>
-              {/* Line connecting to next step - visible on desktop */}
-              <div className="hidden md:block absolute top-8 left-1/2 w-full h-1 bg-blue-200"></div>
-              <h3 className="font-bold text-xl mb-3">Screen</h3>
-              <p className="text-gray-600">
-                View detailed compliance reports and financial metrics to assess halal status
-              </p>
-            </motion.div>
-
-            <motion.div 
-              className="text-center"
-              variants={itemVariants}
-              whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
-            >
-              <div className="h-16 w-16 rounded-full bg-blue-500 text-white flex items-center justify-center mx-auto mb-6 text-xl font-bold shadow-md relative z-10">
-                3
-              </div>
-              <h3 className="font-bold text-xl mb-3">Monitor</h3>
-              <p className="text-gray-600">
-                Add compliant stocks to your watchlist and receive alerts on status changes
-              </p>
-            </motion.div>
-          </motion.div>
-
-          <motion.div 
-            className="text-center mt-12"
+            className="text-center mt-8"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <motion.button 
-              className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg shadow-md transition-all"
-              whileHover={{ scale: 1.05, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleSignupClick}
+            <a 
+              href="#get-started" 
+              className="bg-gradient-to-r from-teal-600 to-blue-600 text-white px-8 py-3 rounded-full font-medium hover:shadow-lg transition-all transform hover:-translate-y-1"
             >
-              Try it now
-            </motion.button>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Why Choose Us Section */}
-      <section className="bg-blue-900 py-20 text-white">
-        <div className="max-w-6xl mx-auto px-6">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={containerVariants}
-            className="text-center mb-16"
-          >
-            <motion.h2 variants={itemVariants} className="text-4xl font-bold mb-3">
-              Why Choose <span className="text-yellow-500">ShariaStocks</span>
-            </motion.h2>
-            <motion.p variants={itemVariants} className="text-lg text-gray-200 max-w-2xl mx-auto">
-              Our platform is designed specifically for Muslim investors
-            </motion.p>
-          </motion.div>
-
-          <motion.div 
-            className="grid grid-cols-1 md:grid-cols-3 gap-12"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={containerVariants}
-          >
-            {/* Thorough Screening */}
-            <motion.div 
-              className="flex flex-col items-center text-center"
-              variants={itemVariants}
-              whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
-            >
-              <motion.div 
-                className="mb-6"
-                initial={{ rotateY: 0 }}
-                whileHover={{ rotateY: 180 }}
-                transition={{ duration: 0.6 }}
-              >
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  className="h-20 w-20 text-yellow-500"
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="1.5"
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                </svg>
-              </motion.div>
-              <h3 className="text-2xl font-bold mb-4">Thorough Screening</h3>
-              <p className="text-gray-300">
-                Comprehensive screening methodology based on established Islamic finance principles
-              </p>
-            </motion.div>
-
-            {/* Global Coverage */}
-            <motion.div 
-              className="flex flex-col items-center text-center"
-              variants={itemVariants}
-              whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
-            >
-              <motion.div 
-                className="mb-6"
-                animate={{ 
-                  rotate: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 360],
-                }}
-                transition={{ 
-                  repeat: Infinity,
-                  repeatDelay: 5,
-                  duration: 2
-                }}
-              >
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  className="h-20 w-20 text-yellow-500" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="1.5" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                >
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M2 12h20"/>
-                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                </svg>
-              </motion.div>
-              <h3 className="text-2xl font-bold mb-4">Global Coverage</h3>
-              <p className="text-gray-300">
-                Access stocks from markets worldwide, not just limited to Islamic indexes
-              </p>
-            </motion.div>
-
-            {/* Easy to Use */}
-            <motion.div 
-              className="flex flex-col items-center text-center"
-              variants={itemVariants}
-              whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
-            >
-              <motion.div 
-                className="mb-6"
-                whileHover={{ y: -10 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  className="h-20 w-20 text-yellow-500" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="1.5" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                >
-                  <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
-                  <line x1="12" y1="18" x2="12" y2="18"/>
-                </svg>
-              </motion.div>
-              <h3 className="text-2xl font-bold mb-4">Easy to Use</h3>
-              <p className="text-gray-300">
-                Intuitive interface designed for investors of all experience levels
-              </p>
-            </motion.div>
+              Get Started Now
+            </a>
           </motion.div>
         </div>
       </section>
@@ -629,10 +570,10 @@ export default function LandingPage() {
           variants={staggerContainer}
         >
           <motion.h2 
-            className="text-4xl font-bold text-center mb-3"
+            className="text-4xl font-bold text-center mb-3 bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent"
             variants={fadeIn}
           >
-            Simple, Transparent <span className="text-green-500">Pricing</span>
+            Simple, Transparent Pricing
           </motion.h2>
           <motion.p 
             className="text-center text-gray-600 mb-20"
@@ -645,7 +586,7 @@ export default function LandingPage() {
             {plans.map((plan, index) => (
               <motion.div 
                 key={plan.name}
-                className={`bg-white rounded-lg ${plan.popular ? 'border-2 border-green-500 shadow-xl' : 'border border-gray-200 shadow-md'} p-8 relative transform transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl`}
+                className={`bg-white rounded-lg ${plan.popular ? 'border-2 border-teal-500 shadow-xl' : 'border border-gray-200 shadow-md'} p-8 relative transform transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl`}
                 variants={fadeIn}
                 onMouseEnter={() => setSelectedPlan(index)}
                 onMouseLeave={() => setSelectedPlan(null)}
@@ -653,7 +594,7 @@ export default function LandingPage() {
                 transition={{ type: "spring", stiffness: 300 }}
               >
                 {plan.popular && (
-                  <div className="absolute -top-4 right-6 bg-green-500 text-white px-4 py-1 rounded-full text-sm font-medium shadow-md">
+                  <div className="absolute -top-4 right-6 bg-gradient-to-r from-teal-500 to-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium shadow-md">
                     Most Popular
                   </div>
                 )}
@@ -699,7 +640,7 @@ export default function LandingPage() {
       </section>
 
       <motion.section 
-        className="bg-gradient-to-r from-green-600 to-blue-700 py-20 text-white text-center"
+        className="bg-white py-20 text-white text-center"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
@@ -707,26 +648,26 @@ export default function LandingPage() {
       >
         <div className="max-w-4xl mx-auto px-6">
           <motion.h2 
-            className="text-4xl font-bold mb-6"
+            className="text-4xl font-bold mb-6 text-black"
             initial={{ y: 30, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            Ready to Build Your Halal Portfolio?
+            Join Thousands of Muslim Investors
           </motion.h2>
           <motion.p 
-            className="text-xl mb-10"
+            className="text-xl mb-10 text-gray-600"
             initial={{ y: 30, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
-            Join thousands of Muslim investors using ShariaStocks to align their investments 
-            with their values.
+            Build your Halal investment portfolio today and invest with confidence
+            knowing your investments and Sharia compliant
           </motion.p>
           <motion.button 
-            className="bg-white text-green-700 px-8 py-4 rounded-md font-medium hover:bg-gray-100 transition duration-300 shadow-lg"
+            className="bg-gradient-to-r from-teal-500 to-blue-500 text-white px-8 py-4 rounded-md font-medium hover:bg-gray-100 transition duration-300 shadow-lg"
             onClick={handleSignupClick}
             initial={{ y: 30, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
@@ -740,7 +681,7 @@ export default function LandingPage() {
         </div>
       </motion.section>
 
-      <section className="py-20 bg-white">
+      <section id='faq' className="py-20 bg-[#f0f7ff]">
         <motion.div 
           className="max-w-4xl mx-auto px-6"
           initial="hidden"
