@@ -519,28 +519,7 @@ const AccountInformationPage = () => {
       )}
             </div>
 
-            {/* Manual Payment Option */}
-            <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-              <h2 className="text-xl font-bold mb-6">Additional Payment Options</h2>
-              
-              <div className="border border-gray-200 rounded-lg p-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="font-medium">Make a Manual Payment</h3>
-                    <p className="text-gray-500 text-sm mt-1">
-                      Add credit to your account or pay for your next billing cycle in advance.
-                    </p>
-                  </div>
-                  <button 
-                    onClick={() => setShowManualPaymentModal(true)}
-                    className="text-purple-700 hover:text-purple-800 text-sm font-medium flex items-center"
-                  >
-                    <Plus size={16} className="mr-1" />
-                    Make Payment
-                  </button>
-                </div>
-              </div>
-            </div>
+            
 
             {/* Account Management */}
             <div className="bg-white rounded-xl shadow-sm p-6">
