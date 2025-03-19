@@ -7,6 +7,8 @@ import logo from '../images/ShariaStocks-logo/logo1.jpeg'
 import { getUserData } from '../api/auth';
 import account from '../images/account-icon.svg';
 import {Bell, Heart } from 'lucide-react';
+import PaymentAlertModal from './PaymentAlertModal';
+import usePaymentAlert from './usePaymentAlert';
 
 const Dashboard = () => {
   const [searchSymbol, setSearchSymbol] = useState('');
@@ -17,6 +19,9 @@ const Dashboard = () => {
   const searchInputRef = useRef(null);
   const [companies, setCompanies] = useState([]);
   const email = localStorage.getItem('userEmail');
+
+  const { isOpen, type, daysRemaining, amount, closeAlert } = usePaymentAlert(user);
+
   useEffect(() => {
     setCompanies(niftyCompanies);
     if (email) {
@@ -106,6 +111,13 @@ const Dashboard = () => {
                 </div>
             </header>
         </div>
+        <PaymentAlertModal
+        isOpen={isOpen}
+        onClose={closeAlert}
+        type={type}
+        daysRemaining={daysRemaining}
+        amount={amount}
+      />
       <div className=" flex flex-col items-center justify-center ">
       <div className="w-full max-w-3xl px-6 py-12 rounded-3xl bg-white shadow-xl mx-4 border border-gray-100">
         {/* Company Logo & Branding */}

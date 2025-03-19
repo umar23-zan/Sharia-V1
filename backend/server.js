@@ -11,6 +11,7 @@ const cors = require('cors');
 const app = express();
 require('dotenv').config();
 require('./config/passport')(app);
+require('./cron/scheduledTasks')
 
 connectDB();
 app.use(cors({

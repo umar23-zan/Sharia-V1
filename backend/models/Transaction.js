@@ -8,8 +8,8 @@ const TransactionSchema = new mongoose.Schema({
   },
   orderId: { 
     type: String, 
-    required: true 
   },
+  subscriptionId: String, 
   paymentId: { 
     type: String 
   },
@@ -23,7 +23,7 @@ const TransactionSchema = new mongoose.Schema({
   },
   status: { 
     type: String, 
-    enum: ['created', 'authorized', 'captured', 'failed', 'pending', 'refunded', 'cancelled'],
+    enum: ['created', 'authorized', 'captured', 'failed', 'pending', 'refunded', 'cancelled', 'halted', 'active'],
     default: 'created' 
   },
   paymentMethod: { 
@@ -44,8 +44,11 @@ const TransactionSchema = new mongoose.Schema({
     },
     previousPlan: { 
       type: String 
-    }
+    },
+    paymentMode: { type: String, enum: ['automatic', 'manual'], default: 'automatic' },
+    isRenewal: Boolean
   },
+  paymentLinkId: String,
   notes: { 
     type: Object 
   },

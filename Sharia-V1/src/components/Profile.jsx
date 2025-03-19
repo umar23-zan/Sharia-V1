@@ -4,6 +4,9 @@ import { ArrowLeft, Camera, Settings, LogOut } from 'lucide-react';
 import account from '../images/account-icon.svg'
 import logo from '../images/ShariaStocks-logo/logo1.jpeg'
 import Header from './Header';
+import PaymentAlertModal from './PaymentAlertModal'
+import usePaymentAlert from './usePaymentAlert';
+
 
 const Profile = () => {
   const location = useLocation();
@@ -15,11 +18,20 @@ const Profile = () => {
     navigate('/login');
   };
 
+  const { isOpen, type, daysRemaining, amount, closeAlert } = usePaymentAlert(user);
+
   const isFree = user?.subscription?.plan === 'free';
 
   return (
     <div className=" max-w-7xl mx-auto min-h-screen ">
       <Header />
+      <PaymentAlertModal
+        isOpen={isOpen}
+        onClose={closeAlert}
+        type={type}
+        daysRemaining={daysRemaining}
+        amount={amount}
+      />
       <div className="max-w-7xl mx-auto">
         <div className="p-4">
           <ArrowLeft 
@@ -52,7 +64,7 @@ const Profile = () => {
             <div className="mt-4 bg-white rounded-2xl shadow-sm p-4">
               <h3 className="font-semibold mb-4">Quick Settings</h3>
               {[
-                { icon: '👤', title: 'Personal Info', subtitle: 'Complete your profile', path: '/personaldetails' },
+                { icon: '👤', title: 'Account Settings', subtitle: '', path: '/account' },
                 { icon: '🔔', title: 'Notifications', subtitle: 'Customize your alerts', badge: '', path: '/notificationpage' },
                 { icon: '💳', title: 'Payment Methods', subtitle: 'Manage your payments', path: '/paymentmethods' }
               ].map((item) => (

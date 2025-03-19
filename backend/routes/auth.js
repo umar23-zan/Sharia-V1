@@ -13,6 +13,12 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const jwt = require("jsonwebtoken");
 const session = require('express-session');
+const Razorpay = require('razorpay');
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET
+});
 
 
 router.get('/google', 
@@ -430,7 +436,7 @@ router.post('/contact-us', async (req, res) => {
 
 router.delete('/deactivate/:email', async (req, res) => {
     const { email } = req.params;
-    const { password } = req.body; // Expect the password in the request body
+    const { password, subscriptionId } = req.body;
 
     try {
         const user = await User.findOne({ email });
@@ -438,23 +444,29 @@ router.delete('/deactivate/:email', async (req, res) => {
             return res.status(404).json({ msg: 'User not found' });
         }
 
-        // Verify the password
+        
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({ msg: 'Incorrect password' });
         }
 
-        // Delete the profile picture from S3 (if exists)
+        
         if (user.profilePicture) {
             try {
                 await deleteFromS3(user.profilePicture);
             } catch (error) {
                 console.error('Error deleting profile picture:', error);
-                // Consider whether to proceed with deactivation even if picture deletion fails
+               
             }
         }
 
-        // Delete the user from the database
+        if (subscriptionId) {
+            try {
+                await razorpay.subscriptions.cancel(subscriptionId);
+            } catch (error) {
+                console.error('Error cancelling Razorpay subscription:', error);
+            }
+        }    
         await User.findOneAndDelete({ email });
 
         res.status(200).json({ msg: 'Account deactivated successfully' });

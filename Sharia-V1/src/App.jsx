@@ -23,6 +23,7 @@ import PaymentCheckout from './components/PaymentCheckout';
 import OAuthCallback from './components/OAuthCallback';
 import Razorpay from './components/razorpay';
 import SubscriptionSuccess from './components/SubscriptionSuccess';
+import AccountInformationPage from './components/AccountSettings';
 
 const App = () => {
   const userId = localStorage.getItem('userId');
@@ -45,6 +46,14 @@ const App = () => {
                 element={
                     <PrivateRoute>
                         <Profile />
+                    </PrivateRoute>
+                    }
+                />
+                <Route
+                path="/account"
+                element={
+                    <PrivateRoute>
+                        <AccountInformationPage />
                     </PrivateRoute>
                     }
                 />

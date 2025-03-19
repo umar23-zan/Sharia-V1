@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { AlertCircle, Lock, AlertTriangle } from 'lucide-react';
 
-const DeactivateAccount = ({ userEmail, onDeactivationSuccess, onCancel }) => {
+const DeactivateAccount = ({ user, userEmail, onDeactivationSuccess, onCancel }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState(false);
+  const subscriptionId= user.subscription.subscriptionId || '';
 
   const handleInitialSubmit = () => {
     if (!password) {
@@ -25,7 +26,7 @@ const DeactivateAccount = ({ userEmail, onDeactivationSuccess, onCancel }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ password, subscriptionId }),
       });
 
       if (response.ok) {

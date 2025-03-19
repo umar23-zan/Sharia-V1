@@ -1,16 +1,35 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const PaymentMethodSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  type: { type: String, enum: ["Visa", "Mastercard", "UPI"], required: true },
-  category: { type: String, enum: ["card", "upi"], required: true },
-  label: { type: String },
-  number: { type: String },
-  expires: { type: String },
-  upiId: { type: String },
-  isDefault: { type: Boolean, default: false },
-  color: { type: String },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  tokenId: {
+    type: String,
+    required: true
+  },
+  method: {
+    type: String,
+    required: true
+  },
+  cardNetwork: String,
+  cardLast4: String,
+  cardExpiryMonth: String,
+  cardExpiryYear: String,
+  isDefault: {
+    type: Boolean,
+    default: false
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
 });
 
-const PaymentMethod = mongoose.model("PaymentMethod", PaymentMethodSchema);
-module.exports = PaymentMethod;
+module.exports = mongoose.model('PaymentMethod', PaymentMethodSchema);

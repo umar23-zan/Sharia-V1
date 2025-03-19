@@ -40,12 +40,12 @@ const UserSchema = new mongoose.Schema({
       },
       billingCycle: {
         type: String,
-        enum: ['monthly', 'annual'],
-        default: 'monthly'
+        enum: ['monthly', 'annual', ''],
+        default: ''
       },
       status: {
         type: String,
-        enum: ['active', 'inactive', 'past_due', 'canceled'],
+        enum: ['active', 'inactive', 'past_due', 'cancelled', 'expired', 'cancelling'],
         default: 'inactive'
       },
       startDate: {
@@ -58,7 +58,33 @@ const UserSchema = new mongoose.Schema({
       autoRenew: {
         type: Boolean,
         default: true
-      }
+      },
+      firstReminderSent: {
+        type: Boolean,
+        
+      },
+      secondReminderSent: {
+        type: Boolean,
+        
+      },
+      finalReminderSent: {
+        type: Boolean,
+        
+      },
+      subscriptionId: String, 
+      paymentMethodId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'PaymentMethod'
+      },
+      paymentMode: { type: String, enum: ['automatic', 'manual'], default: 'automatic' },
+      pendingPaymentMode: { type: String},
+      paymentModeChangeDate: {type: Date},
+      nextPaymentDue: { type: Date },
+      lastPaymentReminder: { type: Date },
+      paymentReminderSent: { type: Boolean, default: false },
+      cancellationReason: String,
+      cancellationFeedback: String,
+      cancelledAt: Date
     },
     createdAt: {
         type: Date,
