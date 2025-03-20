@@ -278,11 +278,11 @@ const StockResults = () => {
     ];
 
     return (
-        <div className="max-w-7xl mx-auto min-h-screen">
+        <div className="min-h-screen">
             <Header />
             <Headers />
             
-            <div className=" p-3 sm:p-4 lg:p-6">
+            <div className="max-w-7xl mx-auto  p-3 sm:p-4 lg:p-6">
                 {/* Desktop Layout */}
                 <div className="lg:grid lg:grid-cols-3 lg:gap-6">
                     {/* Left Column - Chart and Metrics */}

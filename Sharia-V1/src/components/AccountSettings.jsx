@@ -220,7 +220,7 @@ const AccountInformationPage = () => {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className=" min-h-screen">
       {/* Header */}
       <Header />
 
@@ -300,24 +300,6 @@ const AccountInformationPage = () => {
               <h2 className="text-xl font-bold mb-6">Payment Information</h2>
 
               <div className="mb-6">
-                <h3 className="font-medium mb-4">Payment Method</h3>
-                <div className="flex items-center justify-between border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center">
-                    <div className="bg-blue-50 rounded-lg p-2 mr-4">
-                      <CreditCard size={20} className="text-blue-700" />
-                    </div>
-                    <div>
-                      <p className="font-medium">{user.paymentMethod || 'Credit Card ****1234'}</p>
-                      <p className="text-gray-500 text-sm">Expires 12/2026</p>
-                    </div>
-                  </div>
-                  <button className="text-purple-700 hover:text-purple-800 text-sm font-medium">
-                    Change
-                  </button>
-                </div>
-              </div>
-
-              <div className="mb-6">
                 <h3 className="font-medium mb-4">Billing Cycle</h3>
                 <div className="flex items-center justify-between border border-gray-200 rounded-lg p-4">
                   <div className="flex items-center">
@@ -329,9 +311,7 @@ const AccountInformationPage = () => {
                       <p className="text-gray-500 text-sm">Next billing on {endDate}</p>
                     </div>
                   </div>
-                  <button className="text-purple-700 hover:text-purple-800 text-sm font-medium">
-                    Change
-                  </button>
+                  
                 </div>
               </div>
 

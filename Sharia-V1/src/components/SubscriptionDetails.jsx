@@ -397,7 +397,7 @@ const SubscriptionDetails = () => {
     console.log(paymentMode)
 
     return (
-        <div className="max-w-7xl mx-auto min-h-screen font-sans text-slate-900">
+        <div className="min-h-screen font-sans text-slate-900">
            <Header />
 
             {/* Main Content */}

@@ -63,54 +63,9 @@ const Dashboard = () => {
       };
 
   return (
-    <div className='max-w-7xl mx-auto'>
-      <div >
-            <header className="sticky top-0 z-30 bg-white rounded-2xl p-4 shadow-sm mb-6">
-                <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <div
-                            className="sm:hidden items-center gap-2 cursor-pointer transition-transform hover:scale-105"
-                            onClick={() => navigate('/profile', { state: { user } })}
-                        >
-                            <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-r from-indigo-500 to-purple-600 p-0.5">
-                                <div className="bg-white rounded-full w-full h-full flex items-center justify-center overflow-hidden">
-                                    <img src={user.profilePicture || account} alt="profile" className="w-8 h-8 object-cover" />
-                                </div>
-                            </div>
-                        </div>
-                        <img src={logo} onClick={() => navigate('/dashboard')} alt="ShariaStock Logo" className="w-52 h-14 object-fill cursor-pointer" />
-                    </div>
-
-                    <div className="flex gap-3">
-                        <button
-                            className="relative flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                            onClick={() => navigate('/watchlist')}
-                            aria-label="Watchlist"
-                        >
-                            <Heart className="w-5 h-5 text-gray-700" />
-                        </button>
-                        <button
-                            className="relative flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                            onClick={() => navigate('/notificationpage')}
-                            aria-label="Notifications"
-                        >
-                            <Bell className="w-5 h-5 text-gray-700" />
-                        </button>
-                        {/* Desktop Profile Icon - Hidden on small screens (sm and below) */}
-                        <div
-                            className="hidden sm:flex items-center gap-2 cursor-pointer transition-transform hover:scale-105"
-                            onClick={() => navigate('/profile', { state: { user } })}
-                        >
-                            <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-r from-indigo-500 to-purple-600 p-0.5">
-                                <div className="bg-white rounded-full w-full h-full flex items-center justify-center overflow-hidden">
-                                    <img src={user.profilePicture || account} alt="profile" className="w-8 h-8 object-cover" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </header>
-        </div>
+    <div >
+      <Header />
+      <div className='max-w-7xl mx-auto'>
         <PaymentAlertModal
         isOpen={isOpen}
         onClose={closeAlert}
@@ -218,6 +173,8 @@ const Dashboard = () => {
       </div>
     </div>
     </div>
+    </div>
+    
     
   );
 };

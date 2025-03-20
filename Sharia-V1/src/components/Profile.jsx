@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Camera, Settings, LogOut } from 'lucide-react';
+import { ArrowLeft, Camera, Settings, LogOut,ChevronLeft } from 'lucide-react';
 import account from '../images/account-icon.svg'
 import logo from '../images/ShariaStocks-logo/logo1.jpeg'
 import Header from './Header';
@@ -23,7 +23,7 @@ const Profile = () => {
   const isFree = user?.subscription?.plan === 'free';
 
   return (
-    <div className=" max-w-7xl mx-auto min-h-screen ">
+    <div className=" min-h-screen ">
       <Header />
       <PaymentAlertModal
         isOpen={isOpen}
@@ -34,10 +34,13 @@ const Profile = () => {
       />
       <div className="max-w-7xl mx-auto">
         <div className="p-4">
-          <ArrowLeft 
-            className="w-6 h-6 text-gray-600 cursor-pointer" 
-            onClick={() => navigate(-1)} 
-          />
+        <button 
+          className="group flex items-center text-gray-600 hover:text-purple-700 mb-6 transition duration-200" 
+          onClick={() => navigate('/dashboard')}
+        >
+          <ChevronLeft className="w-5 h-5 mr-1 group-hover:transform group-hover:-translate-x-1 transition-transform duration-200" />
+          <span className="font-medium">Back to Dashboard</span>
+        </button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-4">

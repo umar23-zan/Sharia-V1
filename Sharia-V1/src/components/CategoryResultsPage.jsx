@@ -357,9 +357,9 @@ const navigate = useNavigate()
   }
 
   return (
-    <div className="max-w-7xl mx-auto  min-h-screen pb-12">
+    <div className=" min-h-screen">
       <Header />
-      <div className="container mx-auto px-4 pt-6">
+      <div className="max-w-7xl container mx-auto px-4 pt-6">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center mb-1">

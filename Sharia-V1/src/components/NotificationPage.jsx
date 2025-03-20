@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Bell, ChevronRight, ArrowLeft, AlertCircle } from 'lucide-react';
+import Header from './Header';
 
 const NotificationsPage = () => {
   const [activeTab, setActiveTab] = useState('all');
@@ -63,6 +64,44 @@ const NotificationsPage = () => {
   ];
 
   return (
+    <div>
+      
+      {/* Desktop View Header - Using the same gradient */}
+      <div className="hidden lg:block">
+        {/* Header */}
+        <div className="bg-gradient-to-br from-blue-600 to-purple-600 px-4 py-8  shadow-sm flex items-center justify-between mb-6">
+          <div className="flex items-center">
+            <button 
+              onClick={handleBackClick}
+              className="mr-4 p-2 rounded-full hover:bg-white/10 text-white transition"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <div>
+              <h1 className="text-xl font-semibold text-white">Notifications</h1>
+              <p className="text-white/80 text-sm">Stay informed about your investments</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="relative flex items-center">
+              <div className="absolute left-3 text-gray-600">
+                <Search size={18} />
+              </div>
+              <input 
+                type="text" 
+                placeholder="Search notifications..." 
+                className="pl-10 pr-4 py-2 border bg-white/90 rounded-full w-64 text-sm focus:outline-none focus:ring-1 focus:ring-blue-200"
+              />
+            </div>
+            <div className="relative">
+              <Bell size={22} className="text-white" />
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">
+                0
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     <div className="w-full max-w-6xl mx-auto bg-gray-50 min-h-screen">
       {/* Mobile Header */}
       <div className="lg:hidden bg-gradient-to-br from-blue-600 to-purple-600 p-4">
@@ -98,43 +137,6 @@ const NotificationsPage = () => {
                 <span className="text-sm">{notificationCounts[tab.id]}</span>
               </button>
             ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Desktop View */}
-      <div className="hidden lg:block p-4">
-        {/* Header */}
-        <div className="bg-white p-4 rounded-lg shadow-sm flex items-center justify-between mb-6">
-          <div className="flex items-center">
-            <button 
-              onClick={handleBackClick}
-              className="mr-4 p-2 rounded-full hover:bg-gray-100 text-gray-600 transition"
-            >
-              <ArrowLeft size={20} />
-            </button>
-            <div>
-              <h1 className="text-xl font-semibold text-gray-900">Notifications</h1>
-              <p className="text-gray-600 text-sm">Stay informed about your investments</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="relative flex items-center">
-              <div className="absolute left-3 text-gray-400">
-                <Search size={18} />
-              </div>
-              <input 
-                type="text" 
-                placeholder="Search notifications..." 
-                className="pl-10 pr-4 py-2 border rounded-full w-64 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
-            <div className="relative">
-              <Bell size={22} className="text-gray-600" />
-              <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">
-                0
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -242,6 +244,7 @@ const NotificationsPage = () => {
           )}
         </div>
       </div>
+    </div>
     </div>
   );
 };

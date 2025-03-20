@@ -91,12 +91,12 @@ const News = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto bg-white min-h-screen">
+    <div className=" min-h-screen">
       {/* Header */}
       <Header />
 
       {/* Main content */}
-      <div className="p-6">
+      <div className=" max-w-7xl mx-autop-6">
         <h2 className="text-2xl font-bold mb-2">Market News</h2>
         <p className="text-gray-600 mb-6">Stay updated with the latest financial news and Islamic finance insights</p>
 
