@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence  } from 'framer-motion';
-import logo from '../images/ShariaStocks-logo/ShariaStocks.png'
+import logo from '../images/ShariaStocks-logo/ShariaStocks.svg'
+import logo1 from '../images/ShariaStocks-logo/logo.png'
 import land from '../images/land.png'
 
 export default function LandingPage() {
@@ -48,10 +49,7 @@ export default function LandingPage() {
       question: "What financial ratios do you use for screening?",
       answer: "We analyze several key financial ratios including: Debt to Total Assets (must be less than 33%), Interest Income to Total Revenue (must be less than 5%), and Non-compliant Income to Total Revenue (must be less than 5%)."
     },
-    {
-      question: "Do you offer purification calculations?",
-      answer: "Yes, our Premium plan includes purification calculations that help you determine the amount of your investment returns that should be donated to charity to purify any non-compliant income."
-    }
+   
   ];
 
   // Animation variants
@@ -236,18 +234,13 @@ export default function LandingPage() {
               investment decisions.
             </p>
             <div className="flex flex-wrap gap-4">
-              <a 
-                href="#start-investing" 
+              <button 
+                onClick={()=>{navigate('/signup')}}
                 className="bg-gradient-to-r from-teal-600 to-blue-600 text-white px-6 py-3 rounded-full font-medium hover:from-teal-700 hover:to-blue-700 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1"
               >
                 Start Investing
-              </a>
-              <a 
-                href="#learn-more" 
-                className="border-2 border-teal-500 text-teal-600 hover:bg-teal-50 px-6 py-3 rounded-full font-medium transition duration-300 hover:shadow-md transform hover:-translate-y-1"
-              >
-                Learn More
-              </a>
+              </button>
+              
             </div>
           </div>
           
@@ -551,12 +544,12 @@ export default function LandingPage() {
             transition={{ duration: 0.5 }}
             viewport={{ once: true }}
           >
-            <a 
-              href="#get-started" 
+            <button
+              onClick={handleSignupClick}
               className="bg-gradient-to-r from-teal-600 to-blue-600 text-white px-8 py-3 rounded-full font-medium hover:shadow-lg transition-all transform hover:-translate-y-1"
             >
               Get Started Now
-            </a>
+            </button>
           </motion.div>
         </div>
       </section>
@@ -755,7 +748,7 @@ export default function LandingPage() {
               transition={{ duration: 0.6 }}
             >
               <div className="flex items-center mb-4">
-                <img src={logo} alt="logo" className=' w-58 h-18 object-cover '/>
+                <img src={logo1} alt="logo" className=' w-58 h-18 object-cover '/>
               </div>
               <p className="text-gray-300 mb-6">
                 Your trusted platform for halal stock screening and investment guidance according to Islamic principles.
@@ -824,8 +817,6 @@ export default function LandingPage() {
               <ul className="space-y-5">
                 {[
                   { icon: 'email', text: 'support@zansphere.com' },
-                  { icon: 'phone', text: '+1 (555) 123-4567' },
-                  { icon: 'location', text: 'Alwarpet, Chennai' }
                 ].map((item, i) => (
                   <motion.li key={i} className="flex items-start" whileHover={{ x: 5 }}>
                     <svg className="h-6 w-6 text-green-400 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
