@@ -11,7 +11,7 @@ router.post("/", async (req, res) => {
           return res.status(404).json({ error: "User not found" });
       }
 
-      const watchlistLimits = { free: 10, basic: 30, premium: 50 };
+      const watchlistLimits = { free: 0, basic: 10, premium: 25 };
       if (user.watchlist.length >= watchlistLimits[user.subscription.plan]) {
           return res.status(403).json({ error: "Watchlist limit exceeded" });
       }
@@ -53,5 +53,38 @@ router.get('/:userId', async (req, res) => {
       res.status(500).json({ message: 'Internal server error' });
   }
 });
+// Add this route to delete a specific stock from a user's watchlist
+router.delete('/:userId/:symbol', async (req, res) => {
+    const { userId, symbol } = req.params;
+    
+    try {
+      const user = await User.findById(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Check if the stock exists in the watchlist
+      const stockIndex = user.watchlist.findIndex(item => item.symbol === symbol);
+      
+      if (stockIndex === -1) {
+        return res.status(404).json({ error: "Stock not found in watchlist" });
+      }
+      
+      // Remove the stock from the watchlist
+      user.watchlist.splice(stockIndex, 1);
+      await user.save();
+      
+      res.json({ 
+        message: "Stock removed from watchlist", 
+        symbol: symbol,
+        watchlist: user.watchlist 
+      });
+      
+    } catch (error) {
+      console.error("Error removing stock from watchlist:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
 
 module.exports = router;

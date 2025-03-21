@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Shield, Sparkles, Heart, TrendingUp, ArrowLeft, X, Search, Star, StarOff, Filter, BarChart3 } from 'lucide-react';
+import { Shield, Sparkles, Heart, TrendingUp, ArrowLeft, X, Search, Star, StarOff, Filter, BarChart3, AlertCircle, CheckCircle } from 'lucide-react';
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -18,7 +18,13 @@ const WatchList = () => {
     const userId = localStorage.getItem('userId');
     const navigate = useNavigate();
     const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
-    const isFreePlan = user.subscription.plan === 'free';
+    const isFreePlan = user?.subscription?.plan === 'free';
+    
+    // Modal state
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalType, setModalType] = useState(""); // "confirm" or "success"
+    const [modalMessage, setModalMessage] = useState("");
+    const [stockToRemove, setStockToRemove] = useState(null);
 
     useEffect(() => {
         const handleResize = () => {
@@ -37,14 +43,16 @@ const WatchList = () => {
     useEffect(() => {
         if (!userId) {
             console.error("User ID is missing");
+            setLoading(false);
+            setError("User ID is missing. Please log in again.");
             return;
         }
 
         const fetchWatchlist = async () => {
             try {
                 const response = await axios.get(`/api/watchlist/${userId}`);
-                console.log(response.data);
-                setStocks(response.data.watchlist);
+                console.log("Watchlist data:", response.data);
+                setStocks(response.data.watchlist || []);
                 
                 // Populate initial favorites from localStorage if available
                 const savedFavorites = localStorage.getItem('favorites');
@@ -53,24 +61,32 @@ const WatchList = () => {
                 }
 
                 // Fetch company details separately
-                response.data.watchlist.forEach(async (stock) => {
-                    try {
-                        const companyDetailsResponse = await axios.get(
-                            `http://13.201.131.141:5000/api/company-details/${stock.symbol + ".NS"}`
-                        );
+                if (response.data.watchlist && response.data.watchlist.length > 0) {
+                    response.data.watchlist.forEach(async (stock) => {
+                        if (!stock.symbol) {
+                            console.error("Stock symbol is missing:", stock);
+                            return;
+                        }
+                        
+                        try {
+                            const companyDetailsResponse = await axios.get(
+                                `http://13.201.131.141:5000/api/company-details/${stock.symbol + ".NS"}`
+                            );
 
-                        // Store details in state using stock symbol as key
-                        setCompanyDetails(prevDetails => ({
-                            ...prevDetails,
-                            [stock.symbol]: companyDetailsResponse.data
-                        }));
+                            // Store details in state using stock symbol as key
+                            setCompanyDetails(prevDetails => ({
+                                ...prevDetails,
+                                [stock.symbol]: companyDetailsResponse.data
+                            }));
 
-                    } catch (error) {
-                        console.error(`Error fetching details for ${stock.symbol}:`, error);
-                    }
-                });
+                        } catch (error) {
+                            console.error(`Error fetching details for ${stock.symbol}:`, error);
+                        }
+                    });
+                }
 
             } catch (error) {
+                console.error("Error fetching watchlist:", error);
                 setError(error.response?.data?.message || "Failed to fetch watchlist");
             } finally {
                 setLoading(false);
@@ -92,6 +108,62 @@ const WatchList = () => {
             localStorage.setItem('favorites', JSON.stringify(newFavorites));
             return newFavorites;
         });
+    };
+
+    // Show confirmation modal for removing a stock
+    const showRemoveConfirmation = (stockSymbol, e) => {
+        e.stopPropagation(); // Prevent navigating to stock detail page
+        
+        setStockToRemove(stockSymbol);
+        setModalType("confirm");
+        setModalMessage(`Are you sure you want to remove ${stockSymbol} from your watchlist?`);
+        setModalOpen(true);
+    };
+
+    // Handle confirmation from modal
+    const handleConfirmRemove = async () => {
+        if (!userId || !stockToRemove) {
+            setModalType("error");
+            setModalMessage("Missing user ID or stock symbol");
+            return;
+        }
+        
+        try {
+            setLoading(true);
+            setModalOpen(false);
+            
+            console.log(`Removing stock ${stockToRemove} for user ${userId}`);
+            
+            const response = await axios.delete(`/api/watchlist/${userId}/${stockToRemove}`, {
+                data: { userId, symbol: stockToRemove }
+            });
+            
+            console.log("Remove response:", response.data);
+            
+            // Update local state to remove the deleted stock
+            setStocks(prevStocks => prevStocks.filter(stock => stock.symbol !== stockToRemove));
+            
+            // Show success notification
+            setModalType("success");
+            setModalMessage(`${stockToRemove} removed from watchlist`);
+            setModalOpen(true);
+            
+            // Auto close success modal after 2 seconds
+            setTimeout(() => {
+                setModalOpen(false);
+            }, 2000);
+            
+        } catch (error) {
+            console.error("Error removing stock from watchlist:", error);
+            setError(error.response?.data?.message || "Failed to remove stock from watchlist");
+            
+            // Show error modal
+            setModalType("error");
+            setModalMessage("Failed to remove stock from watchlist: " + (error.response?.data?.message || error.message));
+            setModalOpen(true);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const getStatusColor = (status) => {
@@ -130,9 +202,11 @@ const WatchList = () => {
     };
 
     const filteredStocks = stocks.filter((stock) => {
-        const matchesTab = activeTab === "all" || stock.stockData?.Initial_Classification?.toLowerCase() === activeTab.toLowerCase();
-        const matchesSearch = stock.companyName.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                             stock.symbol.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesTab = activeTab === "all" || 
+                          (stock.stockData?.Initial_Classification && 
+                           stock.stockData.Initial_Classification.toLowerCase() === activeTab.toLowerCase());
+        const matchesSearch = stock.companyName?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                             stock.symbol?.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesTab && matchesSearch;
     });
 
@@ -140,7 +214,7 @@ const WatchList = () => {
     const sortedStocks = [...filteredStocks].sort((a, b) => {
         if (favorites.includes(a.symbol) && !favorites.includes(b.symbol)) return -1;
         if (!favorites.includes(a.symbol) && favorites.includes(b.symbol)) return 1;
-        return a.companyName.localeCompare(b.companyName);
+        return a.companyName?.localeCompare(b.companyName || '');
     });
 
     const renderStockCard = (stock) => {
@@ -163,7 +237,25 @@ const WatchList = () => {
                             {getStatusPill(stock.stockData?.Initial_Classification)}
                         </div>
                     </div>
-                    
+                    <div className="flex items-center gap-2">
+                        <button 
+                            onClick={(e) => toggleFavorite(stock.symbol, e)}
+                            className="p-1.5 rounded-full hover:bg-gray-100"
+                            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                        >
+                            {isFavorite ? 
+                                <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" /> : 
+                                <Star className="w-5 h-5 text-gray-400" />
+                            }
+                        </button>
+                        <button 
+                            onClick={(e) => showRemoveConfirmation(stock.symbol, e)}
+                            className="p-1.5 rounded-full hover:bg-gray-100 hover:text-red-500"
+                            aria-label="Remove from watchlist"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
 
                 <div className="flex items-center justify-between mb-4">
@@ -181,8 +273,8 @@ const WatchList = () => {
                     </div>
                 </div>
 
-                {stock.stockData.Haram_Reason && (
-                    <div className="mb-4 p-3  rounded-lg text-sm">
+                {stock.stockData?.Haram_Reason && (
+                    <div className="mb-4 p-3 rounded-lg text-sm">
                         <p className="line-clamp-2">{stock.stockData.Haram_Reason}</p>
                     </div>
                 )}
@@ -219,8 +311,6 @@ const WatchList = () => {
                 className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition cursor-pointer border border-gray-100 flex items-center"
                 onClick={() => {navigate(`/stockresults/${stock.symbol}`)}}
             >
-                
-                
                 <div className="flex-1">
                     <div className="flex flex-col md:flex-row md:items-center md:gap-3">
                         <h3 className="font-semibold text-gray-800">{stock.companyName}</h3>
@@ -230,8 +320,8 @@ const WatchList = () => {
                         </div>
                     </div>
                     
-                    {stock.stockData.Haram_Reason && (
-                        <p className="text-xs  mt-1 line-clamp-1">{stock.stockData.Haram_Reason}</p>
+                    {stock.stockData?.Haram_Reason && (
+                        <p className="text-xs mt-1 line-clamp-1">{stock.stockData.Haram_Reason}</p>
                     )}
                 </div>
                 
@@ -249,6 +339,102 @@ const WatchList = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                         </svg>
                     </div>
+                    
+                    <div className="flex items-center">
+                        <button 
+                            onClick={(e) => toggleFavorite(stock.symbol, e)}
+                            className="p-1.5 rounded-full hover:bg-gray-100"
+                            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                        >
+                            {isFavorite ? 
+                                <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" /> : 
+                                <Star className="w-5 h-5 text-gray-400" />
+                            }
+                        </button>
+                        <button 
+                            onClick={(e) => showRemoveConfirmation(stock.symbol, e)}
+                            className="p-1.5 rounded-full hover:bg-gray-100 hover:text-red-500"
+                            aria-label="Remove from watchlist"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    // Modal component
+    const Modal = () => {
+        if (!modalOpen) return null;
+        
+        let icon, bgColor, textColor, buttonColor;
+        
+        switch(modalType) {
+            case "confirm":
+                icon = <AlertCircle className="w-8 h-8 text-blue-500" />;
+                bgColor = "bg-blue-50";
+                textColor = "text-blue-800";
+                buttonColor = "bg-blue-600 hover:bg-blue-700";
+                break;
+            case "success":
+                icon = <CheckCircle className="w-8 h-8 text-green-500" />;
+                bgColor = "bg-green-50";
+                textColor = "text-green-800";
+                buttonColor = "bg-green-600 hover:bg-green-700";
+                break;
+            case "error":
+                icon = <X className="w-8 h-8 text-red-500" />;
+                bgColor = "bg-red-50";
+                textColor = "text-red-800";
+                buttonColor = "bg-red-600 hover:bg-red-700";
+                break;
+            default:
+                icon = <AlertCircle className="w-8 h-8 text-gray-500" />;
+                bgColor = "bg-gray-50";
+                textColor = "text-gray-800";
+                buttonColor = "bg-gray-600 hover:bg-gray-700";
+        }
+        
+        return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-opacity-50">
+                <div className={`w-full max-w-md rounded-2xl shadow-xl ${bgColor} p-6 transition transform scale-100`}>
+                    <div className="flex flex-col items-center text-center mb-4">
+                        <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-4">
+                            {icon}
+                        </div>
+                        <h3 className={`text-xl font-semibold ${textColor} mb-2`}>
+                            {modalType === "confirm" ? "Confirm Action" : 
+                             modalType === "success" ? "Success" : "Error"}
+                        </h3>
+                        <p className={`${textColor.replace('800', '600')} mb-6`}>{modalMessage}</p>
+                    </div>
+                    
+                    <div className="flex justify-center gap-3">
+                        {modalType === "confirm" ? (
+                            <>
+                                <button 
+                                    className="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition"
+                                    onClick={() => setModalOpen(false)}
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    className={`px-5 py-2 ${buttonColor} text-white rounded-lg transition`}
+                                    onClick={handleConfirmRemove}
+                                >
+                                    Confirm
+                                </button>
+                            </>
+                        ) : (
+                            <button 
+                                className={`px-5 py-2 ${buttonColor} text-white rounded-lg transition`}
+                                onClick={() => setModalOpen(false)}
+                            >
+                                {modalType === "success" ? "Great!" : "OK"}
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
         );
@@ -257,7 +443,7 @@ const WatchList = () => {
     return (
         <div className="relative min-h-screen bg-gray-50">
             {/* Header Background */}
-            <div className="absolute  top-0 left-0 w-full h-[20vh] bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600" />
+            <div className="absolute top-0 left-0 w-full h-[20vh] bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600" />
 
             <div className="relative max-w-6xl mx-auto pt-6 px-4 sm:px-6">
                 {/* Header with Navigation */}
@@ -403,20 +589,20 @@ const WatchList = () => {
                         </button>
                     </div>
                 ) : (isFreePlan && sortedStocks.length === 0) ? ( // Conditionally render for free plan users
-                        <div className="bg-white rounded-2xl shadow p-8 flex flex-col items-center justify-center h-64">
-                            <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-500 mb-4">
-                                <StarOff className="w-8 h-8" />
-                            </div>
-                            <h3 className="text-xl font-semibold text-gray-800 mb-2">Unlock Watchlist Feature</h3>
-                            <p className="text-gray-600 mb-6 text-center max-w-md">Watchlist feature is available for Basic and Premium plans. Upgrade to track your favorite stocks.</p>
-                            <button
-                                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow transition"
-                                onClick={() => navigate('/subscriptiondetails')}
-                            >
-                                Upgrade Now
-                            </button>
-                        </div>
-                    ) : sortedStocks.length === 0 ? (
+                        <div className="bg-white rounded-2xl shadow p-8 flex flex-col items-center justify-center h-64">
+                            <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-500 mb-4">
+                                <StarOff className="w-8 h-8" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-gray-800 mb-2">Unlock Watchlist Feature</h3>
+                            <p className="text-gray-600 mb-6 text-center max-w-md">Watchlist feature is available for Basic and Premium plans. Upgrade to track your favorite stocks.</p>
+                            <button
+                                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow transition"
+                                onClick={() => navigate('/subscriptiondetails')}
+                            >
+                                Upgrade Now
+                            </button>
+                        </div>
+                    ) : sortedStocks.length === 0 ? (
                         <div className="bg-white rounded-2xl shadow p-8 flex flex-col items-center justify-center h-64">
                             <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mb-4">
                                 <TrendingUp className="w-8 h-8" />
@@ -471,7 +657,7 @@ const WatchList = () => {
                         </div>
                     </div>
                 )}
-                
+                <Modal />
                 {/* Padding at bottom */}
                 <div className="h-24"></div>
             </div>

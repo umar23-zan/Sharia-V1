@@ -143,6 +143,8 @@ const StockResults = () => {
         } catch (error) {
             if (error.response?.status === 400) {
                 setAlertMessage(error.response.data.message);
+            } else if (error.response?.status === 403) {
+                setAlertMessage(error.response.data.error);
             } else {
                 setAlertMessage("Error adding stock to watchlist.");
             }
