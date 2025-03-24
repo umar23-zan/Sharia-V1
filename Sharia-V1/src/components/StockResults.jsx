@@ -28,7 +28,8 @@ const StockResults = () => {
     const userId = localStorage.getItem('userId')
     const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
     const isFreePlan = user.subscription.plan === 'free';
-    
+    const [flippedCardIndex, setFlippedCardIndex] = useState(-1);
+
     useEffect(() => {
         const handleResize = () => {
             setIsDesktop(window.innerWidth >= 1024);
@@ -163,50 +164,130 @@ const StockResults = () => {
         </div>
     );
 
-    const MetricCard = ({ label, value, threshold }) => {
+    const useFlippedCardState = (() => {
+        // This creates a closure to maintain state across component instances
+        let activeCardId = null;
+        const listeners = new Set();
       
+        return (id) => {
+          const [isFlipped, setIsFlipped] = useState(false);
+          
+          // Register this component as a listener when mounted
+          useEffect(() => {
+            const notify = (newActiveCardId) => {
+              if (newActiveCardId !== id && isFlipped) {
+                setIsFlipped(false);
+              }
+            };
+            
+            listeners.add(notify);
+            
+            // Clean up listener when component unmounts
+            return () => {
+              listeners.delete(notify);
+            };
+          }, [id, isFlipped]);
+          
+          // Function to toggle this card's flipped state
+          const toggleFlip = () => {
+            const newState = !isFlipped;
+            
+            if (newState) {
+              // If we're flipping this card open, close any other open card
+              activeCardId = id;
+              // Notify all other cards
+              listeners.forEach(listener => listener(activeCardId));
+            } else {
+              // If we're closing this card, clear the active card
+              if (activeCardId === id) {
+                activeCardId = null;
+              }
+            }
+            
+            setIsFlipped(newState);
+          };
+          
+          return [isFlipped, toggleFlip];
+        };
+      })();
+
+    const MetricCard = ({ label, value, threshold, details, stockData, id }) => {
+        // Use the shared card state, passing a unique identifier
+        const [isFlipped, toggleFlip] = useFlippedCardState(id);
+        
         const numericValue = value !== 'N/A' ? parseFloat(value) : NaN;
-        const numericThreshold = threshold && threshold !== 'N/A' ? parseFloat(threshold.split(' ')[3]) : NaN; 
+        const numericThreshold = threshold && threshold !== 'N/A' ? parseFloat(threshold.split(' ')[3]) : NaN;
     
         let bgColorClassName;
         let lineChartColorName;
         const isHalal = stockData.Initial_Classification === 'Halal';
     
         if (isHalal) {
-            
             if (!isNaN(numericValue) && !isNaN(numericThreshold) && numericValue > numericThreshold) {
-                bgColorClassName = 'bg-gradient-to-r from-red-50 to-pink-50/30'; 
-                lineChartColorName = 'text-red-600'
+                bgColorClassName = 'bg-gradient-to-r from-red-50 to-pink-50/30';
+                lineChartColorName = 'text-red-600';
             } else {
-                bgColorClassName = 'bg-gradient-to-r from-green-50 to-emerald-50/30'; 
-                lineChartColorName = 'text-green-600'
+                bgColorClassName = 'bg-gradient-to-r from-green-50 to-emerald-50/30';
+                lineChartColorName = 'text-green-600';
             }
         } else {
-            
             if (!isNaN(numericValue) && !isNaN(numericThreshold) && numericValue > numericThreshold) {
-                bgColorClassName = 'bg-gradient-to-r from-red-50 to-pink-50/30'; 
-                lineChartColorName = 'text-red-600'
+                bgColorClassName = 'bg-gradient-to-r from-red-50 to-pink-50/30';
+                lineChartColorName = 'text-red-600';
             } else {
-                bgColorClassName = 'bg-gradient-to-r from-green-50 to-emerald-50/30'; 
-                lineChartColorName = 'text-green-600'
+                bgColorClassName = 'bg-gradient-to-r from-green-50 to-emerald-50/30';
+                lineChartColorName = 'text-green-600';
             }
         }
     
         return (
-            <div className={`${bgColorClassName} p-3 sm:p-4 rounded-xl hover:bg-gray-50 transition-all`}>
-                <div className="flex flex-col items-center text-center gap-2 sm:gap-3">
-                    <div className="bg-green-50 p-1.5 sm:p-2 rounded-lg">
-                        <LineChart className={`w-3 h-3 sm:w-4 sm:h-4 ${lineChartColorName}`} />
+            <div
+                className="h-40 w-full relative cursor-pointer"
+                onClick={toggleFlip}
+                style={{ perspective: '1000px' }}
+            >
+                <div
+                    className={`relative w-full h-full duration-500 transition-transform`}
+                    style={{
+                        transformStyle: 'preserve-3d',
+                        transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+                    }}
+                >
+                    {/* Front of card */}
+                    <div
+                        className={`${bgColorClassName} p-3 sm:p-4 rounded-xl absolute w-full h-full`}
+                        style={{ backfaceVisibility: 'hidden' }}
+                    >
+                        <div className="flex flex-col items-center text-center gap-2 sm:gap-3">
+                            <div className="bg-green-50 p-1.5 sm:p-2 rounded-lg">
+                                <LineChart className={`w-3 h-3 sm:w-4 sm:h-4 ${lineChartColorName}`} />
+                            </div>
+                            <div>
+                                <p className="text-gray-600 text-sm">{label}</p>
+                                <p className="text-lg sm:text-xl font-semibold text-gray-900">{value}</p>
+                                <p className="text-xs sm:text-sm text-gray-500 mt-1">{threshold}</p>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-gray-600 text-sm">{label}</p>
-                        <p className="text-lg sm:text-xl font-semibold text-gray-900">{value}</p>
-                        <p className="text-xs sm:text-sm text-gray-500 mt-1">{threshold}</p>
+                    
+                    {/* Back of card */}
+                    <div
+                        className={`${bgColorClassName} p-3 sm:p-4 rounded-xl absolute w-full h-full overflow-auto`}
+                        style={{
+                            backfaceVisibility: 'hidden',
+                            transform: 'rotateY(180deg)'
+                        }}
+                    >
+                        <div className="flex flex-col h-full">
+                            <h3 className="font-semibold mb-2 text-center">{label} Details</h3>
+                            <p className="text-sm text-gray-700">{details || "This metric measures the financial health aspect related to " + label.toLowerCase() + " of the company."}</p>
+                        </div>
                     </div>
                 </div>
             </div>
         );
     };
+
 
     const Headers = () => {
         const [isTooltipVisible, setIsTooltipVisible] = useState(false);
@@ -272,11 +353,33 @@ const StockResults = () => {
     if (!stockData) {
         return <div className="min-h-screen flex items-center justify-center">Could not retrieve stock data.</div>;
     }
+
+
     const metrics = [
-        { label: "Debt Ratio", value: `${stockData.Debt_to_Assets ? stockData.Debt_to_Assets.toFixed(3) : 'N/A'}`, threshold: "Must be below 0.33" },
-        { label: "Cash Ratio", value: `${stockData.Cash_and_Interest_Securities_to_Assets ? stockData.Cash_and_Interest_Securities_to_Assets.toFixed(3) : 'N/A'}`, threshold: "Must be above 0.33" },
-        { label: "Interest Ratio", value: `${stockData.Interest_Income_to_Revenue ? stockData.Interest_Income_to_Revenue.toFixed(3) : 'N/A'}`, threshold: "Must be below 0.05" },
-        { label: "Receivables Ratio", value: `${stockData.Receivables_to_Assets ? stockData.Receivables_to_Assets.toFixed(3) : 'N/A'}`, threshold: "Must be below 0.49" }
+        { 
+            label: "Debt Ratio", 
+            value: `${stockData.Debt_to_Assets ? stockData.Debt_to_Assets.toFixed(3) : 'N/A'}`, 
+            threshold: "Must be below 0.33",
+            details: "Debt Ratio measures the company's total debt relative to its total assets. A lower ratio indicates less financial leverage and potentially lower risk." 
+        },
+        { 
+            label: "Cash Ratio", 
+            value: `${stockData.Cash_and_Interest_Securities_to_Assets ? stockData.Cash_and_Interest_Securities_to_Assets.toFixed(3) : 'N/A'}`, 
+            threshold: "Must be above 0.33",
+            details: "Cash Ratio indicates the proportion of assets held in cash or interest-bearing securities. A higher ratio suggests better liquidity and financial stability."
+        },
+        { 
+            label: "Interest Ratio", 
+            value: `${stockData.Interest_Income_to_Revenue ? stockData.Interest_Income_to_Revenue.toFixed(3) : 'N/A'}`, 
+            threshold: "Must be below 0.05",
+            details: "Interest Ratio measures how much of the company's revenue comes from interest. For Halal investments, this should be kept low to minimize income from interest-based activities."
+        },
+        { 
+            label: "Receivables Ratio", 
+            value: `${stockData.Receivables_to_Assets ? stockData.Receivables_to_Assets.toFixed(3) : 'N/A'}`, 
+            threshold: "Must be below 0.49",
+            details: "Receivables Ratio compares accounts receivable to total assets. A lower ratio may indicate less credit exposure and better asset utilization."
+        }
     ];
 
     return (
@@ -319,7 +422,12 @@ const StockResults = () => {
                             <div className="p-4 sm:p-6">
                                 <div className="grid grid-cols-2 gap-3 sm:gap-4">
                                     {metrics.map((metric, index) => (
-                                        <MetricCard key={index} {...metric} />
+                                        <MetricCard
+                                            key={index}
+                                            id={`metric-${index}`}
+                                            {...metric}
+                                            stockData={stockData}
+                                        />
                                     ))}
                                 </div>
                             </div>
