@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Camera, Settings, LogOut, ChevronLeft, AlertTriangle, Loader2 } from 'lucide-react';
 import account from '../images/account-icon.svg'
 import logo from '../images/ShariaStocks-logo/logo1.jpeg'
-import Header from './Header';
+const Header = lazy(() => import('./Header'));
 import PaymentAlertModal from './PaymentAlertModal'
 import usePaymentAlert from './usePaymentAlert';
 import { getUserData, uploadProfilePicture } from '../api/auth';
@@ -145,6 +145,7 @@ const Profile = () => {
   return (
     <ErrorBoundary>
       <div className="min-h-screen">
+      <Suspense fallback={<div>Loading...</div>}>
         <Header />
         <PaymentAlertModal
           isOpen={isOpen}
@@ -367,6 +368,7 @@ const Profile = () => {
             </div>
           </div>
         </div>
+        </Suspense>
       </div>
     </ErrorBoundary>
   );

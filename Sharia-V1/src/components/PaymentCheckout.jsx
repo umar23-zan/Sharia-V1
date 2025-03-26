@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Header from './Header';
+const Header = lazy(() => import('./Header'));
 
 const PaymentCheckout = () => {
     const [selectedCard, setSelectedCard] = useState('visa');
@@ -120,6 +120,7 @@ const PaymentCheckout = () => {
 
     return (
         <div className="font-sans max-w-7xl mx-auto">
+            <Suspense fallback={<div>Loading...</div>}>
             {/* Header */}
             <Header />
             <div className="bg-purple-600 text-white p-6 ">
@@ -347,6 +348,7 @@ const PaymentCheckout = () => {
                     Secured by industry standard encryption
                 </div>
             </div>
+            </Suspense>
         </div>
     );
 };

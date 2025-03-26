@@ -1,5 +1,5 @@
-import React from 'react';
-import Header from './Header';
+import React, {lazy, Suspense} from 'react';
+const Header = lazy(() => import('./Header'));
 import { useLocation, Link } from 'react-router-dom';
 
 const SubscriptionSuccess = () => {
@@ -8,6 +8,7 @@ const SubscriptionSuccess = () => {
 
   return (
     <div className="flex flex-col h-screen">
+      <Suspense fallback={<div>Loading...</div>}>
       <Header />
 
       <div className="bg-gray-100 flex-grow flex justify-center items-center p-4">
@@ -34,6 +35,7 @@ const SubscriptionSuccess = () => {
           </p>
         </div>
       </div>
+      </Suspense>
     </div>
   );
 };

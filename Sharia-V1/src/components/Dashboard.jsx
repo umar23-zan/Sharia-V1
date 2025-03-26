@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import niftyCompanies from '../nifty_symbols.json';
-import Header from './Header'
+const Header = lazy(() => import('./Header'));
 import logo from '../images/ShariaStocks-logo/logo1.jpeg'
 import { getUserData } from '../api/auth';
 import account from '../images/account-icon.svg';
@@ -64,6 +64,7 @@ const Dashboard = () => {
 
   return (
     <div >
+      <Suspense fallback={<div>Loading...</div>}>
       <Header />
       <div className='max-w-7xl mx-auto'>
         <PaymentAlertModal
@@ -173,6 +174,7 @@ const Dashboard = () => {
       </div>
     </div>
     </div>
+    </Suspense>
     </div>
     
     

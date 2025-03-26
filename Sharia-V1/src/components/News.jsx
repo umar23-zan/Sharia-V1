@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowLeft, Bell, Search, LoaderCircle } from 'lucide-react';
 import logo from '../images/ShariaStocks-logo/logo1.jpeg'
-import Header from './Header'
+const Header = lazy(() => import('./Header'));
 
 const News = () => {
   const [newsArticles, setNewsArticles] = useState([]);
@@ -92,6 +92,7 @@ const News = () => {
 
   return (
     <div className=" min-h-screen">
+      <Suspense fallback={<div>Loading...</div>}>
       {/* Header */}
       <Header />
 
@@ -170,6 +171,7 @@ const News = () => {
           </button>
         </div>
       </div>
+      </Suspense>
     </div>
   );
 };

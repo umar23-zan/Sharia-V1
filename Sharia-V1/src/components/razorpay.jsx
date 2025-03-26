@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import Header from './Header';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
+const Header = lazy(() => import('./Header'));
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Razorpay = () => {
@@ -308,6 +308,7 @@ const Razorpay = () => {
       currentSubscription.billingCycle === planDetails.billingCycle) {
     return (
       <div className="flex flex-col h-screen">
+        
         <Header />
         <div className="bg-gray-100 flex-grow flex justify-center items-center">
           <div className="bg-white rounded-lg shadow-md w-full max-w-xl p-8 m-4">
@@ -381,6 +382,7 @@ const Razorpay = () => {
 
   return (
     <div className="flex flex-col h-screen">
+      <Suspense fallback={<div>Loading...</div>}>
       <Header />
 
       <div className="bg-gray-100 flex-grow flex justify-center items-start p-4">
@@ -609,6 +611,7 @@ const Razorpay = () => {
           </div>
         </div>
       </div>
+      </Suspense>
     </div>
   );
 };

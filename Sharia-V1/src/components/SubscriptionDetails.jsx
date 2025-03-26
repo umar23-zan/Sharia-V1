@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { CheckCircle, X, CreditCard, ChevronLeft, Bell, Search, Clock, FileText, Database, Zap, Shield, ArrowRight, AlertCircle  } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -8,7 +8,7 @@ import {
   } from '../api/subscriptionService';
 import axios from "axios";
 import { getUserData } from '../api/auth';
-import Header from './Header';
+const Header = lazy(() => import('./Header'));
 import PaymentModeSelector from './PaymentModeSelector';
 
 const SubscriptionDetails = () => {
@@ -398,6 +398,7 @@ const SubscriptionDetails = () => {
 
     return (
         <div className="min-h-screen font-sans text-slate-900">
+            <Suspense fallback={<div>Loading...</div>}>
            <Header />
 
             {/* Main Content */}
@@ -845,6 +846,7 @@ const SubscriptionDetails = () => {
                 </div>
               </div>
             )}
+            </Suspense>
         </div>
     );
 };

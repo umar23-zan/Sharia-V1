@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { Search, Bell, ChevronRight, ArrowLeft, AlertCircle } from 'lucide-react';
-import Header from './Header';
+// const Header = lazy(() => import('./Header'));
 
 const NotificationsPage = () => {
   const [activeTab, setActiveTab] = useState('all');
@@ -65,8 +65,6 @@ const NotificationsPage = () => {
 
   return (
     <div>
-      
-      {/* Desktop View Header - Using the same gradient */}
       <div className="hidden lg:block">
         {/* Header */}
         <div className="bg-gradient-to-br from-blue-600 to-purple-600 px-4 py-8  shadow-sm flex items-center justify-between mb-6">

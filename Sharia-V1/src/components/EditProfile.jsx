@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Camera, UserRound } from 'lucide-react';
 import { getUserData, updateUserData, uploadProfilePicture } from '../api/auth';
 import account from '../images/account-icon.svg'
 import logo from '../images/ShariaStocks-logo/logo1.jpeg'
-import Header from './Header';
+const Header = lazy(() => import('./Header'));
 
 const EditProfile = () => {
   const [user, setUser] = useState({});
@@ -149,7 +149,8 @@ const handleCameraClick = () => {
 };
 
   return (
-    <div className=" min-h-screen ">                 
+    <div className=" min-h-screen "> 
+    <Suspense fallback={<div>Loading...</div>}>           
         <Header />
       <div>
         <div className="max-w-7xl mx-auto p-4 flex items-center gap-4">
@@ -297,6 +298,7 @@ const handleCameraClick = () => {
           </div>
         </div>
       </div>
+      </Suspense>
     </div>
   );
 };

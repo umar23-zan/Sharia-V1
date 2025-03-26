@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { ChevronLeft, PlusCircle, Shield, CheckCircle, X, CreditCard, AlertTriangle } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
-import Header from './Header';
+const Header = lazy(() => import('./Header'));
 
 const PaymentMethodsPage = () => {
   const [paymentMethods, setPaymentMethods] = useState([]);
@@ -254,6 +254,7 @@ const PaymentMethodsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Suspense fallback={<div>Loading...</div>}>
       <Header />
       <div className="max-w-4xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         <button 
@@ -628,6 +629,7 @@ const PaymentMethodsPage = () => {
           </div>
         </div>
       </div>
+      </Suspense>
     </div>
   );
 };

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Camera, Plus, Trash2 } from 'lucide-react';
 import DeactivateAccount from './DeactivateAccount'
-import Header from './Header';
+const Header = lazy(() => import('./Header'));
 
 const PersonalDetails = () => {
   const navigate = useNavigate();
@@ -28,6 +28,7 @@ const PersonalDetails = () => {
 
   return (
     <div className="max-w-7xl mx-auto min-h-screen ">
+      <Suspense fallback={<div>Loading...</div>}>
       <Header />
       <div className="max-w-7xl mx-auto">
         <div className="p-4 flex items-center gap-4">
@@ -80,6 +81,7 @@ const PersonalDetails = () => {
           </div>
         </div>
       )}
+      </Suspense>
     </div>
   );
 };

@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Heart, ArrowLeft, TrendingUp, ArrowUpRight, ArrowDownRight, Clock, Filter, Star, Bookmark, Lock,Search, Bell } from 'lucide-react';
 import axios from 'axios'; 
 import logo from '../images/ShariaStocks-logo/logo1.jpeg'
 import account from '../images/account-icon.svg';
-import Header from './Header';
+const Header = lazy(() => import('./Header'));
 
 const TrendingStocks = () => {
   const location = useLocation();
@@ -156,6 +156,7 @@ const TrendingStocks = () => {
 
   return (
     <div className=" bg-white min-h-screen">
+    <Suspense fallback={<div>Loading...</div>}>
      <Header />
      
       <div className="max-w-7xl mx-auto p-6">
@@ -323,6 +324,7 @@ const TrendingStocks = () => {
           </div>
         )}
       </div>
+    </Suspense>
     </div>
   );
 };

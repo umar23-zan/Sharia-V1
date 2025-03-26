@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios'; // Keep axios import for potential conditional real API calls
 import { LoaderCircle, Star, Bookmark, BarChart, ArrowUpRight, ChevronDown, Filter, Info, Lock, Search, Bell, Heart } from 'lucide-react';
-import Header from './Header';
+const Header = lazy(() => import('./Header'));
 
 const StatusBadge = ({ status }) => {
   let badgeClasses = "text-xs font-medium px-2 py-1 rounded-full";
@@ -358,6 +358,7 @@ const navigate = useNavigate()
 
   return (
     <div className=" min-h-screen">
+  <Suspense fallback={<div>Loading...</div>}>
       <Header />
       <div className="max-w-7xl container mx-auto px-4 pt-6">
         {/* Header */}
@@ -458,6 +459,7 @@ const navigate = useNavigate()
           </div>
         )}
       </div>
+      </Suspense>
     </div>
   );
 };

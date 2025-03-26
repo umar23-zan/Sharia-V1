@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import DeactivateAccount from './DeactivateAccount';
 import { getUserData } from '../api/auth';
@@ -15,7 +15,7 @@ import {
   Trash2,
   Save
 } from 'lucide-react';
-import Header from './Header';
+const Header = lazy(() => import('./Header'));
 
 const AccountInformationPage = () => {
   const [showDeactivateModal, setShowDeactivateModal] = useState(false);
@@ -254,7 +254,7 @@ const AccountInformationPage = () => {
 
   return (
     <div className=" min-h-screen">
-      {/* Header */}
+      <Suspense fallback={<div>Loading...</div>}>
       <Header />
 
       {/* Main Content */}
@@ -735,7 +735,7 @@ const AccountInformationPage = () => {
         </div>
       )}
 
-      
+      </Suspense>
     </div>
   );
 };
