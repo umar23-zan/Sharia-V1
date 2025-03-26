@@ -14,7 +14,6 @@ const WatchList = () => {
     const [companyDetails, setCompanyDetails] = useState(null);
     const [showFilters, setShowFilters] = useState(false);
     const [view, setView] = useState("grid"); // grid or list view
-    const [favorites, setFavorites] = useState([]);
     const userId = localStorage.getItem('userId');
     const navigate = useNavigate();
     const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
@@ -96,19 +95,7 @@ const WatchList = () => {
         fetchWatchlist();
     }, [userId]);
     
-    const toggleFavorite = (symbol, e) => {
-        e.stopPropagation();
-        
-        setFavorites(prev => {
-            const newFavorites = prev.includes(symbol)
-                ? prev.filter(s => s !== symbol)
-                : [...prev, symbol];
-                
-            // Save to localStorage
-            localStorage.setItem('favorites', JSON.stringify(newFavorites));
-            return newFavorites;
-        });
-    };
+    
 
     // Show confirmation modal for removing a stock
     const showRemoveConfirmation = (stockSymbol, e) => {
@@ -219,7 +206,7 @@ const WatchList = () => {
 
     const renderStockCard = (stock) => {
         const details = companyDetails?.[stock.symbol];
-        const isFavorite = favorites.includes(stock.symbol);
+        
         
         return (
             <div 
@@ -238,16 +225,6 @@ const WatchList = () => {
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        <button 
-                            onClick={(e) => toggleFavorite(stock.symbol, e)}
-                            className="p-1.5 rounded-full hover:bg-gray-100"
-                            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-                        >
-                            {isFavorite ? 
-                                <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" /> : 
-                                <Star className="w-5 h-5 text-gray-400" />
-                            }
-                        </button>
                         <button 
                             onClick={(e) => showRemoveConfirmation(stock.symbol, e)}
                             className="p-1.5 rounded-full hover:bg-gray-100 hover:text-red-500"
@@ -341,16 +318,7 @@ const WatchList = () => {
                     </div>
                     
                     <div className="flex items-center">
-                        <button 
-                            onClick={(e) => toggleFavorite(stock.symbol, e)}
-                            className="p-1.5 rounded-full hover:bg-gray-100"
-                            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-                        >
-                            {isFavorite ? 
-                                <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" /> : 
-                                <Star className="w-5 h-5 text-gray-400" />
-                            }
-                        </button>
+                        
                         <button 
                             onClick={(e) => showRemoveConfirmation(stock.symbol, e)}
                             className="p-1.5 rounded-full hover:bg-gray-100 hover:text-red-500"

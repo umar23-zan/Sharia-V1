@@ -979,6 +979,51 @@ router.post('/update-payment-mode', async (req, res) => {
   }
 });
 
+router.post('/cancel-manual-payment-change', async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (user.subscription.status !== 'active') {
+      return res.status(400).json({ error: 'No active subscription found' });
+    }
+
+    if (user.subscription.pendingPaymentMode === 'manual') {
+      await User.findByIdAndUpdate(
+        userId,
+        {
+          $set: {
+            'subscription.pendingPaymentMode': null,
+            'subscription.paymentModeChangeDate': null,
+            'subscription.paymentMode': 'automatic',
+          },
+        },
+        { new: true }
+      );
+
+      res.json({
+        status: 'success',
+        message: 'Pending manual payment change cancelled. Payment mode reverted to automatic.',
+        user: await User.findById(userId),
+      });
+      return;
+    } else {
+      return res.status(400).json({ error: 'No pending manual payment change found for this user.' });
+    }
+  } catch (error) {
+    console.error('Error cancelling manual payment change:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.post('/pay-renewal', async (req, res) => {
   try {
     const { userId } = req.body;

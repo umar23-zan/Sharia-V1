@@ -7,13 +7,24 @@ const router = express.Router();
 const multer = require('multer');
 const { uploadToS3, deleteFromS3 } = require('../config/s3config');
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs').promises
 require('dotenv').config();
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const jwt = require("jsonwebtoken");
 const session = require('express-session');
 const Razorpay = require('razorpay');
+
+const transporter = nodemailer.createTransport({
+    service: "smtppro.zoho.in",
+    host: "smtppro.zoho.in",
+    port: 465, 
+    secure: true,
+    auth: {
+        user: 'contact@shariastocks.in',
+        pass: 'jEgZxnPPNNbv',
+    },
+  });
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -68,24 +79,35 @@ router.post('/signup', async (req, res) => {
 
         const verificationToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "1d" });
 
-        user = new User({ name, email, password: hashedPassword, verificationToken: verificationToken });
-        await user.save();
+        
 
         const verificationUrl = `${process.env.FRONTEND_URL}/verify/${verificationToken}`;
 
-        const message = `
-            <p>Thank you for registering with our service!</p>
-            <p>Please verify your email address by clicking on the following link:</p>
-            <p><a href="${verificationUrl}">Verify Email Address</a></p>
-            <p>This link will expire in 24 hours.</p>
-        `;
+        const logoPath = path.join(__dirname, '../../Sharia-v1/src/images/ShariaStocks-logo/logo.png');
+        
+        // Add error handling for logo reading
+        let logoBase64 = '';
+        try {
+            logoBase64 = await fs.readFile(logoPath, {encoding: 'base64'});
+        } catch (logoError) {
+            console.error('Error reading logo:', logoError);
+        }
+
+        const logoSrc = `data:image/png;base64,${logoBase64}`;
+
+        const message = await fs.readFile('../Sharia-V1/src/components/emailTemplate.html', 'utf8');
+        const compiledMessage = message.replace('${verificationUrl}', verificationUrl).replace("LOGO_PLACEHOLDER", logoSrc).replace('${currentYear}', new Date().getFullYear());
+        
 
         await transporter.sendMail({ 
             from: process.env.EMAIL_USER,
             to: email,
             subject: 'Verify Your Email Address',
-            html: message, 
+            html: compiledMessage, 
         });
+
+        user = new User({ name, email, password: hashedPassword, verificationToken: verificationToken });
+        await user.save();
 
         res.status(201).json({ msg: 'User registered successfully' });
     } catch (error) {
@@ -202,13 +224,7 @@ router.post('/login', async (req, res) => {
 });
 
 // Forgot Password Route
-const transporter = nodemailer.createTransport({
-  service: 'Gmail',
-  auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-  },
-});
+
 
 // Forgot Password Route
 router.post('/forgot-password', async (req, res) => {

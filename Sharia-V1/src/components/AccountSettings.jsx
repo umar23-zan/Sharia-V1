@@ -10,18 +10,10 @@ import {
   CheckCircle, 
   AlertCircle, 
   Clock,
-  Shield, 
-  LogOut, 
   X, 
   ChevronRight, 
-  Download, 
-  Mail, 
-  Bell, 
-  Settings,
   Trash2,
-  Plus,
-  RefreshCw,
-  ArrowLeft, Save
+  Save
 } from 'lucide-react';
 import Header from './Header';
 
@@ -49,11 +41,13 @@ const AccountInformationPage = () => {
   const [notificationMessage, setNotificationMessage] = useState('');
   const [notificationType, setNotificationType] = useState('success'); 
   const [subscriptionStatus, setSubscriptionStatus] = useState(user.subscription?.status);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState(null);
+  const [cancelSuccess, setCancelSuccess] = useState(false);
+
   useEffect(() => {
     setSubscriptionStatus(user.subscription?.status);
   }, [user.subscription?.status]);
-  console.log(user?.subscription?.status )
-  console.log(subscriptionStatus)
 
   const showAlert = (message, type = 'success') => {
     setNotificationMessage(message);
@@ -139,22 +133,25 @@ const AccountInformationPage = () => {
   }
 
   const handlePaymentModeChange = (mode) => {
-    // If currently automatic and changing to manual, show warning modal
+    console.log(mode)
+    if (hasPendingChange) {
+            return;
+    }
     if (user?.subscription?.paymentMode === 'automatic' && mode === 'manual') {
+      setPaymentMode(mode);
       setShowAlertModal(true);
     } else {
       setPaymentMode(mode);
     }
   };
 
-  const confirmManualMode = () => {
+  const confirmManualMode = (e) => {
     setPaymentMode('manual');
     setShowAlertModal(false);
   };
 
   const cancelManualMode = () => {
     setShowAlertModal(false);
-    // Keep the payment mode as automatic
   };
 
   const handleSave = async () => {
@@ -162,6 +159,9 @@ const AccountInformationPage = () => {
       setLoading(true);
       setError(null);
       setSuccess(false);
+      if (hasPendingChange) {
+          return;
+        }
       
       const response = await axios.post('/api/transaction/update-payment-mode', {
         userId: user._id,
@@ -172,7 +172,15 @@ const AccountInformationPage = () => {
       });
       
       setSuccess(true);
-      // Update user in local state or context if needed
+      if (response.data.user) {
+        setUser(response.data.user);
+      }
+      if (paymentMode === 'manual' && user?.subscription?.paymentMode === 'automatic') {
+        setHasPendingChange(true);
+      } else {
+        setHasPendingChange(false);
+      }
+      
     } catch (err) {
       console.error("Error details:", err);
       setError(err.response?.data?.error || 'Failed to update payment mode');
@@ -180,6 +188,31 @@ const AccountInformationPage = () => {
       setLoading(false);
     }
   };
+
+  const handleCancelManualChange = async () => {
+        setIsCancelling(true);
+        setCancelError(null);
+        setCancelSuccess(false);
+        try {
+          const response = await axios.post('/api/transaction/cancel-manual-payment-change', {
+            userId: user._id,
+          });
+          if (response.data.status === 'success') {
+            setHasPendingChange(false);
+            setPendingChangeDate(null);
+            setPaymentMode('automatic'); 
+            setCancelSuccess(true);
+          
+          } else {
+            setCancelError(response.data.error || 'Failed to cancel payment mode change.');
+          }
+        } catch (error) {
+          console.error("Error cancelling manual payment change:", error);
+          setCancelError(error.response?.data?.error || 'Failed to cancel payment mode change.');
+        } finally {
+          setIsCancelling(false);
+        }
+      };
 
 
   const handleCancelSubscription = async () => {
@@ -320,14 +353,25 @@ const AccountInformationPage = () => {
             {/* Pending Payment Mode Change Banner */}
             {hasPendingChange && (
                 <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start text-blue-700">
-                  <Clock className="w-5 h-5 mt-0.5 mr-2 flex-shrink-0" />
-                  <div>
-                    <span className="font-medium">Scheduled Payment Mode Change</span>
-                    <p className="text-blue-600 mt-1">
-                      Your payment mode is currently set to <strong>automatic</strong>, but will change to <strong>manual</strong> when 
-                      your subscription expires on <strong>{pendingChangeDate}</strong>.
-                    </p>
+                  <div className="flex items-start">
+                    <Clock className="w-5 h-5 mt-0.5 mr-2 flex-shrink-0" />
+                    <div>
+                      <span className="font-medium">Scheduled Payment Mode Change</span>
+                      <p className="text-blue-600 mt-1">
+                        Your payment mode is currently set to <strong>automatic</strong>, but will change to <strong>manual</strong> when 
+                        your subscription expires on <strong>{pendingChangeDate}</strong>.
+                      </p>
+                    </div>
                   </div>
+                  <button
+                    onClick={handleCancelManualChange}
+                    disabled={isCancelling}
+                    className={`inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ${
+                      isCancelling ? 'cursor-not-allowed opacity-50' : ''
+                    }`}
+                  >
+                    {isCancelling ? 'Cancelling...' : 'Cancel Change'}
+                  </button>
                 </div>
               )}
               {/* Payment Mode Selection */}
@@ -340,7 +384,7 @@ const AccountInformationPage = () => {
                     className={`p-4 border rounded-xl cursor-pointer transition-colors ${
                       (paymentMode === 'automatic' && !hasPendingChange) ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'
                     }`}
-                    onClick={() => handlePaymentModeChange('automatic')}
+                    onClick={hasPendingChange ? undefined : () => handlePaymentModeChange('automatic')}
                   >
                     <div className="flex items-center">
                       <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
@@ -370,15 +414,15 @@ const AccountInformationPage = () => {
                   {/* Manual Payment Option */}
                   <div 
                     className={`p-4 border rounded-xl cursor-pointer transition-colors ${
-                      (paymentMode === 'manual' && hasPendingChange) ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'
+                      (paymentMode === 'manual' ) ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'
                     }`}
-                    onClick={() => handlePaymentModeChange('manual')}
+                    onClick={hasPendingChange ? undefined : () => handlePaymentModeChange('manual')}
                   >
                     <div className="flex items-center">
                       <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                        (paymentMode === 'manual' && hasPendingChange) ? 'border-blue-500' : 'border-gray-300'
+                        (paymentMode === 'manual' ) ? 'border-blue-500' : 'border-gray-300'
                       }`}>
-                        {(paymentMode === 'manual' && hasPendingChange) && <div className="w-3 h-3 rounded-full bg-blue-500"></div>}
+                        {(paymentMode === 'manual' ) && <div className="w-3 h-3 rounded-full bg-blue-500"></div>}
                       </div>
                       
                       <div className="ml-3 flex-1">
@@ -389,7 +433,7 @@ const AccountInformationPage = () => {
                       </div>
                       
                       <AlertCircle className={`w-6 h-6 ${
-                        (paymentMode === 'manual' && hasPendingChange) ? 'text-blue-500' : 'text-gray-400'
+                        (paymentMode === 'manual' ) ? 'text-blue-500' : 'text-gray-400'
                       }`} />
                     </div>
                     
@@ -579,7 +623,7 @@ const AccountInformationPage = () => {
             </div>
           </div>
         </div>
-      
+       
 
         {showDeactivateModal && (
         <div className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex justify-center items-center">

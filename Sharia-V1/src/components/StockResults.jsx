@@ -1,109 +1,177 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { LineChart, Shield, Sparkles, Heart, ArrowLeft, LoaderCircle } from 'lucide-react';
 import Card from './Card';
-import PriceChart from './PriceChart';
-import Header from './Header'
+const PriceChart = lazy(() => import('./PriceChart'));
+const Header = lazy(() => import('./Header'));
+
+const PriceChartSkeleton = () => (
+    <div className="animate-pulse bg-gray-100 h-64 w-full rounded-lg">
+      <div className="h-full w-full bg-gray-200"></div>
+    </div>
+  );
 
 
 const StockResults = () => {
     const location = useLocation();
-    const user = location.state?.user;
-    
+    const navigate = useNavigate();
     const { symbol } = useParams();
+
+    const prevSymbolRef = useRef(null);
+
+    const [user, setUser] = useState(null);
+    const [userId, setUserId] = useState(null);
+    const [isFreePlan, setIsFreePlan] = useState(false);
     const [companyDetails, setCompanyDetails] = useState(null);
     const [stockData, setStockData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [newsArticles, setNewsArticles] = useState([]);
-    const navigate = useNavigate();
     const [isInWatchlist, setIsInWatchlist] = useState(false);
     const [watchlist, setWatchlist] = useState([]);
     const [alertMessage, setAlertMessage] = useState("");
+    const [viewLimitReached, setViewLimitReached] = useState(false);
     const [isLoadingInitialData, setIsLoadingInitialData] = useState(true);
     const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
-    // const [subscriptionStatus, setSubscriptionStatus] = useState(null);
-    const [viewLimitReached, setViewLimitReached] = useState(false);
-    const userId = localStorage.getItem('userId')
-    const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
-    const isFreePlan = user.subscription.plan === 'free';
-    const [flippedCardIndex, setFlippedCardIndex] = useState(-1);
+    const [isDesktop, setIsDesktop] = useState(false);
+    const [flippedCardId, setFlippedCardId] = useState(null);
+    
+
+    const toggleCardFlip = useCallback((id) => {
+        setFlippedCardId(current => current === id ? null : id);
+    }, []);
+
+    const metrics = useMemo(() => {
+        if (!stockData) return [];
+        return [
+            { 
+                id: 'debt-ratio',
+                label: "Debt Ratio", 
+                value: `${stockData.Debt_to_Assets ? stockData.Debt_to_Assets.toFixed(3) : 'N/A'}`, 
+                threshold: "Must be below 0.33",
+                details: "Debt Ratio measures the company's total debt relative to its total assets. A lower ratio indicates less financial leverage and potentially lower risk." 
+            }, 
+            { 
+                id: 'cash-ratio',
+                label: "Cash Ratio", 
+                value: `${stockData.Cash_and_Interest_Securities_to_Assets ? stockData.Cash_and_Interest_Securities_to_Assets.toFixed(3) : 'N/A'}`, 
+                threshold: "Must be above 0.33",
+                details: "Cash Ratio indicates the proportion of assets held in cash or interest-bearing securities. A higher ratio suggests better liquidity and financial stability."
+            },
+            { 
+                id: 'interest-ratio',
+                label: "Interest Ratio", 
+                value: `${stockData.Interest_Income_to_Revenue ? stockData.Interest_Income_to_Revenue.toFixed(3) : 'N/A'}`, 
+                threshold: "Must be below 0.05",
+                details: "Interest Ratio measures how much of the company's revenue comes from interest. For Halal investments, this should be kept low to minimize income from interest-based activities."
+            },
+            { 
+                id: 'receivables-ratio',
+                label: "Receivables Ratio", 
+                value: `${stockData.Receivables_to_Assets ? stockData.Receivables_to_Assets.toFixed(3) : 'N/A'}`, 
+                threshold: "Must be below 0.49",
+                details: "Receivables Ratio compares accounts receivable to total assets. A lower ratio may indicate less credit exposure and better asset utilization."
+            }
+        ];
+    }, [stockData]);
 
     useEffect(() => {
-        const handleResize = () => {
+        const storedUser = location.state?.user;
+        const storedUserId = localStorage.getItem('userId');
+
+        if (storedUser) {
+            setUser(storedUser);
+            setIsFreePlan(storedUser.subscription?.plan === 'free');
+        }
+
+        if (storedUserId) {
+            setUserId(storedUserId);
+        }
+    }, [location.state]);
+
+    useEffect(() => {
+        const checkDesktopSize = () => {
             setIsDesktop(window.innerWidth >= 1024);
         };
 
-        window.addEventListener('resize', handleResize);
+        checkDesktopSize();
+        window.addEventListener('resize', checkDesktopSize);
         return () => {
-            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('resize', checkDesktopSize);
         };
     }, []);
 
-    // useEffect(() => {
-    //     const checkSubscriptionStatus = async () => {
-    //         try {
-    //             const userId = localStorage.getItem('userId');
-    //             const response = await axios.get(`/api/subscribe/subscription-status?userId=${userId}`);
-    //             setSubscriptionStatus(response.data);
-    //         } catch (error) {
-    //             console.error('Error checking subscription status:', error);
-    //         }
-    //     };
+   
 
-    //     checkSubscriptionStatus();
-    // }, []);
-    
-
-    useEffect(() => {
-        const fetchStockResults = async () => {
-            setIsLoadingInitialData(true);
-            setLoading(true);
-            setError(null);
-            setViewLimitReached(false);
-            try {
-                const companyDetailsResponse = await axios.get(`http://13.201.131.141:5000/api/company-details/${symbol}.NS`);
-                const companyInfo = companyDetailsResponse.data;
-                setCompanyDetails(companyInfo);
-
-                const stockDataResponse = await axios.get(`/api/stocks/${symbol.toUpperCase()}?userId=${userId}`);
-                setStockData(stockDataResponse.data);
-                
-                
-                    const response = await axios.get("https://newsdata.io/api/1/news", {
-                        params: {
-                            apikey: 'pub_5726909ae8ab74afd8fcf47ed1aa5e8cec510',
-                            q: companyInfo.company_name,
-                            country: "in",
-                            language: "en",
-                            category: "Business",
-                            size: 2,
-                        },
-                    });
-                    setNewsArticles(response.data.results || []);
-                
-            } catch (err) {
-                console.error("Error fetching stock results:", err);
-                
-                if (err.response?.status === 403) {
-                    setViewLimitReached(true);
-                    setShowSubscriptionModal(true);
-                   
-                } else {
-                    setError("Could not load stock results. Please check the symbol and try again.");
-                    setStockData(null); 
-                }
-            }  finally {
-                setLoading(false);
-                setIsLoadingInitialData(false);
+    const fetchStockResults = useCallback(async () => {
+        if (!symbol || !userId) return;
+        const controller = new AbortController();
+        
+        try {
+          setLoading(true);
+          const companyDetailsResponse = await axios.get(
+            `http://13.201.131.141:5000/api/company-details/${symbol}.NS`,
+            { 
+              signal: controller.signal,
+              timeout: 10000 
             }
-        };
+          );
+    
+          const stockDataResponse = await axios.get(
+            `/api/stocks/${symbol.toUpperCase()}?userId=${userId}`,
+            { 
+              signal: controller.signal,
+              timeout: 10000 
+            }
+          );
+    
+          localStorage.setItem(`companyDetails_${symbol}`, JSON.stringify(companyDetailsResponse.data));
+          localStorage.setItem(`stockData_${symbol}`, JSON.stringify(stockDataResponse.data));
+    
+          setCompanyDetails(companyDetailsResponse.data);
+          setStockData(stockDataResponse.data);
+    
+          const newsResponse = await axios.get("https://newsdata.io/api/1/news", {
+            params: {
+              apikey: 'pub_5726909ae8ab74afd8fcf47ed1aa5e8cec510',
+              q: companyDetailsResponse.data.company_name,
+              country: "in",
+              language: "en",
+              category: "Business",
+              size: 2,
+            },
+            signal: controller.signal,
+            timeout: 5000
+          });
+    
+          setNewsArticles(newsResponse.data.results || []);
+    
+        } catch (err) {
+          // Detailed error handling
+          if (axios.isCancel(err)) {
+            console.log('Request canceled');
+          } else if (err.code === 'ECONNABORTED') {
+            setError('Request timed out. Please check your connection.');
+          } else {
+            setError(err.message);
+          }
+        } finally {
+          setLoading(false);
+        }
+    
+        return () => controller.abort();
+      }, [symbol, userId]);
 
-        fetchStockResults();
-    }, [symbol]);
+      useEffect(() => {
+        if (symbol && userId) {
+          fetchStockResults();
+        }
+      }, [symbol, userId, fetchStockResults]);
+      
 
-    if (isLoadingInitialData) { 
+
+    if (loading) { 
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <LoaderCircle className="w-16 h-16 text-blue-500 animate-spin" /> {/* Centered loader */}
@@ -111,9 +179,84 @@ const StockResults = () => {
         );
     }
 
-    if (loading) {
-        return <div className="min-h-screen flex items-center justify-center">Loading stock results...</div>;
-    }
+    const MetricCard = React.memo(({ metric, stockData }) => {
+        const { id, label, value, threshold, details } = metric;
+        const isFlipped = flippedCardId === id;
+
+        const numericValue = value !== 'N/A' ? parseFloat(value) : NaN;
+        const numericThreshold = threshold && threshold !== 'N/A' ? parseFloat(threshold.split(' ')[3]) : NaN;
+    
+        let bgColorClassName;
+        let lineChartColorName;
+        const isHalal = stockData.Initial_Classification === 'Halal';
+    
+        if (isHalal) {
+            if (!isNaN(numericValue) && !isNaN(numericThreshold) && numericValue > numericThreshold) {
+                bgColorClassName = 'bg-gradient-to-r from-red-50 to-pink-50/30';
+                lineChartColorName = 'text-red-600';
+            } else {
+                bgColorClassName = 'bg-gradient-to-r from-green-50 to-emerald-50/30';
+                lineChartColorName = 'text-green-600';
+            }
+        } else {
+            if (!isNaN(numericValue) && !isNaN(numericThreshold) && numericValue > numericThreshold) {
+                bgColorClassName = 'bg-gradient-to-r from-red-50 to-pink-50/30';
+                lineChartColorName = 'text-red-600';
+            } else {
+                bgColorClassName = 'bg-gradient-to-r from-green-50 to-emerald-50/30';
+                lineChartColorName = 'text-green-600';
+            }
+        }
+    
+        return (
+            <div
+                className="h-40 w-full relative cursor-pointer"
+                onClick={() => toggleCardFlip(id)}
+                style={{ perspective: '1000px'
+                 }}
+            >
+                <div
+                    className={`relative w-full h-full duration-500 transition-transform`}
+                    style={{
+                        transformStyle: 'preserve-3d',
+                        transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+                    }}
+                >
+                    {/* Front of card */}
+                    <div
+                        className={`${bgColorClassName} p-3 sm:p-4 rounded-xl absolute w-full h-full`}
+                        style={{ backfaceVisibility: 'hidden',
+                         }}
+                    >
+                        <div className="flex flex-col items-center text-center gap-2 sm:gap-3">
+                            <div className="bg-green-50 p-1.5 sm:p-2 rounded-lg">
+                                <LineChart className={`w-3 h-3 sm:w-4 sm:h-4 ${lineChartColorName}`} />
+                            </div>
+                            <div>
+                                <p className="text-gray-600 text-sm">{label}</p>
+                                <p className="text-lg sm:text-xl font-semibold text-gray-900">{value}</p>
+                                <p className="text-xs sm:text-sm text-gray-500 mt-1">{threshold}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div
+                        className={`${bgColorClassName} p-3 sm:p-4 rounded-xl absolute w-full h-full overflow-auto`}
+                        style={{
+                            backfaceVisibility: 'hidden',
+                            transform: 'rotateY(180deg)'
+                        }}
+                    >
+                        <div className="flex flex-col h-full">
+                            <h3 className="font-semibold mb-2 text-center">{label} Details</h3>
+                            <p className="text-sm text-gray-700">{details || "This metric measures the financial health aspect related to " + label.toLowerCase() + " of the company."}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    });
+    
 
 
 
@@ -164,131 +307,6 @@ const StockResults = () => {
         </div>
     );
 
-    const useFlippedCardState = (() => {
-        // This creates a closure to maintain state across component instances
-        let activeCardId = null;
-        const listeners = new Set();
-      
-        return (id) => {
-          const [isFlipped, setIsFlipped] = useState(false);
-          
-          // Register this component as a listener when mounted
-          useEffect(() => {
-            const notify = (newActiveCardId) => {
-              if (newActiveCardId !== id && isFlipped) {
-                setIsFlipped(false);
-              }
-            };
-            
-            listeners.add(notify);
-            
-            // Clean up listener when component unmounts
-            return () => {
-              listeners.delete(notify);
-            };
-          }, [id, isFlipped]);
-          
-          // Function to toggle this card's flipped state
-          const toggleFlip = () => {
-            const newState = !isFlipped;
-            
-            if (newState) {
-              // If we're flipping this card open, close any other open card
-              activeCardId = id;
-              // Notify all other cards
-              listeners.forEach(listener => listener(activeCardId));
-            } else {
-              // If we're closing this card, clear the active card
-              if (activeCardId === id) {
-                activeCardId = null;
-              }
-            }
-            
-            setIsFlipped(newState);
-          };
-          
-          return [isFlipped, toggleFlip];
-        };
-      })();
-
-    const MetricCard = ({ label, value, threshold, details, stockData, id }) => {
-        // Use the shared card state, passing a unique identifier
-        const [isFlipped, toggleFlip] = useFlippedCardState(id);
-        
-        const numericValue = value !== 'N/A' ? parseFloat(value) : NaN;
-        const numericThreshold = threshold && threshold !== 'N/A' ? parseFloat(threshold.split(' ')[3]) : NaN;
-    
-        let bgColorClassName;
-        let lineChartColorName;
-        const isHalal = stockData.Initial_Classification === 'Halal';
-    
-        if (isHalal) {
-            if (!isNaN(numericValue) && !isNaN(numericThreshold) && numericValue > numericThreshold) {
-                bgColorClassName = 'bg-gradient-to-r from-red-50 to-pink-50/30';
-                lineChartColorName = 'text-red-600';
-            } else {
-                bgColorClassName = 'bg-gradient-to-r from-green-50 to-emerald-50/30';
-                lineChartColorName = 'text-green-600';
-            }
-        } else {
-            if (!isNaN(numericValue) && !isNaN(numericThreshold) && numericValue > numericThreshold) {
-                bgColorClassName = 'bg-gradient-to-r from-red-50 to-pink-50/30';
-                lineChartColorName = 'text-red-600';
-            } else {
-                bgColorClassName = 'bg-gradient-to-r from-green-50 to-emerald-50/30';
-                lineChartColorName = 'text-green-600';
-            }
-        }
-    
-        return (
-            <div
-                className="h-40 w-full relative cursor-pointer"
-                onClick={toggleFlip}
-                style={{ perspective: '1000px' }}
-            >
-                <div
-                    className={`relative w-full h-full duration-500 transition-transform`}
-                    style={{
-                        transformStyle: 'preserve-3d',
-                        transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
-                    }}
-                >
-                    {/* Front of card */}
-                    <div
-                        className={`${bgColorClassName} p-3 sm:p-4 rounded-xl absolute w-full h-full`}
-                        style={{ backfaceVisibility: 'hidden' }}
-                    >
-                        <div className="flex flex-col items-center text-center gap-2 sm:gap-3">
-                            <div className="bg-green-50 p-1.5 sm:p-2 rounded-lg">
-                                <LineChart className={`w-3 h-3 sm:w-4 sm:h-4 ${lineChartColorName}`} />
-                            </div>
-                            <div>
-                                <p className="text-gray-600 text-sm">{label}</p>
-                                <p className="text-lg sm:text-xl font-semibold text-gray-900">{value}</p>
-                                <p className="text-xs sm:text-sm text-gray-500 mt-1">{threshold}</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    {/* Back of card */}
-                    <div
-                        className={`${bgColorClassName} p-3 sm:p-4 rounded-xl absolute w-full h-full overflow-auto`}
-                        style={{
-                            backfaceVisibility: 'hidden',
-                            transform: 'rotateY(180deg)'
-                        }}
-                    >
-                        <div className="flex flex-col h-full">
-                            <h3 className="font-semibold mb-2 text-center">{label} Details</h3>
-                            <p className="text-sm text-gray-700">{details || "This metric measures the financial health aspect related to " + label.toLowerCase() + " of the company."}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
-
     const Headers = () => {
         const [isTooltipVisible, setIsTooltipVisible] = useState(false);
         return (
@@ -326,10 +344,11 @@ const StockResults = () => {
 
     if (viewLimitReached) {
         return (
-            <div className="max-w-7xl mx-auto  min-h-screen">
+            <div className="min-h-screen">
                 <Header />
+
+                <div className="max-w-7xl mx-auto  p-4">
                 <Headers />
-                <div className="p-4">
                     <div className="bg-white rounded-lg shadow-lg p-6 text-center">
                         <h2 className="text-xl font-semibold mb-4">View Limit Reached</h2>
                         <p className="text-gray-600 mb-6">You've reached the limit for viewing stock details. Subscribe to continue viewing more stocks.</p>
@@ -355,45 +374,24 @@ const StockResults = () => {
     }
 
 
-    const metrics = [
-        { 
-            label: "Debt Ratio", 
-            value: `${stockData.Debt_to_Assets ? stockData.Debt_to_Assets.toFixed(3) : 'N/A'}`, 
-            threshold: "Must be below 0.33",
-            details: "Debt Ratio measures the company's total debt relative to its total assets. A lower ratio indicates less financial leverage and potentially lower risk." 
-        },
-        { 
-            label: "Cash Ratio", 
-            value: `${stockData.Cash_and_Interest_Securities_to_Assets ? stockData.Cash_and_Interest_Securities_to_Assets.toFixed(3) : 'N/A'}`, 
-            threshold: "Must be above 0.33",
-            details: "Cash Ratio indicates the proportion of assets held in cash or interest-bearing securities. A higher ratio suggests better liquidity and financial stability."
-        },
-        { 
-            label: "Interest Ratio", 
-            value: `${stockData.Interest_Income_to_Revenue ? stockData.Interest_Income_to_Revenue.toFixed(3) : 'N/A'}`, 
-            threshold: "Must be below 0.05",
-            details: "Interest Ratio measures how much of the company's revenue comes from interest. For Halal investments, this should be kept low to minimize income from interest-based activities."
-        },
-        { 
-            label: "Receivables Ratio", 
-            value: `${stockData.Receivables_to_Assets ? stockData.Receivables_to_Assets.toFixed(3) : 'N/A'}`, 
-            threshold: "Must be below 0.49",
-            details: "Receivables Ratio compares accounts receivable to total assets. A lower ratio may indicate less credit exposure and better asset utilization."
-        }
-    ];
+    
 
     return (
         <div className="min-h-screen">
+            <Suspense fallback={<div>Loading...</div>}>
             <Header />
-            <Headers />
+            
             
             <div className="max-w-7xl mx-auto  p-3 sm:p-4 lg:p-6">
+            <Headers />
                 {/* Desktop Layout */}
                 <div className="lg:grid lg:grid-cols-3 lg:gap-6">
                     {/* Left Column - Chart and Metrics */}
                     <div className="lg:col-span-2">
                         <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-                            <PriceChart symbol={symbol + ".NS"} />
+                        <Suspense fallback={<PriceChartSkeleton />}>
+                                <PriceChart symbol={symbol + ".NS"} />
+                        </Suspense>
                         </div>
                         
                         <Card className="overflow-hidden bg-white shadow-xl">
@@ -421,14 +419,13 @@ const StockResults = () => {
 
                             <div className="p-4 sm:p-6">
                                 <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                                    {metrics.map((metric, index) => (
-                                        <MetricCard
-                                            key={index}
-                                            id={`metric-${index}`}
-                                            {...metric}
-                                            stockData={stockData}
-                                        />
-                                    ))}
+                                 {metrics.map(metric => (
+                                    <MetricCard 
+                                        key={metric.id} 
+                                        metric={metric} 
+                                        stockData={stockData} 
+                                    />
+                                ))}
                                 </div>
                             </div>
                         </Card>
@@ -504,6 +501,7 @@ const StockResults = () => {
                     </div>
                 </div>
             </div>
+            </Suspense>
         </div>
     );
 };
