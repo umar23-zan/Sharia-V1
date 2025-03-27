@@ -816,7 +816,7 @@ export default function LandingPage() {
               <h3 className="text-lg font-bold mb-6">Contact Us</h3>
               <ul className="space-y-5">
                 {[
-                  { icon: 'email', text: 'support@zansphere.com' },
+                  { icon: 'email', text: 'contact@shariastocks.in' },
                 ].map((item, i) => (
                   <motion.li key={i} className="flex items-start" whileHover={{ x: 5 }}>
                     <svg className="h-6 w-6 text-green-400 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -838,7 +838,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.8 }}
           >
-            © 2025 Zansphere. All rights reserved.
+            © 2025 ShariaStocks. All rights reserved.
           </motion.div>
         </div>
       </footer>
