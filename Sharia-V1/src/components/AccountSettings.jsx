@@ -33,10 +33,10 @@ const AccountInformationPage = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [showAlertModal, setShowAlertModal] = useState(false);
-  const hasPendingChange = user?.subscription?.pendingPaymentMode === 'manual';
-  const pendingChangeDate = user?.subscription?.paymentModeChangeDate 
+  const [hasPendingChange, setHasPendingChange] = useState(false)
+  const [pendingChangeDate, setPendingChangeDate] =useState(user?.subscription?.paymentModeChangeDate 
     ? new Date(user.subscription.paymentModeChangeDate).toLocaleDateString() 
-    : null;
+    : null) 
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
   const [notificationType, setNotificationType] = useState('success'); 
@@ -108,6 +108,7 @@ const AccountInformationPage = () => {
       fetchUserData();
     }
   }, [email]);
+  
 
   const fetchUserData = async () => {
     setLoading(true);
@@ -120,6 +121,14 @@ const AccountInformationPage = () => {
       setLoading(false);
     }
   };
+console.log(user)
+  useEffect(() => {
+    if (user?.subscription?.pendingPaymentMode === "manual") {
+      setHasPendingChange(true);
+    } else {
+      setHasPendingChange(false);
+    }
+  }, [user]); 
 
   const handleDeactivationSuccess = () => {
     setDeactivated(true);
@@ -138,7 +147,7 @@ const AccountInformationPage = () => {
             return;
     }
     if (user?.subscription?.paymentMode === 'automatic' && mode === 'manual') {
-      setPaymentMode(mode);
+      // setPaymentMode(mode);
       setShowAlertModal(true);
     } else {
       setPaymentMode(mode);
@@ -374,6 +383,19 @@ const AccountInformationPage = () => {
                   </button>
                 </div>
               )}
+              {cancelSuccess && (
+                    <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center text-green-700">
+                      <CheckCircle className="w-5 h-5 mr-2" />
+                      <span>Payment mode change cancelled and reverted to automatic.</span>
+                </div>
+              )}
+              {/* Cancellation Error Message */}
+                {cancelError && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200  rounded-lg flex items-center text-red-700">
+                  <AlertCircle className="w-5 h-5 mr-2" />
+                  <span>{cancelError}</span>
+                </div>
+              )}
               {/* Payment Mode Selection */}
               <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
                 <h2 className="text-lg font-semibold mb-4">Payment Mode</h2>

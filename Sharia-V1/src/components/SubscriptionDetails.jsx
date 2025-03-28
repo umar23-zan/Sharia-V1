@@ -23,8 +23,8 @@ const SubscriptionDetails = () => {
     const [showUpgradeConfirmation, setShowUpgradeConfirmation] = useState(false);
     const [planPrices, setPlanPrices] = useState({
         free: { monthly: 0, annual: 0 },
-        basic: { monthly: 299, annual: 3048 },
-        premium: { monthly: 599, annual: 6110 }
+        basic: { monthly: 299, annual: 2512 },
+        premium: { monthly: 499, annual: 4192 }
     });
     const [planFeatures, setPlanFeatures] = useState({});
     const [loading, setLoading] = useState(true);
@@ -423,7 +423,7 @@ const SubscriptionDetails = () => {
                                 }`}
                             onClick={() => setBillingCycle('annual')}
                         >
-                            Annual <span className="text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full text-xs ml-1 font-bold">Save 15%</span>
+                            Annual <span className="text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full text-xs ml-1 font-bold">Save 30%</span>
                         </button>
                     </div>
                 </div>
