@@ -15,12 +15,12 @@ const getPlanId = (plan, billingCycle) => {
   
   const planMapping = {
     basic: {
-      monthly: 'plan_Q7pROVv5pkgDBH', 
-      annual: 'plan_Q7pTmk93JVnpcT' 
+      monthly: 'plan_QCsQzgSogc37NP', 
+      annual: 'plan_QCsSF56STadNOW' 
     },
     premium: {
-      monthly: 'plan_Q7pVqgd2H1goSD', 
-      annual: 'plan_Q7pVCjD2qfaEQv'  
+      monthly: 'plan_QCsUQ7ahSqZ8Oy', 
+      annual: 'plan_QCsTdvd0K6Uyc9'  
     }
   };
 
