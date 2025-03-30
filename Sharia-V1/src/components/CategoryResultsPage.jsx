@@ -277,7 +277,7 @@ const navigate = useNavigate()
         const transformedCategoryStocksPromises = transformedData.map(async (stock) => {
           try {
             // Use dummyCompanyDetails instead of actual axios call
-            // const companyDetailsResponse = await axios.get(`http://13.201.131.141:5000/api/company-details/${stock.SYMBOL}.NS`);
+            // const companyDetailsResponse = await axios.get(`http://15.206.209.211:5000/api/company-details/${stock.SYMBOL}.NS`);
             const companyDetailsData = dummyCompanyDetails[`${stock.SYMBOL}.NS`];
             return {
               symbol: stock.SYMBOL,

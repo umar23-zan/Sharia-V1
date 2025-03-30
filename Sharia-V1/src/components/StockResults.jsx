@@ -111,7 +111,7 @@ const StockResults = () => {
         try {
           setLoading(true);
           const companyDetailsResponse = await axios.get(
-            `http://13.201.131.141:5000/api/company-details/${symbol}.NS`,
+            `http://15.206.209.211:5000/api/company-details/${symbol}.NS`,
             { 
               signal: controller.signal,
               timeout: 10000 

@@ -69,7 +69,7 @@ const WatchList = () => {
                         
                         try {
                             const companyDetailsResponse = await axios.get(
-                                `http://13.201.131.141:5000/api/company-details/${stock.symbol + ".NS"}`
+                                `http://15.206.209.211:5000/api/company-details/${stock.symbol + ".NS"}`
                             );
 
                             // Store details in state using stock symbol as key
