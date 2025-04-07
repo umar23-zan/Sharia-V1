@@ -11,89 +11,148 @@
             color: #333;
             background-color: #f4f4f4;
             margin: 0;
-            padding: 0;
+            padding: 20px;
         }
         .email-container {
             max-width: 600px;
             margin: 0 auto;
             background-color: white;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            border-radius: 8px;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+            border-radius: 12px;
             overflow: hidden;
         }
         .email-header {
-            background-color: #2C3E50;
+            background: linear-gradient(135deg, #22577A, #38A3A5);
             color: white;
-            padding: 20px;
+            padding: 30px 20px;
             text-align: center;
         }
         .email-header img {
-            max-height: 60px;
-            max-width: 200px;
-            margin-bottom: 10px;
+            max-height: 70px;
+            max-width: 220px;
+            object-fit: cover;
+            margin-bottom: 15px;
+        }
+        .email-header h1 {
+            margin: 0;
+            font-size: 26px;
+            letter-spacing: 0.5px;
         }
         .email-content {
-            padding: 30px;
+            padding: 40px 30px;
             text-align: center;
         }
-        .email-content h2 {
-            color: #2C3E50;
+        .email-content p {
+            color: #555;
+            font-size: 16px;
             margin-bottom: 20px;
+            line-height: 1.7;
+        }
+        .greeting {
+            font-size: 22px;
+            color: #22577A;
+            margin-bottom: 25px;
+            font-weight: 600;
         }
         .verify-button {
             display: inline-block;
-            background-color: #3498DB;
-            color: white;
-            padding: 12px 24px;
+            background: linear-gradient(to right, #38A3A5, #22577A);
+            color: white !important;
+            padding: 14px 32px;
             text-decoration: none;
-            border-radius: 5px;
-            margin: 20px 0;
+            border-radius: 50px;
+            margin: 25px 0;
             font-weight: bold;
-            transition: background-color 0.3s ease;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(34, 87, 122, 0.2);
         }
         .verify-button:hover {
-            background-color: #2980B9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(34, 87, 122, 0.3);
         }
-        .email-footer {
-            background-color: #f4f4f4;
-            padding: 20px;
-            text-align: center;
-            font-size: 12px;
-            color: #777;
+        .expiry-notice {
+            background-color: #f8f9fa;
+            border-left: 4px solid #22577A;
+            padding: 12px 15px;
+            margin: 25px 0;
+            text-align: left;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #666;
+        }
+        .support-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
         }
         .support-link {
-            color: #3498DB;
+            color: #38A3A5;
             text-decoration: none;
+            font-weight: 500;
         }
-        .subtle-text {
-            color: #666;
-            font-size: 14px;
+        .support-link:hover {
+            text-decoration: underline;
+        }
+        .email-footer {
+            background-color: #f8f9fa;
+            padding: 25px 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #777;
+        }
+        .social-links {
+            margin: 15px 0;
+        }
+        .social-icon {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            background-color: #22577A;
+            border-radius: 50%;
+            margin: 0 5px;
+            line-height: 32px;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        .disclaimer {
+            font-size: 12px;
+            color: #999;
+            margin-top: 15px;
         }
     </style>
 </head>
 <body>
     <div class="email-container">
         <div class="email-header">
-            <img src="LOGO_PLACEHOLDER" alt="ShariaStocks Logo" />
+            <img src="https://mygiggobucket.s3.ap-south-1.amazonaws.com/profilePictures/logo.png" alt="ShariaStocks Logo" />
             <h1>Welcome to ShariaStocks</h1>
         </div>
         
         <div class="email-content">
+            <p class="greeting">Thank you for joining us!</p>
             
-            <p>Thank you for signing up with ShariaStocks. We're excited to help you explore our innovative financial solutions and discover how our platform can support your investment goals.</p>
+            <p>We're excited to welcome you to ShariaStocks, your trusted partner for Sharia-compliant investment solutions. Our platform is designed to help you achieve your financial goals while adhering to Islamic principles.</p>
             
-            <p>To ensure the security of your account and start receiving important announcements and alerts, please verify your email address by clicking the button below.</p>
+            <p>To begin your investment journey and ensure the security of your account, please verify your email address:</p>
             
-            <a href="${verificationUrl}" class="verify-button">Verify Email Address</a>
+            <a href="${verificationUrl}" class="verify-button">Verify My Email</a>
             
-            <p class="subtle-text">This verification link will expire in 24 hours.</p>
+            <div class="expiry-notice">
+                <strong>Note:</strong> This verification link will expire in 24 hours for security reasons.
+            </div>
             
-            <p>If you have any questions or need assistance, our support team is ready to help. Reach out to us at <a href="mailto:contact@shariastocks.in" class="support-link">contact@shariastocks.in</a>.</p>
+            <div class="support-section">
+                <p>Have questions or need assistance? Our dedicated support team is here to help you every step of the way.</p>
+                <p>Contact us at <a href="mailto:contact@shariastocks.in" class="support-link">contact@shariastocks.in</a></p>
+            </div>
         </div>
         
         <div class="email-footer">
             <p>© ${currentYear} ShariaStocks. All rights reserved.</p>
-            <p>If you did not create this account, please ignore this email or contact our support.</p>
+            <p class="disclaimer">If you did not create this account, please ignore this email or <a href="mailto:security@shariastocks.in" class="support-link">report it</a>.</p>
         </div>
     </div>
 </body>

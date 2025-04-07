@@ -274,9 +274,9 @@ cron.schedule('0 0 * * *', async () => {
 
 function getAmountForPlan(plan, billingCycle) {
   if (plan === 'basic') {
-    return billingCycle === 'monthly' ? 352.82 : 3596.64;
+    return billingCycle === 'monthly' ? 352.82 : 2964.16;
   } else if (plan === 'premium') {
-    return billingCycle === 'monthly' ? 706.82 : 7209.80;
+    return billingCycle === 'monthly' ? 588.82 : 4,946.56;
   }
-  return 0;
+  return 0
 }

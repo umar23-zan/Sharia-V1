@@ -6,6 +6,8 @@ const watchlistRoutes = require('./routes/watchlist')
 const subscriptionRoutes = require('./routes/subscriptionRoutes')
 const paymentRoutes = require('./routes/paymentmethods')
 const transactionRoutes = require('./routes/transaction')
+const notificationRoutes = require('./routes/notification')
+const { initNotificationCron } = require('./cron/notificationCron');
 
 const cors = require('cors');
 const app = express();
@@ -14,6 +16,7 @@ require('./config/passport')(app);
 require('./cron/scheduledTasks')
 
 connectDB();
+initNotificationCron();
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true
@@ -26,6 +29,7 @@ app.use('/api/subscribe',subscriptionRoutes);
 app.use('/api/watchlist', watchlistRoutes)
 app.use("/api/payments", paymentRoutes);
 app.use('/api/transaction', transactionRoutes)
+app.use('/api/notifications', notificationRoutes)
 
 app.use('/uploads', express.static('uploads'));
 

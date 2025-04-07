@@ -5,6 +5,7 @@ const User = require('../models/User');
 const PaymentMethod = require('../models/PaymentMethods')
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
+const { sendEmail } = require('../service/emailService')
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -73,9 +74,9 @@ router.post('/create-subscription', async (req, res) => {
     // Set amount based on plan and billing cycle
     let amount;
     if (plan === 'basic') {
-      amount = billingCycle === 'monthly' ? 352.82 : 3596.64;
+      amount = billingCycle === 'monthly' ? 352.82 : 2964.16;
     } else if (plan === 'premium') {
-      amount = billingCycle === 'monthly' ? 706.82 : 7209.80;
+      amount = billingCycle === 'monthly' ? 588.82 : 4,946.56;
     }
     
     const notes = {
@@ -189,8 +190,6 @@ router.post('/verify-subscription', async (req, res) => {
     const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
     hmac.update(razorpay_payment_id + '|' + razorpay_subscription_id);
     const generatedSignature = hmac.digest('hex');
-    console.log(generatedSignature)
-    console.log("RAZORPAY_KEY_SECRET:", process.env.RAZORPAY_KEY_SECRET);
 
     
     if (generatedSignature === razorpay_signature) {

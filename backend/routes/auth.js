@@ -83,20 +83,8 @@ router.post('/signup', async (req, res) => {
 
         const verificationUrl = `${process.env.FRONTEND_URL}/verify/${verificationToken}`;
 
-        const logoPath = path.join(__dirname, '../../Sharia-v1/src/images/ShariaStocks-logo/logo.png');
-        
-        // Add error handling for logo reading
-        let logoBase64 = '';
-        try {
-            logoBase64 = await fs.readFile(logoPath, {encoding: 'base64'});
-        } catch (logoError) {
-            console.error('Error reading logo:', logoError);
-        }
-
-        const logoSrc = `data:image/png;base64,${logoBase64}`;
-
         const message = await fs.readFile('../Sharia-V1/src/components/emailTemplate.html', 'utf8');
-        const compiledMessage = message.replace('${verificationUrl}', verificationUrl).replace("LOGO_PLACEHOLDER", logoSrc).replace('${currentYear}', new Date().getFullYear());
+        const compiledMessage = message.replace('${verificationUrl}', verificationUrl).replace('${currentYear}', new Date().getFullYear());
         
 
         await transporter.sendMail({ 

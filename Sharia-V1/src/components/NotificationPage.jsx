@@ -1,65 +1,110 @@
-import React, { useState, lazy, Suspense } from 'react';
-import { Search, Bell, ChevronRight, ArrowLeft, AlertCircle } from 'lucide-react';
-// const Header = lazy(() => import('./Header'));
+import React, { useState, useEffect } from 'react';
+import { Search, Bell, ChevronRight, ArrowLeft, AlertCircle, X } from 'lucide-react';
+import axios from 'axios';
 
 const NotificationsPage = () => {
   const [activeTab, setActiveTab] = useState('all');
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  
-  const notifications = [];
+  useEffect(() => {
+    fetchNotifications();
+  }, [activeTab]);
+
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const userId = localStorage.getItem("userId");
+      const response = await axios.get(`/api/notifications?userId=${userId}&type=${activeTab}`);
+      setNotifications(response.data);
+      console.log(notifications)
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      setLoading(false);
+    }
+  };
 
   const handleBackClick = () => {
-    
     window.history.back();
   };
 
+  const handleNotificationClick = async (notification) => {
+    
+    try {
+      // Mark notification as read
+      await axios.post(`/api/notifications/read/${notification.id}`);
+      
+      // Update local state to show it's read
+      setNotifications(prevNotifications => 
+        prevNotifications.map(n => 
+          n.id === notification.id ? { ...n, isRead: true } : n
+        )
+      );
+      
+      // Navigate to the article URL if available, otherwise fallback to stock page
+      if (notification.articleUrl) {
+        window.open(notification.articleUrl, '_blank', 'noopener,noreferrer');
+      } else {
+        // Fallback to stock page if no article URL
+        window.location.href = `/stocks/${notification.symbol}`;
+      }
+    } catch (error) {
+      console.error('Error handling notification click:', error);
+    }
+  };
+
+  const handleDeleteNotification = async (e, notificationId) => {
+    e.stopPropagation(); // Prevent the notification click event from firing
+    
+    try {
+      await axios.delete(`/api/notifications/${notificationId}`);
+      // Remove the notification from state
+      setNotifications(prevNotifications => 
+        prevNotifications.filter(notification => notification.id !== notificationId)
+      );
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+    }
+  };
 
   const filteredNotifications = notifications.filter(notification => {
-    if (activeTab === 'all') return true;
-    return notification.type === activeTab;
+    if (!searchTerm) return true;
+    return notification.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           notification.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           (notification.description && notification.description.toLowerCase().includes(searchTerm.toLowerCase()));
   });
 
   // Calculate notification counts
   const notificationCounts = {
     all: notifications.length,
-    price: notifications.filter(n => n.type === 'price').length,
-    status: notifications.filter(n => n.type === 'status').length,
-    news: notifications.filter(n => n.type === 'news').length
+    haram: notifications.filter(n => n.type === 'haram').length,
+    uncertain: notifications.filter(n => n.type === 'uncertain').length
   };
 
   // Tab configurations
   const tabConfig = [
     { id: 'all', label: 'All Notifications', icon: <Bell size={20} />, mobileLabel: 'All' },
     { 
-      id: 'price', 
-      label: 'Price Alerts', 
-      icon: (
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor">
-          <path d="M3 3v18h18" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M19 9l-5-5-4 4-3 3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      ),
-      mobileLabel: 'Price'
-    },
-    { 
-      id: 'status', 
-      label: 'Status Changes', 
-      icon: (
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      ),
-      mobileLabel: 'Status'
-    },
-    { 
-      id: 'news', 
-      label: 'Market News', 
+      id: 'haram', 
+      label: 'Haram Stocks', 
       icon: (
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor">
           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       ),
-      mobileLabel: 'News'
+      mobileLabel: 'Haram'
+    },
+    { 
+      id: 'uncertain', 
+      label: 'Uncertain Stocks', 
+      icon: (
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      ),
+      mobileLabel: 'Uncertain'
     }
   ];
 
@@ -67,7 +112,7 @@ const NotificationsPage = () => {
     <div>
       <div className="hidden lg:block">
         {/* Header */}
-        <div className="bg-gradient-to-br from-blue-600 to-purple-600 px-4 py-8  shadow-sm flex items-center justify-between mb-6">
+        <div className="bg-gradient-to-br from-blue-600 to-purple-600 px-4 py-8 shadow-sm flex items-center justify-between mb-6">
           <div className="flex items-center">
             <button 
               onClick={handleBackClick}
@@ -89,12 +134,14 @@ const NotificationsPage = () => {
                 type="text" 
                 placeholder="Search notifications..." 
                 className="pl-10 pr-4 py-2 border bg-white/90 rounded-full w-64 text-sm focus:outline-none focus:ring-1 focus:ring-blue-200"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <div className="relative">
               <Bell size={22} className="text-white" />
               <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">
-                0
+                {notifications.filter(n => !n.isRead).length}
               </div>
             </div>
           </div>
@@ -114,9 +161,23 @@ const NotificationsPage = () => {
           <div className="relative">
             <Bell className="w-6 h-6 text-white" />
             <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">
-              0
+              {notifications.filter(n => !n.isRead).length}
             </div>
           </div>
+        </div>
+
+        {/* Mobile Search */}
+        <div className="relative flex items-center mb-4">
+          <div className="absolute left-3 text-white/70">
+            <Search size={18} />
+          </div>
+          <input 
+            type="text" 
+            placeholder="Search notifications..." 
+            className="pl-10 pr-4 py-2 border bg-white/20 text-white rounded-lg w-full text-sm focus:outline-none focus:ring-1 focus:ring-white/30 placeholder-white/70"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
 
         {/* Mobile Tabs */}
@@ -163,50 +224,65 @@ const NotificationsPage = () => {
 
         {/* Notifications List */}
         <div className="flex-1 px-4 lg:px-0">
-          {filteredNotifications.length > 0 ? (
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+            </div>
+          ) : filteredNotifications.length > 0 ? (
             filteredNotifications.map((notification) => (
-              <div key={notification.id} className="bg-white rounded-lg shadow-sm mb-4 overflow-hidden">
-                <div className="p-4 flex items-start justify-between cursor-pointer">
-                  {/* Icon based on notification type */}
+              <div 
+                key={notification.id} 
+                className={`bg-white rounded-lg shadow-sm mb-4 overflow-hidden relative ${
+                  !notification.isRead ? 'border-l-4 border-blue-500' : ''
+                }`}
+                onClick={() => handleNotificationClick(notification)}
+              >
+                {/* Delete button - positioned absolutely */}
+                <button 
+                  onClick={(e) => handleDeleteNotification(e, notification.id)}
+                  className="absolute top-2 right-2 p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition z-10"
+                  aria-label="Delete notification"
+                >
+                  <X size={16} />
+                </button>
+
+                <div className="p-4 flex items-start justify-between cursor-pointer hover:bg-gray-50">
+                 
                   <div className="flex">
-                    {notification.type === 'price' && (
-                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#10B981">
-                          <path d="M3 3v18h18" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          <path d="M19 9l-5-5-4 4-3 3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-                    )}
-                    {notification.type === 'status' && (
-                      <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center mr-4">
-                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#D97706">
-                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-                    )}
-                    {notification.type === 'news' && (
+                    {notification.type === 'haram' && (
                       <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-4">
                         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#EF4444">
                           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </div>
                     )}
+                    {notification.type === 'uncertain' && (
+                      <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center mr-4">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#D97706">
+                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                    )}
 
-                    <div className="flex-1">
+                    <div className="flex-1 pr-6"> {/* Added padding-right to avoid overlap with delete button */}
                       <h3 className="text-gray-900 font-medium">{notification.title}</h3>
                       <div className="mt-1">
                         <span className="text-blue-500 font-medium">{notification.symbol}</span>
-                        {notification.change && (
-                          <span className={`ml-2 ${notification.changeColor}`}>{notification.change}</span>
-                        )}
                       </div>
                       {notification.description && (
-                        <p className="text-gray-700 mt-1 text-sm">{notification.description}</p>
+                        <p className="text-gray-700 mt-1 text-sm line-clamp-2 overflow-hidden text-ellipsis">
+                          {notification.description}
+                        </p>
                       )}
                       {notification.status && (
                         <div className={`${notification.statusBg} ${notification.statusText} text-sm py-1 px-3 rounded-md mt-2 inline-block`}>
                           {notification.status}
                         </div>
+                      )}
+                      {notification.status === "UNDER REVIEW" && (
+                        <p className="mt-2 text-xs text-amber-700 bg-amber-50 p-2 rounded-md border border-amber-200">
+                          Our AI model has found something concerning about this stock. Our team is reviewing it and will update the status within 48 hours.
+                        </p>
                       )}
                       <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
                         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor">
@@ -221,9 +297,21 @@ const NotificationsPage = () => {
                           </>
                         )}
                       </div>
+                      
+                      {/* Violations list */}
+                      {notification.violations && notification.violations.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-gray-100">
+                          <h4 className="text-sm font-medium text-gray-700 mb-1">Key Violations:</h4>
+                          <ul className="text-xs text-gray-600 list-disc pl-4">
+                            {notification.violations.map((violation, index) => (
+                              <li key={index}>{violation}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <ChevronRight size={20} className="text-gray-400" />
+                  {/* <ChevronRight size={20} className="text-gray-400" /> */}
                 </div>
               </div>
             ))
@@ -236,7 +324,7 @@ const NotificationsPage = () => {
               <h3 className="text-lg font-medium text-gray-900 mb-2">No notifications</h3>
               <p className="text-gray-500 max-w-md mx-auto">
                 You don't have any {activeTab !== 'all' ? activeTab : ''} notifications at the moment. 
-                We'll notify you when there are updates to your investments.
+                We'll notify you when stocks in your watchlist are classified as {activeTab !== 'all' ? activeTab : 'HARAM or UNCERTAIN'}.
               </p>
             </div>
           )}

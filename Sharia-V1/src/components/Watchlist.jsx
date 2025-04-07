@@ -199,8 +199,7 @@ const WatchList = () => {
 
     // Sort stocks - favorites first, then alphabetically
     const sortedStocks = [...filteredStocks].sort((a, b) => {
-        if (favorites.includes(a.symbol) && !favorites.includes(b.symbol)) return -1;
-        if (!favorites.includes(a.symbol) && favorites.includes(b.symbol)) return 1;
+       
         return a.companyName?.localeCompare(b.companyName || '');
     });
 
