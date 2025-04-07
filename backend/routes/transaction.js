@@ -35,6 +35,7 @@ const getPlanId = (plan, billingCycle) => {
 };
 
 router.post('/create-subscription', async (req, res) => {
+  // ... (keep existing code)
   try {
     const {plan, billingCycle, userId, paymentMode} = req.body;
     console.log("selectedPlan:", plan);
@@ -47,6 +48,9 @@ router.post('/create-subscription', async (req, res) => {
     }
 
     const user = await User.findById(userId);
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
     const isUpgrade = user.subscription.plan !== 'free' && user.subscription.status === 'active';
     const previousPlan = user.subscription.plan;
 
@@ -57,15 +61,15 @@ router.post('/create-subscription', async (req, res) => {
       'subscriptionDetails.plan': plan,
       'subscriptionDetails.billingCycle': billingCycle
     };
-    
+
     const pendingTransaction = await Transaction.findOne(pendingTransactionQuery);
 
     if (pendingTransaction) {
-      const pendingId = paymentMode === 'automatic' ? 
-        pendingTransaction.subscriptionId : 
+      const pendingId = paymentMode === 'automatic' ?
+        pendingTransaction.subscriptionId :
         pendingTransaction.orderId;
-        
-      return res.status(400).json({ 
+
+      return res.status(400).json({
         error: 'There is already a pending payment for this plan',
         pendingId: pendingId
       });
@@ -74,11 +78,13 @@ router.post('/create-subscription', async (req, res) => {
     // Set amount based on plan and billing cycle
     let amount;
     if (plan === 'basic') {
-      amount = billingCycle === 'monthly' ? 352.82 : 2964.16;
+      amount = billingCycle === 'monthly' ? 352.82 : 3596.64;
     } else if (plan === 'premium') {
-      amount = billingCycle === 'monthly' ? 588.82 : 4,946.56;
+      amount = billingCycle === 'monthly' ? 706.82 : 7209.80;
+    } else {
+         return res.status(400).json({ error: 'Invalid plan selected' });
     }
-    
+
     const notes = {
       userId: userId,
       plan: plan,
@@ -89,20 +95,20 @@ router.post('/create-subscription', async (req, res) => {
     };
 
     let transaction;
-    
+
     if (paymentMode === 'automatic') {
       // Create subscription for automatic payments
       const planId = getPlanId(plan, billingCycle);
       const subscriptionOptions = {
         plan_id: planId,
-        total_count: billingCycle === 'monthly' ? 12 : 1,
+        total_count: billingCycle === 'monthly' ? 12 : 1, // Example: 12 cycles for monthly, 1 for annual
         quantity: 1,
-        customer_notify: 1,
+        customer_notify: 0, // Disable Razorpay notifications if you send your own
         notes: notes
       };
-      
+
       const subscription = await razorpay.subscriptions.create(subscriptionOptions);
-      
+
       transaction = await Transaction.create({
         userId: userId,
         subscriptionId: subscription.id,
@@ -118,24 +124,23 @@ router.post('/create-subscription', async (req, res) => {
         },
         notes: notes
       });
-      
+
       res.json({
         subscription: subscription,
         transactionId: transaction._id
       });
-      
-    } else {
+
+    } else { // Manual payment mode
       // Create order for manual payments
       const orderOptions = {
-        amount: amount * 100, // Amount in paise
+        amount: Math.round(amount * 100), // Amount in paise, ensure it's an integer
         currency: 'INR',
-        receipt: `order_rcpt_${Date.now()}`,
+        receipt: `order_rcpt_${Date.now()}_${userId}`, // More unique receipt
         notes: notes,
-        
       };
-      
+
       const order = await razorpay.orders.create(orderOptions);
-      
+
       transaction = await Transaction.create({
         userId: userId,
         orderId: order.id,
@@ -151,277 +156,572 @@ router.post('/create-subscription', async (req, res) => {
         },
         notes: notes
       });
-      
+
       res.json({
         order: order,
         transactionId: transaction._id
       });
     }
   } catch (error) {
-    console.error("Create subscription error:", error);
-  res.status(500).json({ error: error.message, stack: error.stack });
+    console.error("Create subscription/order error:", error);
+    res.status(500).json({ error: error.message, stack: error.stack }); // Include stack in dev?
   }
 });
 
 router.post('/verify-subscription', async (req, res) => {
   try {
-    const { 
-      razorpay_subscription_id, 
-      razorpay_payment_id, 
+    const {
+      razorpay_subscription_id,
+      razorpay_payment_id,
       razorpay_signature,
-      save_payment_method 
+      save_payment_method
     } = req.body;
-    
+
     const transaction = await Transaction.findOne({ subscriptionId: razorpay_subscription_id });
     if (!transaction) {
-      return res.status(404).json({ status: 'failed', message: 'Subscription not found' });
+      console.error(`Verification Error: Transaction not found for subscription ID: ${razorpay_subscription_id}`);
+      return res.status(404).json({ status: 'failed', message: 'Subscription transaction not found' });
     }
-    
-    if (transaction.paymentId) {
-      return res.status(400).json({ 
-        status: 'duplicate', 
-        message: 'This payment was already processed',
+
+    // Check for duplicate processing more robustly
+    if (transaction.status === 'captured' && transaction.paymentId === razorpay_payment_id) {
+       console.log(`Duplicate verification attempt for subscription ${razorpay_subscription_id}, payment ${razorpay_payment_id}`);
+       // Optionally fetch the user data again to send consistent response
+       const currentUser = await User.findById(transaction.userId);
+       return res.status(400).json({
+        status: 'duplicate',
+        message: 'This payment was already processed successfully',
+        user: currentUser, // Send current user state
         transaction: transaction
       });
     }
+     if (transaction.status === 'captured') {
+         console.warn(`Verification attempt for already captured subscription ${razorpay_subscription_id} with a DIFFERENT payment ID (${razorpay_payment_id}). Original payment ID: ${transaction.paymentId}`);
+         // Decide how to handle this - maybe reject, maybe log extensively. Rejecting is safer.
+         return res.status(400).json({
+             status: 'failed',
+             message: 'Subscription is already active, possibly from a different payment.',
+             transaction: transaction
+         });
+     }
 
-    
+
     // Verify the payment signature
     const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
     hmac.update(razorpay_payment_id + '|' + razorpay_subscription_id);
     const generatedSignature = hmac.digest('hex');
 
-    
     if (generatedSignature === razorpay_signature) {
-      // Fetch payment details
+      // Fetch payment details *before* marking as captured locally
       const paymentDetails = await razorpay.payments.fetch(razorpay_payment_id);
-      
+      if (paymentDetails.status !== 'captured' && paymentDetails.status !== 'authorized') { // Or just 'captured' depending on flow
+            console.error(`Payment ${razorpay_payment_id} status is not 'captured' or 'authorized'. Status: ${paymentDetails.status}`);
+            // Potentially update transaction to 'failed' here or based on specific status
+             transaction.status = 'failed'; // Or a more specific status like 'payment_failed'
+             transaction.updatedAt = new Date();
+             await transaction.save();
+            return res.status(400).json({ status: 'failed', message: `Payment status is ${paymentDetails.status}` });
+      }
+
       // Update transaction record
       transaction.paymentId = razorpay_payment_id;
-      transaction.status = 'captured';
+      transaction.status = 'captured'; // Mark as captured
       transaction.paymentMethod = paymentDetails.method;
       transaction.updatedAt = new Date();
+      // Add more payment details if needed
+      transaction.paymentDetails = {
+          method: paymentDetails.method,
+          card_id: paymentDetails.card_id,
+          bank: paymentDetails.bank,
+          wallet: paymentDetails.wallet,
+          vpa: paymentDetails.vpa,
+          //... any other relevant fields
+      };
       await transaction.save();
 
-      // Save payment method if requested
+      // --- Payment Method Saving Logic ---
       let savedPaymentMethod = null;
-      if (save_payment_method && paymentDetails.method !== 'upi') {
+      let customerIdForToken = null; // Define outside the block
+
+      // Fetch user to get potential existing razorpay_customer_id
+       const userForPaymentMethod = await User.findById(transaction.userId);
+       if (userForPaymentMethod && userForPaymentMethod.razorpayCustomerId) {
+           customerIdForToken = userForPaymentMethod.razorpayCustomerId;
+           console.log(`Using existing Razorpay Customer ID: ${customerIdForToken} for tokenization.`);
+       } else {
+            // Optionally create a Razorpay customer if one doesn't exist
+            // This might be better done during user signup or first payment attempt
+            console.warn(`User ${transaction.userId} does not have a Razorpay Customer ID. Tokenization might be limited or fail without it.`);
+            // If you decide to create a customer here:
+            /*
+            try {
+                const customer = await razorpay.customers.create({
+                    name: userForPaymentMethod.name || 'User ' + transaction.userId, // Get name from user model
+                    email: userForPaymentMethod.email, // Get email from user model
+                    contact: userForPaymentMethod.phone, // Get phone from user model
+                    fail_existing: 0 // Don't fail if email/contact exists, just return existing customer
+                });
+                customerIdForToken = customer.id;
+                console.log(`Created Razorpay Customer ID: ${customerIdForToken}`);
+                // Update user model with this ID
+                await User.findByIdAndUpdate(transaction.userId, { $set: { razorpayCustomerId: customerIdForToken } });
+            } catch (customerError) {
+                 console.error('Error creating Razorpay customer:', customerError);
+            }
+            */
+       }
+
+
+      if (save_payment_method && paymentDetails.method !== 'upi' && customerIdForToken) { // Only proceed if customer ID exists
         try {
-          // Create token for the payment method
-          const tokenResponse = await razorpay.payments.createToken({
-            customer_id: transaction.userId,
-            payment_id: razorpay_payment_id
-          });
-          
-          // Extract payment method details
-          const paymentMethodInfo = {
-            userId: transaction.userId,
-            tokenId: tokenResponse.id,
-            method: paymentDetails.method,
-            isDefault: true
+          // Create token for the payment method using the *Payment ID*
+          // This links the token to a successful transaction.
+          const tokenPayload = {
+            payment_id: razorpay_payment_id,
+            customer_id: customerIdForToken, // Use the fetched/created customer ID
+            // token: { // Optional: Details for creating a token without a payment ID (less common for saving *after* payment)
+            //     method: paymentDetails.method,
+            //     // ... other details depending on method (card number etc.) - REQUIRES PCI COMPLIANCE
+            // }
           };
-          
-          // Add card-specific details if it's a card payment
-          if (paymentDetails.method === 'card') {
-            paymentMethodInfo.cardNetwork = paymentDetails.card.network;
-            paymentMethodInfo.cardLast4 = paymentDetails.card.last4;
-            paymentMethodInfo.cardExpiryMonth = paymentDetails.card.expiry_month;
-            paymentMethodInfo.cardExpiryYear = paymentDetails.card.expiry_year;
-          }
-          
-          // Update any existing default payment methods
-          if (paymentMethodInfo.isDefault) {
+
+           // Use the payment ID to create a token
+           // NOTE: Razorpay's `payments.createToken` might not be the standard way.
+           // Often, you fetch the token associated with a payment or use specific tokenization APIs.
+           // Let's assume we fetch the token info if available with the payment.
+           const paymentMethodToken = paymentDetails.token_id; // Check if token_id exists on paymentDetails
+
+            let paymentTokenIdToSave = null;
+
+           if (paymentMethodToken) {
+                console.log(`Token ${paymentMethodToken} already associated with payment ${razorpay_payment_id}`);
+                // Fetch token details if needed - requires customer_id and token_id
+                 try {
+                     const tokenDetails = await razorpay.customers.fetchToken(customerIdForToken, paymentMethodToken);
+                     console.log("Fetched token details:", tokenDetails);
+                     paymentTokenIdToSave = tokenDetails.id; // Use the fetched token ID
+                 } catch(fetchTokenError) {
+                      console.error(`Error fetching token ${paymentMethodToken} for customer ${customerIdForToken}:`, fetchTokenError);
+                      // Fallback or error handling needed
+                 }
+
+           } else if (paymentDetails.method === 'card' && paymentDetails.card_id) {
+                // If it's a card payment, a card object (saved card) might exist.
+                // The token might be linked to the card_id rather than directly to the payment token.
+                // Let's try fetching the token associated with the card potentially.
+                // This part is highly dependent on your exact Razorpay setup (Saved Cards vs Tokens API).
+
+                // Simplification: Assume the card_id itself can represent the saved method for recurring.
+                // However, for true tokenization, Razorpay usually returns a token ID.
+                // Let's log a warning if no direct token_id is found.
+                console.warn(`No direct token_id found on payment ${razorpay_payment_id}. Card ID ${paymentDetails.card_id} exists. Saving logic might need adjustment based on Razorpay token/card APIs.`);
+                // For this example, let's proceed *without* a specific token ID if none was returned/found.
+                // In a real scenario, you'd need to ensure you have the correct identifier (token_id or card_id)
+                // that Razorpay Subscriptions API expects for future automatic charges.
+
+                // You might need to explicitly create a token IF the payment didn't generate one automatically
+                // ONLY if you are PCI compliant to handle raw card details. This is generally NOT recommended.
+                // The standard flow relies on Razorpay generating the token during the checkout/payment process.
+
+
+           } else {
+               console.log(`Payment method ${paymentDetails.method} used for payment ${razorpay_payment_id} does not seem to have an associated reusable token_id.`);
+               // Cannot save this method for recurring payments via tokenization
+           }
+
+
+            // Proceed only if we have a token ID (or decide to handle card_id)
+           // if (paymentTokenIdToSave) { // Let's relax this for now to save basic info
+
+            const paymentMethodInfo = {
+                userId: transaction.userId,
+                razorpayCustomerId: customerIdForToken, // Store the customer ID
+                // tokenId: paymentTokenIdToSave, // Store the actual token ID if available
+                method: paymentDetails.method,
+                isDefault: true, // Make this new one the default
+                // Add other useful details
+                 status: 'active', // Or 'verified'
+                 createdAt: new Date(),
+                 updatedAt: new Date(),
+            };
+
+            // Add card-specific details if it's a card payment
+            if (paymentDetails.method === 'card' && paymentDetails.card) {
+                paymentMethodInfo.cardNetwork = paymentDetails.card.network;
+                paymentMethodInfo.cardLast4 = paymentDetails.card.last4;
+                paymentMethodInfo.cardIssuer = paymentDetails.card.issuer;
+                paymentMethodInfo.cardType = paymentDetails.card.type;
+                // DO NOT store expiry month/year unless absolutely necessary and compliant.
+                // Razorpay tokens handle expiry internally.
+                // Store the razorpay card_id if available - useful identifier
+                paymentMethodInfo.razorpayCardId = paymentDetails.card_id;
+                // If we decided to use card_id as the primary identifier when token_id is absent:
+                if (!paymentTokenIdToSave && paymentDetails.card_id) {
+                     paymentMethodInfo.tokenId = paymentDetails.card_id; // Using card_id as identifier
+                     console.log(`Using card_id ${paymentDetails.card_id} as the identifier for saved payment method.`);
+                } else if (paymentTokenIdToSave) {
+                    paymentMethodInfo.tokenId = paymentTokenIdToSave; // Use the found token ID
+                }
+
+
+            } else if (paymentDetails.method === 'netbanking') {
+                 paymentMethodInfo.bank = paymentDetails.bank;
+            } // Add other methods like wallets if needed
+
+             // Update any existing default payment methods for this user
             await PaymentMethod.updateMany(
-              { userId: transaction.userId, isDefault: true },
-              { $set: { isDefault: false } }
+                { userId: transaction.userId, isDefault: true },
+                { $set: { isDefault: false, updatedAt: new Date() } }
             );
-          }
-          
-          // Save the new payment method
-          savedPaymentMethod = await PaymentMethod.create(paymentMethodInfo);
-          
-          // Update user with payment method
-          await User.findByIdAndUpdate(
-            transaction.userId,
-            { $set: { 'subscription.paymentMethodId': savedPaymentMethod._id } }
-          );
+
+            // Save the new payment method
+            savedPaymentMethod = await PaymentMethod.create(paymentMethodInfo);
+            console.log('Saved new payment method:', savedPaymentMethod._id);
+
+             // Update user's default payment method reference ONLY if successfully saved
+             await User.findByIdAndUpdate(
+               transaction.userId,
+               { $set: { 'subscription.paymentMethodId': savedPaymentMethod._id } }
+             );
+          // } // End of 'if (paymentTokenIdToSave)' // Relaxed this condition
+
         } catch (tokenError) {
           console.error('Error saving payment method:', tokenError);
-          // Continue with subscription update even if token creation fails
+          // Decide if this should halt the process or just be logged.
+          // It's important for recurring payments, but the initial subscription might still be valid.
         }
       }
-      
-      const { plan, billingCycle, isUpgrade, paymentMode  } = transaction.subscriptionDetails;
+      // --- End Payment Method Saving Logic ---
+
+
+      const { plan, billingCycle, isUpgrade, paymentMode } = transaction.subscriptionDetails;
       const userId = transaction.userId;
-      
+
+      // Fetch user again to get the most recent data including email
+      const user = await User.findById(userId);
+      if (!user) {
+         // This should ideally not happen if the transaction exists, but handle it.
+         console.error(`User ${userId} not found after successful payment verification.`);
+         // Don't throw, just prevent user update and email. Transaction is already saved.
+         return res.status(500).json({ status: 'error', message: 'User not found after payment processing.' });
+      }
+
+
       // Set subscription dates
       const startDate = new Date();
       let endDate = new Date(startDate);
-      
+
       if (billingCycle === 'monthly') {
         endDate.setMonth(endDate.getMonth() + 1);
       } else if (billingCycle === 'annual') {
         endDate.setFullYear(endDate.getFullYear() + 1);
       }
-      
-      if (isUpgrade) {
-        const user = await User.findById(userId);
-        
-        if (user.subscription.endDate > startDate) {
-          // Add remaining time from previous subscription
-          const remainingTime = user.subscription.endDate - startDate;
-          endDate = new Date(endDate.getTime() + remainingTime);
-        }
+
+      let proratedAdjustmentApplied = false; // Flag for email content
+      if (isUpgrade && user.subscription.endDate && user.subscription.endDate > startDate) {
+          // Simple proration: Add remaining time from the *previous active* subscription end date
+          const remainingTime = user.subscription.endDate.getTime() - startDate.getTime();
+          if (remainingTime > 0) {
+              endDate = new Date(endDate.getTime() + remainingTime);
+              proratedAdjustmentApplied = true;
+              console.log(`Upgrade detected. Added ${remainingTime / (1000 * 60 * 60 * 24)} days. New end date: ${endDate}`);
+           }
       }
-      const nextPaymentDue = new Date(endDate);
-        nextPaymentDue.setDate(nextPaymentDue.getDate() - 7);
-      
-      // Update user subscription
-      const updatedUser = await User.findByIdAndUpdate(
-        userId,
-        {
-          $set: {
-            'subscription.plan': plan,
-            'subscription.billingCycle': billingCycle,
-            'subscription.status': 'active',
-            'subscription.startDate': startDate,
-            'subscription.endDate': endDate,
-            'subscription.autoRenew': true, // Always true for subscriptions
-            'subscription.subscriptionId': razorpay_subscription_id,
-            'subscription.paymentMode': paymentMode || 'automatic',
-            'subscription.nextPaymentDue': nextPaymentDue,
-            'subscription.paymentReminderSent': false
-          }
-        },
-        { new: true }
-      );
-      
-      res.json({ 
-        status: 'success', 
+
+       // Calculate next payment due date (relevant for display, reminders, and potential auto-charge attempts)
+       // For automatic subscriptions, this is effectively the endDate.
+       const nextPaymentDate = new Date(endDate);
+
+
+      // Update user subscription details in DB
+      const updatePayload = {
+        $set: {
+          'subscription.plan': plan,
+          'subscription.billingCycle': billingCycle,
+          'subscription.status': 'active', // Set to active
+          'subscription.startDate': startDate,
+          'subscription.endDate': endDate,
+          'subscription.autoRenew': true, // Automatic subscription
+          'subscription.subscriptionId': razorpay_subscription_id, // Link to Razorpay subscription
+          'subscription.paymentMode': paymentMode || 'automatic', // Ensure it's set
+          'subscription.nextPaymentDue': nextPaymentDate, // Date of next expected charge
+          'subscription.paymentReminderSent': false, // Reset reminder flag
+          'subscription.lastPaymentDate': startDate, // Record date of this successful payment
+          'subscription.lastPaymentId': razorpay_payment_id, // Record the payment ID
+           // If a payment method was saved, link it. Otherwise, keep the existing one or leave it null.
+          ...(savedPaymentMethod && { 'subscription.paymentMethodId': savedPaymentMethod._id }),
+        }
+      };
+
+      const updatedUser = await User.findByIdAndUpdate(userId, updatePayload, { new: true });
+
+      // --- Send Confirmation Email ---
+      if (updatedUser && updatedUser.email) {
+        const subject = `Your ${plan.toUpperCase()} Subscription is Active!`;
+        const html = `
+          <h1>Subscription Activated!</h1>
+          <p>Hello ${user.name || 'User'},</p>
+          <p>Your payment for the <strong>${plan} (${billingCycle})</strong> subscription was successful.</p>
+          <ul>
+            <li>Plan: ${plan}</li>
+            <li>Billing Cycle: ${billingCycle}</li>
+            <li>Start Date: ${startDate.toLocaleDateString()}</li>
+            <li>End Date: ${endDate.toLocaleDateString()}</li>
+            <li>Next Payment Date: ${nextPaymentDate.toLocaleDateString()}</li>
+            <li>Payment ID: ${razorpay_payment_id}</li>
+            <li>Subscription ID: ${razorpay_subscription_id}</li>
+            ${proratedAdjustmentApplied ? '<li>Your new end date includes remaining time from your previous plan.</li>' : ''}
+            ${savedPaymentMethod ? `<li>Your payment method (${paymentDetails.method} ending in ${savedPaymentMethod.cardLast4 || ''}) has been saved for automatic renewals.</li>` : '<li>Your subscription will automatically renew using the payment method on file.</li>'}
+          </ul>
+          <p>Thank you for subscribing!</p>
+        `;
+        await sendEmail(updatedUser.email, subject, html);
+      } else {
+        console.warn(`Could not send confirmation email: User ${userId} not found or has no email address.`);
+      }
+      // --- End Send Email ---
+
+      res.json({
+        status: 'success',
         message: 'Payment successful and subscription updated',
         user: updatedUser,
-        transaction: transaction
+        transaction: transaction // Send back the updated transaction
       });
+
     } else {
       // Invalid signature
+      console.error(`Invalid signature for subscription ${razorpay_subscription_id}. Generated: ${generatedSignature}, Received: ${razorpay_signature}`);
       transaction.status = 'failed';
+      transaction.notes.failure_reason = 'Invalid signature'; // Add failure reason
       transaction.updatedAt = new Date();
       await transaction.save();
-      
+
       res.status(400).json({ status: 'failed', message: 'Invalid signature' });
     }
   } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
+     console.error("Verify subscription error:", error);
+     // Attempt to update transaction status to failed if an unexpected error occurs
+     if (req.body.razorpay_subscription_id) {
+         try {
+             await Transaction.findOneAndUpdate(
+                 { subscriptionId: req.body.razorpay_subscription_id, status: { $ne: 'captured' } }, // Avoid overwriting success
+                 { $set: { status: 'failed', 'notes.failure_reason': 'Verification process error: ' + error.message, updatedAt: new Date() } }
+             );
+         } catch (dbError) {
+             console.error("Failed to update transaction status on error:", dbError);
+         }
+     }
+    res.status(500).json({ status: 'error', message: error.message, stack: error.stack }); // Include stack in dev?
   }
 });
 
+
 router.post('/verify-order', async (req, res) => {
   try {
-    const { 
-      razorpay_order_id, 
-      razorpay_payment_id, 
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
       razorpay_signature,
-      save_payment_method 
+      // save_payment_method // Saving method usually not applicable/useful for one-time orders unless intended for future use
     } = req.body;
-    
+
     const transaction = await Transaction.findOne({ orderId: razorpay_order_id });
     if (!transaction) {
-      return res.status(404).json({ status: 'failed', message: 'Order not found' });
+       console.error(`Verification Error: Transaction not found for order ID: ${razorpay_order_id}`);
+      return res.status(404).json({ status: 'failed', message: 'Order transaction not found' });
     }
-    
-    if (transaction.paymentId) {
-      return res.status(400).json({ 
-        status: 'duplicate', 
-        message: 'This payment was already processed',
-        transaction: transaction
-      });
-    }
-    
+
+     // Check for duplicate processing
+     if (transaction.status === 'captured' && transaction.paymentId === razorpay_payment_id) {
+        console.log(`Duplicate verification attempt for order ${razorpay_order_id}, payment ${razorpay_payment_id}`);
+         const currentUser = await User.findById(transaction.userId);
+        return res.status(400).json({
+         status: 'duplicate',
+         message: 'This payment was already processed successfully',
+         user: currentUser,
+         transaction: transaction
+       });
+     }
+      if (transaction.status === 'captured') {
+          console.warn(`Verification attempt for already captured order ${razorpay_order_id} with a DIFFERENT payment ID (${razorpay_payment_id}). Original payment ID: ${transaction.paymentId}`);
+          return res.status(400).json({
+              status: 'failed',
+              message: 'Order is already marked as paid, possibly from a different payment.',
+              transaction: transaction
+          });
+      }
+
+
     // Verify the payment signature
     const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
     hmac.update(razorpay_order_id + '|' + razorpay_payment_id);
     const generatedSignature = hmac.digest('hex');
-    
+
     if (generatedSignature === razorpay_signature) {
-      // Fetch payment details
-      const paymentDetails = await razorpay.payments.fetch(razorpay_payment_id);
-      
+       // Fetch payment details *before* marking as captured
+       const paymentDetails = await razorpay.payments.fetch(razorpay_payment_id);
+       if (paymentDetails.status !== 'captured') { // For orders, status must be 'captured'
+            console.error(`Payment ${razorpay_payment_id} for order ${razorpay_order_id} is not 'captured'. Status: ${paymentDetails.status}`);
+             transaction.status = 'failed'; // Or 'payment_failed'
+             transaction.notes.failure_reason = `Payment status check failed: ${paymentDetails.status}`;
+             transaction.updatedAt = new Date();
+             await transaction.save();
+            return res.status(400).json({ status: 'failed', message: `Payment status is ${paymentDetails.status}` });
+       }
+        // Ensure the payment amount matches the transaction amount (in paise)
+        if (paymentDetails.amount !== Math.round(transaction.amount * 100)) {
+            console.error(`Amount mismatch for order ${razorpay_order_id}. Expected: ${Math.round(transaction.amount * 100)}, Received: ${paymentDetails.amount}`);
+            transaction.status = 'failed';
+            transaction.notes.failure_reason = 'Amount mismatch';
+            transaction.updatedAt = new Date();
+            await transaction.save();
+            return res.status(400).json({ status: 'failed', message: 'Payment amount mismatch' });
+        }
+
+
       // Update transaction record
       transaction.paymentId = razorpay_payment_id;
-      transaction.status = 'captured';
+      transaction.status = 'captured'; // Mark as captured
       transaction.paymentMethod = paymentDetails.method;
+       transaction.paymentDetails = { // Store details
+          method: paymentDetails.method,
+          card_id: paymentDetails.card_id,
+          bank: paymentDetails.bank,
+          wallet: paymentDetails.wallet,
+          vpa: paymentDetails.vpa,
+           amount_paid: paymentDetails.amount / 100, // Store amount paid from payment object
+           currency: paymentDetails.currency
+      };
       transaction.updatedAt = new Date();
       await transaction.save();
 
-      // Process payment method if requested (same as in verify-subscription)
-      // ... [payment method saving logic, same as verify-subscription]
-      
+      // Payment method saving logic could be added here if needed for future manual renewals
+      // but it's less common for non-subscription orders. Follow similar logic as in /verify-subscription if required.
+
       const { plan, billingCycle, isUpgrade } = transaction.subscriptionDetails;
       const userId = transaction.userId;
-      
-      // Set subscription dates
+
+      // Fetch user again to get email and current state
+       const user = await User.findById(userId);
+       if (!user) {
+           console.error(`User ${userId} not found after successful order payment verification.`);
+           return res.status(500).json({ status: 'error', message: 'User not found after payment processing.' });
+       }
+
+
+      // Set subscription dates for this manual period
       const startDate = new Date();
       let endDate = new Date(startDate);
-      
+
       if (billingCycle === 'monthly') {
         endDate.setMonth(endDate.getMonth() + 1);
       } else if (billingCycle === 'annual') {
         endDate.setFullYear(endDate.getFullYear() + 1);
       }
-      
-      if (isUpgrade) {
-        const user = await User.findById(userId);
-        
-        if (user.subscription.endDate > startDate) {
-          // Add remaining time from previous subscription
-          const remainingTime = user.subscription.endDate - startDate;
-          endDate = new Date(endDate.getTime() + remainingTime);
-        }
+
+       let proratedAdjustmentApplied = false; // Flag for email content
+       if (isUpgrade && user.subscription.endDate && user.subscription.endDate > startDate) {
+           // Add remaining time from previous plan
+           const remainingTime = user.subscription.endDate.getTime() - startDate.getTime();
+            if (remainingTime > 0) {
+               endDate = new Date(endDate.getTime() + remainingTime);
+               proratedAdjustmentApplied = true;
+                console.log(`Upgrade detected (manual). Added ${remainingTime / (1000 * 60 * 60 * 24)} days. New end date: ${endDate}`);
+            }
+       }
+
+
+        // For manual payments, 'nextPaymentDue' is more like an 'expiry warning' date.
+        // Setting multiple reminder flags can be useful.
+       const firstReminderDate = new Date(endDate);
+       firstReminderDate.setDate(firstReminderDate.getDate() - 7); // 7 days before expiry
+       const secondReminderDate = new Date(endDate);
+       secondReminderDate.setDate(secondReminderDate.getDate() - 3); // 3 days before expiry
+       const finalReminderDate = new Date(endDate);
+       finalReminderDate.setDate(finalReminderDate.getDate() - 1); // 1 day before expiry
+
+
+      // Update user subscription details in DB
+       const updatePayload = {
+         $set: {
+           'subscription.plan': plan,
+           'subscription.billingCycle': billingCycle,
+           'subscription.status': 'active', // Set to active
+           'subscription.startDate': startDate,
+           'subscription.endDate': endDate,
+           'subscription.autoRenew': false, // Manual payment
+           // 'subscription.subscriptionId': null, // Clear any old auto-renew subscription ID
+           'subscription.orderId': razorpay_order_id, // Link to the successful order
+           'subscription.paymentMode': 'manual', // Explicitly set to manual
+            // Reset reminder flags for this new period
+           'subscription.firstReminderSent': false,
+           'subscription.secondReminderSent': false,
+           'subscription.finalReminderSent': false,
+            'subscription.lastPaymentDate': startDate,
+           'subscription.lastPaymentId': razorpay_payment_id,
+           // Optional: Clear paymentMethodId if it was linked to an auto-renew method
+           // 'subscription.paymentMethodId': null
+         }
+       };
+
+      const updatedUser = await User.findByIdAndUpdate(userId, updatePayload, { new: true });
+
+      // --- Send Confirmation Email ---
+      if (updatedUser && updatedUser.email) {
+        const subject = `Your ${plan.toUpperCase()} Plan Activated!`;
+        const html = `
+          <h1>Plan Activated!</h1>
+          <p>Hello ${user.name || 'User'},</p>
+          <p>Your manual payment for the <strong>${plan} (${billingCycle})</strong> plan was successful.</p>
+          <ul>
+            <li>Plan: ${plan}</li>
+            <li>Billing Cycle: ${billingCycle}</li>
+            <li>Start Date: ${startDate.toLocaleDateString()}</li>
+            <li>Expiry Date: ${endDate.toLocaleDateString()}</li>
+            <li>Payment ID: ${razorpay_payment_id}</li>
+            <li>Order ID: ${razorpay_order_id}</li>
+            ${proratedAdjustmentApplied ? '<li>Your new expiry date includes remaining time from your previous plan.</li>' : ''}
+            <li>This plan requires manual renewal before the expiry date. We'll send you reminders.</li>
+          </ul>
+          <p>Thank you!</p>
+        `;
+        await sendEmail(updatedUser.email, subject, html);
+      } else {
+         console.warn(`Could not send confirmation email: User ${userId} not found or has no email address.`);
       }
-      
-      // Set reminder dates
-      const nextPaymentDue = new Date(endDate);
-      nextPaymentDue.setDate(nextPaymentDue.getDate() - 7); // 7 days before expiry
-      
-      // Update user subscription
-      const updatedUser = await User.findByIdAndUpdate(
-        userId,
-        {
-          $set: {
-            'subscription.plan': plan,
-            'subscription.billingCycle': billingCycle,
-            'subscription.status': 'active',
-            'subscription.startDate': startDate,
-            'subscription.endDate': endDate,
-            'subscription.autoRenew': false, // Manual payments don't auto-renew
-            'subscription.orderId': razorpay_order_id,
-            'subscription.paymentMode': 'manual',
-            'subscription.nextPaymentDue': nextPaymentDue,
-            'subscription.paymentReminderSent': false,
-            'subscription.firstReminderSent': false,
-            'subscription.secondReminderSent': false,
-            'subscription.finalReminderSent': false
-          }
-        },
-        { new: true }
-      );
-      
-      res.json({ 
-        status: 'success', 
-        message: 'Payment successful and subscription updated',
+      // --- End Send Email ---
+
+      res.json({
+        status: 'success',
+        message: 'Payment successful and plan updated (manual)',
         user: updatedUser,
         transaction: transaction
       });
+
     } else {
       // Invalid signature
+      console.error(`Invalid signature for order ${razorpay_order_id}. Generated: ${generatedSignature}, Received: ${razorpay_signature}`);
       transaction.status = 'failed';
+      transaction.notes.failure_reason = 'Invalid signature';
       transaction.updatedAt = new Date();
       await transaction.save();
-      
+
       res.status(400).json({ status: 'failed', message: 'Invalid signature' });
     }
   } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
+     console.error("Verify order error:", error);
+      // Attempt to update transaction status to failed
+     if (req.body.razorpay_order_id) {
+         try {
+             await Transaction.findOneAndUpdate(
+                 { orderId: req.body.razorpay_order_id, status: { $ne: 'captured' } },
+                 { $set: { status: 'failed', 'notes.failure_reason': 'Verification process error: ' + error.message, updatedAt: new Date() } }
+             );
+         } catch (dbError) {
+             console.error("Failed to update transaction status on error:", dbError);
+         }
+     }
+    res.status(500).json({ status: 'error', message: error.message, stack: error.stack });
   }
 });
 

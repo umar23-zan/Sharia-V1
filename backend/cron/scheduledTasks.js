@@ -1,282 +1,166 @@
 const cron = require('node-cron');
 const User = require('../models/User');
 const nodemailer = require('nodemailer');
-const Razorpay = require('razorpay');
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET
-});
-const Transaction = require('../models/Transaction');
+const { sendEmail } = require('../service/emailService')
+const mongoose = require('mongoose')
 
+console.log('Scheduler started. Waiting for scheduled jobs.');
 
+const formatDate = (date) => date ? date.toLocaleDateString() : 'N/A';
 
-const transporter = nodemailer.createTransport({
-  service: process.env.EMAIL_SERVICE,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+cron.schedule('* * * * *', async () => {
+  console.log('Running daily check for automatic renewal reminders...');
+  const reminderDate = new Date();
+  reminderDate.setDate(reminderDate.getDate() + 7); // Target date 7 days from now
 
-async function createPaymentLink(user, plan, billingCycle) {
   try {
-    const amount = getAmountForPlan(plan, billingCycle);
-    const customerContact = user.phone ? String(user.phone) : "9442442233";
-    // Create a payment link using Razorpay's Payment Links API
-    const paymentLinkOptions = {
-      amount: amount * 100, // Amount in paise
-      currency: 'INR',
-      accept_partial: false,
-      description: `Subscription renewal for ${plan} plan (${billingCycle})`,
-      customer: {
-        name: user.name,
-        email: user.email,
-        contact: customerContact,
-      },
-      notify: {
-        email: true,
-        sms: Boolean(user.phone)
-      },
-      reminder_enable: true,
-      notes: {
-        userId: user._id.toString(),
-        plan: plan,
-        billingCycle: billingCycle,
-        isRenewal: true
-      },
-      callback_url: `${process.env.FRONTEND_URL}/api/transaction/renewal-callback`,
-      callback_method: 'get',
-      // reference_id: 'myverysecuresecretkey123'
-    };
-    
-    const paymentLink = await razorpay.paymentLink.create(paymentLinkOptions);
-    
-    // Create transaction record
-    const transaction = await Transaction.create({
-      userId: user._id,
-      paymentLinkId: paymentLink.id,
-      amount: amount,
-      currency: 'INR',
-      status: 'created',
-      subscriptionDetails: {
-        plan: plan,
-        billingCycle: billingCycle,
-        isRenewal: true,
-        paymentMode: 'manual'
-      },
-      notes: paymentLinkOptions.notes
-    });
-    
-    return {
-      paymentLink: paymentLink.short_url,
-      transaction: transaction
-    };
-  } catch (error) {
-    console.error('Error creating payment link:', error);
-    throw error;
-  }
-}
-
-cron.schedule('0 0 * * *', async () => {
-  try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    // Part 1: Process manual payment mode changes
-    const usersForPaymentModeChange = await User.find({
-      'subscription.status': 'active',
-      'subscription.pendingPaymentMode': 'manual',
-      'subscription.paymentModeChangeDate': { $lte: today }
-    });
-    
-    for (const user of usersForPaymentModeChange) {
-      try {
-        // Cancel the subscription in Razorpay
-        await razorpay.subscriptions.cancel(user.subscription.subscriptionId);
-        
-        // Update user record
-        await User.findByIdAndUpdate(
-          user._id,
-          {
-            $set: { 'subscription.paymentMode': 'manual' },
-            $unset: { 
-              'subscription.pendingPaymentMode': 1, 
-              'subscription.paymentModeChangeDate': 1 
-            }
-          }
-        );
-        
-        console.log(`Subscription ${user.subscription.subscriptionId} canceled for user ${user._id} due to payment mode change`);
-      } catch (error) {
-        console.error(`Failed to cancel subscription for user ${user._id}:`, error);
-      }
-    }
-
-    // Part 2: Process subscription status changes from cancelling to inactive
-    const usersWithExpiredSubscriptions = await User.find({
-      'subscription.status': 'cancelling',
-      'subscription.endDate': { $lt: today }
-    });
-    
-    for (const user of usersWithExpiredSubscriptions) {
-      try {
-        await User.findByIdAndUpdate(
-          user._id,
-          { $set: { 'subscription.status': 'inactive' } }
-        );
-        
-        console.log(`Updated subscription status to inactive for user ${user._id}`);
-      } catch (error) {
-        console.error(`Failed to update subscription status for user ${user._id}:`, error);
-      }
-    }
-
-    console.log(`Daily subscription job completed: Processed ${usersForPaymentModeChange.length} payment mode changes and ${usersWithExpiredSubscriptions.length} subscription expirations`);
-
     const usersToRemind = await User.find({
-      'subscription.paymentMode': 'manual',
       'subscription.status': 'active',
-      'subscription.endDate': { $gte: today },
-      $or: [
-        // First reminder: 7 days before expiration
-        {
-          'subscription.firstReminderSent': false,
-          'subscription.endDate': { 
-            $lte: new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000) 
-          }
-        },
-        // Second reminder: 3 days before expiration
-        {
-          'subscription.secondReminderSent': false,
-          'subscription.endDate': { 
-            $lte: new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000) 
-          }
-        },
-        // Final reminder: 1 day before expiration
-        {
-          'subscription.finalReminderSent': false,
-          'subscription.endDate': { 
-            $lte: new Date(today.getTime() + 1 * 24 * 60 * 60 * 1000) 
-          }
-        }
-      ]
-    });
-    
-    console.log(`Found ${usersToRemind.length} users to remind`);
-  
-    for (const user of usersToRemind) {
-      // Calculate days remaining
-      const daysRemaining = Math.ceil((user.subscription.endDate - today) / (24 * 60 * 60 * 1000));
-      console.log(`Processing user ${user._id}, days remaining: ${daysRemaining}`);
-      
-      const { paymentLink, transaction } = await createPaymentLink(
-        user, 
-        user.subscription.plan, 
-        user.subscription.billingCycle
-      );
-      // Determine reminder type and update user accordingly
-      let reminderType, updateField;
-      if (daysRemaining <= 1 && !user.subscription.finalReminderSent) {
-        reminderType = 'FINAL';
-        updateField = 'finalReminderSent';
-      } else if (daysRemaining <= 3 && !user.subscription.secondReminderSent) {
-        reminderType = 'SECOND';
-        updateField = 'secondReminderSent';
-      } else if (daysRemaining <= 7 && !user.subscription.firstReminderSent) {
-        reminderType = 'FIRST';
-        updateField = 'firstReminderSent';
-      } else {
-        console.log(`No reminder needed for user ${user._id}`);
-        continue;
-      }
-      
-      console.log(`Sending ${reminderType} reminder to user ${user._id}`);
-      
-      // Send email reminder
-      const emailSubject = `${reminderType === 'FINAL' ? 'URGENT: ' : ''}Your subscription expires in ${daysRemaining} day${daysRemaining > 1 ? 's' : ''}`;
-      const emailText = `
-        Dear ${user.name},
-        
-        Your ${user.subscription.plan} subscription will expire in ${daysRemaining} day${daysRemaining > 1 ? 's' : ''}.
-        
-        To continue enjoying our services without interruption, please renew your subscription by clicking the link below:
-        
-        ${paymentLink}
-        
-        If you have any questions or need assistance, please contact our support team.
-        
-        Thank you for your continued support!
-      `;
-      
-      await transporter.sendMail({
-        from: process.env.EMAIL_FROM,
-        to: user.email,
-        subject: emailSubject,
-        text: emailText
-      });
-      
-     
-      
-      // Update user to mark reminder as sent
-      await User.findByIdAndUpdate(
-        user._id,
-        { $set: { [`subscription.${updateField}`]: true } }
-      );
-      
-      console.log(`Reminder sent to user ${user._id}`);
-    }
-    
-    // Handle expired subscriptions
-    const expiredUsers = await User.find({
-      'subscription.paymentMode': 'manual',
-      'subscription.status': 'active',
-      'subscription.endDate': { $lt: today }
-    });
-    
-    console.log(`Found ${expiredUsers.length} expired subscriptions`);
-    
-    for (const user of expiredUsers) {
-      // Update subscription status to expired
-      await User.findByIdAndUpdate(
-        user._id,
-        { $set: { 'subscription.status': 'expired' } }
-      );
-      
-      // Send expiration notification
-      await transporter.sendMail({
-        from: process.env.EMAIL_FROM,
-        to: user.email,
-        subject: 'Your subscription has expired',
-        text: `
-          Dear ${user.name},
-          
-          Your ${user.subscription.plan} subscription has expired.
-          
-          To restore access to our services, please renew your subscription at your earliest convenience:
-          
-          ${process.env.FRONTEND_URL}/subscription
-          
-          If you have any questions or need assistance, please contact our support team.
-          
-          Thank you for choosing our service!
-        `
-      });
-      
-      console.log(`Marked subscription as expired for user ${user._id}`);
-    }
-    
-    console.log('Subscription reminder check completed');
+      'subscription.autoRenew': true,
+      'subscription.paymentMode': 'automatic',
+      'subscription.endDate': { 
+         $gte: new Date(reminderDate.setHours(0, 0, 0, 0)), 
+         $lt: new Date(reminderDate.setHours(23, 59, 59, 999)) 
+       },
+      'subscription.paymentReminderSent': { $ne: true } 
+    }).select('email name subscription'); 
 
+    console.log(`Found ${usersToRemind.length} users for auto-renewal reminder.`);
+
+    for (const user of usersToRemind) {
+      const { plan, billingCycle, endDate } = user.subscription;
+      const subject = `Upcoming Renewal for Your ${plan.toUpperCase()} Subscription`;
+      const html = `
+        <h1>Subscription Renewal Reminder</h1>
+        <p>Hello ${user.name || 'User'},</p>
+        <p>This is a friendly reminder that your <strong>${plan} (${billingCycle})</strong> subscription is scheduled to automatically renew on <strong>${formatDate(endDate)}</strong>.</p>
+        <p>No action is needed if you wish to continue. Your default payment method will be charged.</p>
+        <p>If you need to update your payment method or manage your subscription, please visit your account settings.</p>
+        <p>Thank you!</p>
+      `;
+
+      await sendEmail(user.email, subject, html);
+
+      await User.updateOne(
+        { _id: user._id },
+        { $set: { 'subscription.paymentReminderSent': true } }
+      );
+      console.log(`Auto-renewal reminder sent to ${user.email}`);
+    }
   } catch (error) {
-    console.error('Error in subscription job:', error);
+    console.error('Error processing automatic renewal reminders:', error);
   }
+}, {
+  scheduled: true,
+  timezone: "Asia/Kolkata" 
 });
 
-function getAmountForPlan(plan, billingCycle) {
-  if (plan === 'basic') {
-    return billingCycle === 'monthly' ? 352.82 : 2964.16;
-  } else if (plan === 'premium') {
-    return billingCycle === 'monthly' ? 588.82 : 4,946.56;
-  }
-  return 0
-}
+cron.schedule('5 8 * * *', async () => {
+  console.log('Running daily check for manual expiry reminders...');
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); 
+
+  const reminderDate7 = new Date(today);
+  reminderDate7.setDate(today.getDate() + 7); 
+  const reminderDate3 = new Date(today);
+  reminderDate3.setDate(today.getDate() + 3); 
+  const reminderDate1 = new Date(today);
+  reminderDate1.setDate(today.getDate() + 1); 
+
+
+   try {
+    const usersToRemind = await User.find({
+       'subscription.status': 'active',
+       'subscription.autoRenew': false,
+       'subscription.paymentMode': 'manual',
+       'subscription.endDate': { // Find subscriptions ending within the next 7 days
+         $gte: new Date(today.getTime() + 24 * 60 * 60 * 1000), // Starting from tomorrow
+         $lt: new Date(today.getTime() + 8 * 24 * 60 * 60 * 1000) // Up to 7 days from now
+       }
+     }).select('email name subscription'); // Select only necessary fields
+
+     console.log(`Found ${usersToRemind.length} users potentially needing manual expiry reminders.`);
+
+     for (const user of usersToRemind) {
+       const { plan, billingCycle, endDate, firstReminderSent, secondReminderSent, finalReminderSent } = user.subscription;
+       let subject = '';
+       let html = '';
+       let reminderToSend = null; // 'first', 'second', 'final'
+       let updatePayload = {};
+
+        // Check end date against reminder dates (ensure comparison ignores time part)
+       const endDateDay = new Date(endDate);
+       endDateDay.setHours(0, 0, 0, 0);
+
+       // Check for 7-day reminder
+       if (!firstReminderSent && endDateDay.getTime() === reminderDate7.getTime()) {
+         reminderToSend = 'first';
+         subject = `Action Required: Your ${plan.toUpperCase()} Plan Expires in 7 Days`;
+         html = `
+            <h1>Plan Expiry Reminder</h1>
+            <p>Hello ${user.name || 'User'},</p>
+            <p>Your <strong>${plan} (${billingCycle})</strong> plan will expire on <strong>${formatDate(endDate)}</strong> (in 7 days).</p>
+            <p>To continue enjoying the benefits, please renew your plan manually before the expiry date.</p>
+            <p>[Link to Renewal Page]</p>
+            <p>Thank you!</p>
+         `;
+         updatePayload = { 'subscription.firstReminderSent': true };
+       }
+        // Check for 3-day reminder (use else if to prevent multiple emails on the same day if logic overlaps)
+       else if (!secondReminderSent && endDateDay.getTime() === reminderDate3.getTime()) {
+         reminderToSend = 'second';
+         subject = `Action Required: Your ${plan.toUpperCase()} Plan Expires in 3 Days`;
+          html = `
+            <h1>Plan Expiry Reminder</h1>
+            <p>Hello ${user.name || 'User'},</p>
+            <p>Just a reminder that your <strong>${plan} (${billingCycle})</strong> plan will expire on <strong>${formatDate(endDate)}</strong> (in 3 days).</p>
+            <p>Renew now to avoid any interruption in service.</p>
+            <p>[Link to Renewal Page]</p>
+            <p>Thank you!</p>
+         `;
+         updatePayload = { 'subscription.secondReminderSent': true };
+       }
+        // Check for 1-day reminder
+       else if (!finalReminderSent && endDateDay.getTime() === reminderDate1.getTime()) {
+         reminderToSend = 'final';
+         subject = `Final Reminder: Your ${plan.toUpperCase()} Plan Expires Tomorrow!`;
+          html = `
+            <h1>Final Expiry Reminder</h1>
+            <p>Hello ${user.name || 'User'},</p>
+            <p>Your <strong>${plan} (${billingCycle})</strong> plan expires tomorrow, <strong>${formatDate(endDate)}</strong>.</p>
+            <p>This is your last chance to renew manually and keep your access.</p>
+            <p>[Link to Renewal Page]</p>
+            <p>Thank you!</p>
+         `;
+         updatePayload = { 'subscription.finalReminderSent': true };
+       }
+
+
+       if (reminderToSend) {
+          await sendEmail(user.email, subject, html);
+          await User.updateOne({ _id: user._id }, { $set: updatePayload });
+          console.log(`Manual expiry reminder (${reminderToSend}) sent to ${user.email} for expiry on ${formatDate(endDate)}`);
+       }
+     }
+
+   } catch (error) {
+      console.error('Error processing manual expiry reminders:', error);
+   }
+
+}, {
+  scheduled: true,
+  timezone: "Asia/Kolkata" // Use the same timezone
+});
+
+// Optional: Add a job to handle failed automatic payments (requires webhook setup from Razorpay)
+// Optional: Add a job to deactivate expired subscriptions daily
+
+
+// Keep the scheduler running (if it's the main process)
+// If run separately, ensure it connects to the DB
+// Example DB connection (if run standalone)
+/*
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('Scheduler connected to MongoDB'))
+  .catch(err => console.error('Scheduler MongoDB connection error:', err));
+*/

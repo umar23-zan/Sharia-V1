@@ -25,7 +25,7 @@ const sendEmail = async (to, subject, html, text) => {
       from: process.env.EMAIL_FROM, // Sender address from .env
       to: to,                      // List of receivers
       subject: subject,            // Subject line
-      html: message,                  // HTML body
+      html: html,                  // HTML body
       text: text                   // Plain text body (optional)
     };
 

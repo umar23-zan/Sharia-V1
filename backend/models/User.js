@@ -32,6 +32,7 @@ const UserSchema = new mongoose.Schema({
       companyName: { type: String, required: true },
       stockData: { type: Object, required: true }
   }],
+  razorpayCustomerId: { type: String, index: true },
     subscription: {
       plan: {
         type: String,
@@ -59,17 +60,20 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: true
       },
+      subscriptionId: { type: String, index: true },
+      orderId: { type: String, index: true },   
+      paymentReminderSent: { type: Boolean, default: false },
       firstReminderSent: {
         type: Boolean,
-        
+        default: false
       },
       secondReminderSent: {
         type: Boolean,
-        
+        default: false
       },
       finalReminderSent: {
         type: Boolean,
-        
+        default: false
       },
       subscriptionId: String, 
       paymentMethodId: {
@@ -80,8 +84,9 @@ const UserSchema = new mongoose.Schema({
       pendingPaymentMode: { type: String},
       paymentModeChangeDate: {type: Date},
       nextPaymentDue: { type: Date },
+      lastPaymentDate: Date, 
+      lastPaymentId: String,
       lastPaymentReminder: { type: Date },
-      paymentReminderSent: { type: Boolean, default: false },
       cancellationReason: String,
       cancellationFeedback: String,
       cancelledAt: Date
@@ -92,7 +97,17 @@ const UserSchema = new mongoose.Schema({
     },
 });
 
-
-
+UserSchema.pre('save', function(next) {
+  this.updatedAt = Date.now();
+  next();
+});
+UserSchema.pre('findOneAndUpdate', function(next) {
+  this.set({ updatedAt: new Date() });
+  next();
+});
+UserSchema.pre('updateMany', function(next) { 
+  this.set({ updatedAt: new Date() });
+  next();
+});
 
 module.exports = mongoose.model('User', UserSchema);
