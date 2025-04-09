@@ -8,69 +8,6 @@ const DATABASE_NAME = "authdb";
 const COLLECTION_NAME = "StockData";
 const USER_COLLECTION = "users";
 
-const checkSubscription = async (req, res, next) => {
-        const userId = req.query.userId; 
-    
-        if (!userId) {
-            return res.status(401).json({ message: "User ID is required" });
-        }
-    
-        let client;
-        try {
-            client = await MongoClient.connect(MONGO_URI);
-            const db = client.db(DATABASE_NAME);
-            const user = await db.collection(USER_COLLECTION).findOne({ _id: new ObjectId(userId) });
-    
-            if (!user) {
-                return res.status(404).json({ message: "User not found" });
-            }
-    
-            
-            const subscriptionPlan = user.subscription?.plan || 'free';
-    
-            if (subscriptionPlan === 'basic' || subscriptionPlan === 'premium') {
-               
-                if (user.subscription?.status === 'active' && user.subscription?.endDate && new Date(user.subscription.endDate) < new Date()) {
-                   
-                    await db.collection(USER_COLLECTION).updateOne(
-                        { _id: new ObjectId(userId) },
-                        {
-                            $set: {
-                                'subscription.status': 'inactive', 
-                                viewedStockIds: [],
-                                stockResultsViewsCount: 0
-                            }
-                        }
-                    );
-                    return res.status(403).json({ message: "Subscription expired. Please renew to continue viewing stocks." });
-                }
-                return next();
-            } else if (subscriptionPlan === 'free') {
-                
-    
-                if (!user.viewedStockIds) {
-                    await db.collection(USER_COLLECTION).updateOne(
-                        { _id: new ObjectId(userId) },
-                        { $set: { viewedStockIds: [], stockResultsViewsCount: 0 } }
-                    );
-                }
-                if (user.viewedStockIds.length >= 3) {
-                    return res.status(403).json({ message: "Stock view limit reached for free plan. Please subscribe to view more." });
-                }
-                next();
-            } else {
-               
-                return res.status(400).json({ message: "Invalid subscription plan." });
-            }
-    
-        } catch (error) {
-            console.error("Error checking subscription:", error);
-            res.status(500).json({ message: "Error verifying subscription" });
-        } finally {
-            if (client) client.close();
-        }
-    };
-
 
 router.get('/all', async (req, res) => {
   let client;

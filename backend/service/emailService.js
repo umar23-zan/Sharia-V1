@@ -11,22 +11,16 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS,
   }
 });
-/**
- * Sends an email.
- * @param {string} to Recipient email address.
- * @param {string} subject Email subject.
- * @param {string} html Email body (HTML).
- * @param {string} [text] Optional plain text version of the email body.
- */
+
 const sendEmail = async (to, subject, html, text) => {
   try {
     const message = await fs.readFile('../Sharia-V1/src/components/emailTemplate.html', 'utf8');
     const mailOptions = {
-      from: process.env.EMAIL_FROM, // Sender address from .env
-      to: to,                      // List of receivers
-      subject: subject,            // Subject line
-      html: html,                  // HTML body
-      text: text                   // Plain text body (optional)
+      from: process.env.EMAIL_FROM, 
+      to: to,     
+      subject: subject,    
+      html: html,                  
+      text: text               
     };
 
     const info = await transporter.sendMail(mailOptions);

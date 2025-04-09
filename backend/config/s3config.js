@@ -32,46 +32,6 @@ const uploadToS3 = async (file, email) => {
     }
 };
 
-const uploadGigImageToS3 = async (file, gigId) => {
-    const fileExtension = require('path').extname(file.originalname);
-    const key = `gigImages/${gigId}-${Date.now()}${fileExtension}`;
-
-    const params = {
-        Bucket: process.env.AWS_S3_BUCKET_NAME,
-        Key: key,
-        Body: file.buffer,
-        ContentType: file.mimetype,
-    };
-
-    try {
-        const result = await s3.upload(params).promise();
-        return result.Location;
-    } catch (error) {
-        console.error('Error uploading gig image to S3:', error);
-        throw new Error('Failed to upload gig image to S3');
-    }
-};
-
-const uploadMessageFileToS3 = async (file, conversationId) => {
-    const fileExtension = require('path').extname(file.originalname);
-    const key = `messages/${conversationId}/${Date.now()}${fileExtension}`;
-
-    const params = {
-        Bucket: process.env.AWS_S3_BUCKET_NAME,
-        Key: key,
-        Body: file.buffer,
-        ContentType: file.mimetype,
-    };
-
-    try {
-        const result = await s3.upload(params).promise();
-        console.log('File uploaded to S3:', result.Location);
-        return result.Location; // The S3 file URL
-    } catch (error) {
-        console.error('Error uploading to S3:', error);
-        throw new Error('Failed to upload file to S3');
-    }
-};
 
 // S3 Delete Function
 const deleteFromS3 = async (fileUrl) => {
@@ -129,8 +89,6 @@ module.exports = {
     s3,
     uploadToS3,
     deleteFromS3,
-    uploadGigImageToS3,
-    uploadMessageFileToS3,
     getS3File,
     generatePresignedUrl
 };

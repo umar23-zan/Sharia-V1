@@ -14,8 +14,3 @@ const connectDB = async () => {
     }
 };
 module.exports = connectDB;
-
-
-//mongodb+srv://umar:umar444@authentication-app.ted5m.mongodb.net/authdb?retryWrites=true&w=majority
-
-//mongodb://mongo-db/ShariaStock

@@ -33,7 +33,6 @@ module.exports = function(app) {
     }
   });
 
-  // Configure Google strategy
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
