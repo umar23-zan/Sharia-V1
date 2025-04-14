@@ -240,6 +240,7 @@ router.post('/forgot-password', async (req, res) => {
       const message = `You are receiving this email because you (or someone else) requested a password reset. Click the link to reset your password: \n\n ${resetUrl}`;
       
       await transporter.sendMail({
+          from: process.env.EMAIL_USER,
           to: email,
           subject: 'Password Reset Request',
           text: message,
