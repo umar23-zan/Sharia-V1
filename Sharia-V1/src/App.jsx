@@ -24,6 +24,14 @@ import OAuthCallback from './components/OAuthCallback';
 import Razorpay from './components/razorpay';
 import SubscriptionSuccess from './components/SubscriptionSuccess';
 import AccountInformationPage from './components/AccountSettings';
+import UnderstandingHaram from './blogs/UnderstandingHaram';
+import BlogAdmin from './components/BlogAdmin';
+import BlogCatalogue from './components/BlogCatalogue';
+import HalalHaramStocksBlog from './blogs/HalalHaramStocksBlog';
+import RoleAIBlog from './blogs/RoleAIBlog';
+import HalalStockblog from './blogs/HalalStockblog';
+import FinancialRatios from './blogs/FinancialRatios';
+import HowItWorks from './blogs/HowItWorks';
 
 const App = () => {
   const userId = localStorage.getItem('userId');
@@ -40,6 +48,13 @@ const App = () => {
                     <Route path="/verify/:token" element={<EmailVerification />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/reset-password/:token" element={<ResetPassword />} />
+                    <Route path='/blog-catalogue' element={<BlogCatalogue/>} />
+                    <Route path="/understand-haram" element={<UnderstandingHaram />} />
+                    <Route path="/halal-haram-diff" element={<HalalHaramStocksBlog />} />
+                    <Route path="/role-ai" element={<RoleAIBlog />} />
+                    <Route path="/halal-stock" element={<HalalStockblog />} />
+                    <Route path="/financial-ratios" element={<FinancialRatios />} />
+                    <Route path="/how-it-works" element={<HowItWorks />} />
                     {/* Protected Routes */}
                 <Route
                 path="/profile"
@@ -167,6 +182,14 @@ const App = () => {
                         <PrivateRoute>
                             <SubscriptionSuccess />
                         </PrivateRoute>
+                    }
+                />
+                 <Route
+                path="/admin/blogs"
+                element={
+                    <PrivateRoute>
+                        <BlogAdmin />
+                    </PrivateRoute>
                     }
                 />
                 </Routes>

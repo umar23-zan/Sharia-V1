@@ -408,36 +408,6 @@ router.get('/user-plan/:email', async (req, res) => {
         }
     });
 
-
-// Contact Us Route
-router.post('/contact-us', async (req, res) => {
-    const request = req.body;
-    
-    // Create the formdata object from the request
-    const formdata = {
-        firstName: request.firstName,
-        lastName: request.lastName,
-        email: request.email,
-        phone: request.phone,
-        message: request.message
-    };
-
-    try {
-        // Create a new contact entry and save it to the database
-        const contactEntry = new ContactUs(formdata);
-        const savedEntry = await contactEntry.save(); // Save to the database and get the saved entry
-        
-        // Send email using the saved entry
-        await sendEmail(savedEntry); 
-        
-        // Return the saved entry as a response
-        res.status(200).json({ message: 'Contact details saved successfully and email sent!', data: savedEntry });
-    } catch (error) {
-        console.error('Error saving contact details or sending email:', error);
-        res.status(500).json({ message: 'Error saving contact details or sending email.' });
-    }
-});
-
 router.delete('/deactivate/:email', async (req, res) => {
     const { email } = req.params;
     const { password, subscriptionId } = req.body;

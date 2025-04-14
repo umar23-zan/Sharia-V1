@@ -31,6 +31,7 @@ export default function LandingPage() {
   const handleSignupClick = () => navigate('/signup');
   const toggleFAQ = (index) => setOpenIndex(openIndex === index ? null : index);
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const handleBlogClick = () => navigate('/blog-catalogue');
 
   const faqs = [
     {
@@ -170,6 +171,7 @@ export default function LandingPage() {
             <a href="#how-it-works" className="text-gray-600 hover:text-green-600 transition-colors">How It Works</a>
             <a href="#pricing" className="text-gray-600 hover:text-green-600 transition-colors">Pricing</a>
             <a href="#faq" className="text-gray-600 hover:text-green-600 transition-colors">FAQ</a>
+            <a onClick={handleBlogClick} className="text-gray-600 hover:text-green-600 transition-colors">Blogs</a>
           </div>
           
           <div className="flex items-center space-x-4">
@@ -213,6 +215,7 @@ export default function LandingPage() {
             <a href="#how-it-works" className="block text-gray-600 hover:text-green-600 transition-colors">How It Works</a>
             <a href="#pricing" className="block text-gray-600 hover:text-green-600 transition-colors">Pricing</a>
             <a href="#faq" className="block text-gray-600 hover:text-green-600 transition-colors">FAQ</a>
+            <a onClick={handleBlogClick} className="text-gray-600 hover:text-green-600 transition-colors cursor-pointer">Blogs</a>
             <div className="pt-4 flex flex-col space-y-3">
               <button className="bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent transition-colors text-left" onClick={handleLoginClick}>Log in</button>
               <button className="bg-gradient-to-r from-teal-600 to-blue-600  text-white px-4 py-2 rounded-lg transition-colors text-center" onClick={handleSignupClick}>Sign Up</button>

@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Disallow sensitive or internal routes
+Disallow: /profile
+Disallow: /account
+Disallow: /editprofile
+Disallow: /personaldetails
+Disallow: /subscriptiondetails
+Disallow: /paymentmethods
+Disallow: /admin/blogs
+
+# Sitemap location
+Sitemap: https://shariastocks.in/sitemap.xml

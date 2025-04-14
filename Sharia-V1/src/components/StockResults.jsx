@@ -269,7 +269,7 @@ const StockResults = () => {
         const isDuplicate = watchlist.some(item => item.symbol === symbolToAdd);
         if (isDuplicate) {
             setAlertMessage("Stock is already in your watchlist.");
-            setTimeout(() => setAlertMessage(""), 2000);
+            setTimeout(() => setAlertMessage(""), 6000);
             return; 
         }
             const response = await axios.post('/api/watchlist', {
@@ -293,7 +293,7 @@ const StockResults = () => {
                 setAlertMessage("Error adding stock to watchlist.");
             }
         }
-        setTimeout(() => setAlertMessage(""), 2000);
+        setTimeout(() => setAlertMessage(""), 6000);
     };
 
     const StatusBadge = () => (

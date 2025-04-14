@@ -8,7 +8,7 @@ console.log('Scheduler started. Waiting for scheduled jobs.');
 
 const formatDate = (date) => date ? date.toLocaleDateString() : 'N/A';
 
-cron.schedule('* * * * *', async () => {
+cron.schedule('0 0 * * *', async () => {
   console.log('Running daily check for automatic renewal reminders...');
   const reminderDate = new Date();
   reminderDate.setDate(reminderDate.getDate() + 7); // Target date 7 days from now

@@ -216,8 +216,7 @@ router.post('/verify-subscription', async (req, res) => {
       const paymentDetails = await razorpay.payments.fetch(razorpay_payment_id);
       if (paymentDetails.status !== 'captured' && paymentDetails.status !== 'authorized') { // Or just 'captured' depending on flow
             console.error(`Payment ${razorpay_payment_id} status is not 'captured' or 'authorized'. Status: ${paymentDetails.status}`);
-            // Potentially update transaction to 'failed' here or based on specific status
-             transaction.status = 'failed'; // Or a more specific status like 'payment_failed'
+             transaction.status = 'failed'; 
              transaction.updatedAt = new Date();
              await transaction.save();
             return res.status(400).json({ status: 'failed', message: `Payment status is ${paymentDetails.status}` });
@@ -249,53 +248,24 @@ router.post('/verify-subscription', async (req, res) => {
            customerIdForToken = userForPaymentMethod.razorpayCustomerId;
            console.log(`Using existing Razorpay Customer ID: ${customerIdForToken} for tokenization.`);
        } else {
-            // Optionally create a Razorpay customer if one doesn't exist
-            // This might be better done during user signup or first payment attempt
             console.warn(`User ${transaction.userId} does not have a Razorpay Customer ID. Tokenization might be limited or fail without it.`);
-            // If you decide to create a customer here:
-            /*
-            try {
-                const customer = await razorpay.customers.create({
-                    name: userForPaymentMethod.name || 'User ' + transaction.userId, // Get name from user model
-                    email: userForPaymentMethod.email, // Get email from user model
-                    contact: userForPaymentMethod.phone, // Get phone from user model
-                    fail_existing: 0 // Don't fail if email/contact exists, just return existing customer
-                });
-                customerIdForToken = customer.id;
-                console.log(`Created Razorpay Customer ID: ${customerIdForToken}`);
-                // Update user model with this ID
-                await User.findByIdAndUpdate(transaction.userId, { $set: { razorpayCustomerId: customerIdForToken } });
-            } catch (customerError) {
-                 console.error('Error creating Razorpay customer:', customerError);
-            }
-            */
        }
 
 
       if (save_payment_method && paymentDetails.method !== 'upi' && customerIdForToken) { // Only proceed if customer ID exists
         try {
-          // Create token for the payment method using the *Payment ID*
-          // This links the token to a successful transaction.
           const tokenPayload = {
             payment_id: razorpay_payment_id,
             customer_id: customerIdForToken, // Use the fetched/created customer ID
-            // token: { // Optional: Details for creating a token without a payment ID (less common for saving *after* payment)
-            //     method: paymentDetails.method,
-            //     // ... other details depending on method (card number etc.) - REQUIRES PCI COMPLIANCE
-            // }
+           
           };
 
-           // Use the payment ID to create a token
-           // NOTE: Razorpay's `payments.createToken` might not be the standard way.
-           // Often, you fetch the token associated with a payment or use specific tokenization APIs.
-           // Let's assume we fetch the token info if available with the payment.
            const paymentMethodToken = paymentDetails.token_id; // Check if token_id exists on paymentDetails
 
             let paymentTokenIdToSave = null;
 
            if (paymentMethodToken) {
                 console.log(`Token ${paymentMethodToken} already associated with payment ${razorpay_payment_id}`);
-                // Fetch token details if needed - requires customer_id and token_id
                  try {
                      const tokenDetails = await razorpay.customers.fetchToken(customerIdForToken, paymentMethodToken);
                      console.log("Fetched token details:", tokenDetails);
@@ -306,32 +276,12 @@ router.post('/verify-subscription', async (req, res) => {
                  }
 
            } else if (paymentDetails.method === 'card' && paymentDetails.card_id) {
-                // If it's a card payment, a card object (saved card) might exist.
-                // The token might be linked to the card_id rather than directly to the payment token.
-                // Let's try fetching the token associated with the card potentially.
-                // This part is highly dependent on your exact Razorpay setup (Saved Cards vs Tokens API).
 
-                // Simplification: Assume the card_id itself can represent the saved method for recurring.
-                // However, for true tokenization, Razorpay usually returns a token ID.
-                // Let's log a warning if no direct token_id is found.
                 console.warn(`No direct token_id found on payment ${razorpay_payment_id}. Card ID ${paymentDetails.card_id} exists. Saving logic might need adjustment based on Razorpay token/card APIs.`);
-                // For this example, let's proceed *without* a specific token ID if none was returned/found.
-                // In a real scenario, you'd need to ensure you have the correct identifier (token_id or card_id)
-                // that Razorpay Subscriptions API expects for future automatic charges.
-
-                // You might need to explicitly create a token IF the payment didn't generate one automatically
-                // ONLY if you are PCI compliant to handle raw card details. This is generally NOT recommended.
-                // The standard flow relies on Razorpay generating the token during the checkout/payment process.
-
 
            } else {
                console.log(`Payment method ${paymentDetails.method} used for payment ${razorpay_payment_id} does not seem to have an associated reusable token_id.`);
-               // Cannot save this method for recurring payments via tokenization
            }
-
-
-            // Proceed only if we have a token ID (or decide to handle card_id)
-           // if (paymentTokenIdToSave) { // Let's relax this for now to save basic info
 
             const paymentMethodInfo = {
                 userId: transaction.userId,
@@ -351,9 +301,7 @@ router.post('/verify-subscription', async (req, res) => {
                 paymentMethodInfo.cardLast4 = paymentDetails.card.last4;
                 paymentMethodInfo.cardIssuer = paymentDetails.card.issuer;
                 paymentMethodInfo.cardType = paymentDetails.card.type;
-                // DO NOT store expiry month/year unless absolutely necessary and compliant.
-                // Razorpay tokens handle expiry internally.
-                // Store the razorpay card_id if available - useful identifier
+            
                 paymentMethodInfo.razorpayCardId = paymentDetails.card_id;
                 // If we decided to use card_id as the primary identifier when token_id is absent:
                 if (!paymentTokenIdToSave && paymentDetails.card_id) {
@@ -366,9 +314,7 @@ router.post('/verify-subscription', async (req, res) => {
 
             } else if (paymentDetails.method === 'netbanking') {
                  paymentMethodInfo.bank = paymentDetails.bank;
-            } // Add other methods like wallets if needed
-
-             // Update any existing default payment methods for this user
+            }
             await PaymentMethod.updateMany(
                 { userId: transaction.userId, isDefault: true },
                 { $set: { isDefault: false, updatedAt: new Date() } }
@@ -387,11 +333,8 @@ router.post('/verify-subscription', async (req, res) => {
 
         } catch (tokenError) {
           console.error('Error saving payment method:', tokenError);
-          // Decide if this should halt the process or just be logged.
-          // It's important for recurring payments, but the initial subscription might still be valid.
         }
       }
-      // --- End Payment Method Saving Logic ---
 
 
       const { plan, billingCycle, isUpgrade, paymentMode } = transaction.subscriptionDetails;
@@ -1228,13 +1171,15 @@ router.post('/update-payment-mode', async (req, res) => {
    
     
     const subscriptionId = user.subscription.subscriptionId;
+    console.log(subscriptionId)
     let subscription;
    
     try {
       subscription = await razorpay.subscriptions.fetch(subscriptionId);
     } catch (error) {
-      return res.status(400).json({ error: 'Could not fetch subscription details' });
-    }
+      console.error('Razorpay Fetch Error:', error);
+      return res.status(400).json({ error: 'Could not fetch subscription details', details: error.message });
+}
 
     
     if (paymentMode === 'manual' && user.subscription.paymentMode === 'automatic') {

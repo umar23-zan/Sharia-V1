@@ -7,6 +7,7 @@ const subscriptionRoutes = require('./routes/subscriptionRoutes')
 const paymentRoutes = require('./routes/paymentmethods')
 const transactionRoutes = require('./routes/transaction')
 const notificationRoutes = require('./routes/notification')
+const blogRoutes = require('./routes/blogroutes');
 const { initNotificationCron } = require('./cron/notificationCron');
 
 const cors = require('cors');
@@ -30,6 +31,8 @@ app.use('/api/watchlist', watchlistRoutes)
 app.use("/api/payments", paymentRoutes);
 app.use('/api/transaction', transactionRoutes)
 app.use('/api/notifications', notificationRoutes)
+app.use('/api/blogs', blogRoutes);
+
 
 app.use('/uploads', express.static('uploads'));
 
