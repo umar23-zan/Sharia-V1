@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowLeft, Loader2 } from 'lucide-react';
-// import { signup, initiateGoogleSignIn } from '../api/auth';
+import { signup, initiateGoogleSignIn } from '../api/auth';
 import logo from '../images/ShariaStocks-logo/ShariaStocks1.png';
-// import googleLogo from '../images/ShariaStocks-logo/google.png';
+import googleLogo from '../images/ShariaStocks-logo/google.png';
 
 const Signup = () => {
     const [formData, setFormData] = useState({
@@ -227,7 +227,7 @@ const Signup = () => {
                         </button>
                     </div>
 
-                     {/*<div className="relative my-6">
+                     <div className="relative my-6">
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t border-gray-300"></div>
                         </div>
@@ -243,7 +243,7 @@ const Signup = () => {
                     >
                         <img src={googleLogo} alt="" className="w-5 h-5" />
                         Sign up with Google
-                    </button>*/}
+                    </button>
                 </form>
 
                 <div className="mt-8 text-center">

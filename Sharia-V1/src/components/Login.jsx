@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowLeft, Loader2 } from 'lucide-react';
 import shariastocks from '../images/ShariaStocks-logo/ShariaStocks1.png';
-// import googleLogo from '../images/ShariaStocks-logo/google.png';
-// import { login, initiateGoogleSignIn } from '../api/auth';
+import googleLogo from '../images/ShariaStocks-logo/google.png';
+import { login, initiateGoogleSignIn } from '../api/auth';
 
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -184,7 +184,7 @@ const Login = () => {
                         </button>
                     </div>
 
-                     {/*<div className="relative my-6">
+                     <div className="relative my-6">
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t border-gray-300"></div>
                         </div>
@@ -200,7 +200,7 @@ const Login = () => {
                     >
                         <img src={googleLogo} alt="" className="w-5 h-5" />
                         Continue with Google
-                    </button>*/}
+                    </button>
                 </form>
 
                 <div className="mt-8 text-center">
