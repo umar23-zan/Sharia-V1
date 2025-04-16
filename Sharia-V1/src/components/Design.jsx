@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence  } from 'framer-motion';
-import logo from '../images/ShariaStocks-logo/ShariaStocks.svg'
-import logo1 from '../images/ShariaStocks-logo/logo.png'
-import land from '../images/land.png'
+import { motion, AnimatePresence } from 'framer-motion';
+import logo from '../images/ShariaStocks-logo/ShariaStocks.svg';
+import logo1 from '../images/ShariaStocks-logo/logo.png';
+import land from '../images/land.png';
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -50,7 +50,6 @@ export default function LandingPage() {
       question: "What financial ratios do you use for screening?",
       answer: "We analyze several key financial ratios including: Debt to Total Assets (must be less than 33%), Interest Income to Total Revenue (must be less than 5%), and Non-compliant Income to Total Revenue (must be less than 5%)."
     },
-   
   ];
 
   // Animation variants
@@ -74,6 +73,7 @@ export default function LandingPage() {
       }
     }
   };
+  
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
     visible: { 
@@ -131,7 +131,7 @@ export default function LandingPage() {
     },
     {
       name: "Premium",
-      price: "₹ 599",
+      price: "₹ 499",
       period: "/mo",
       description: "Complete Solution for Professional investors",
       popular: false,
@@ -151,9 +151,9 @@ export default function LandingPage() {
 
   return (
     <div className="flex flex-col min-h-screen font-sans overflow-x-hidden">
-      {/* Header - Now with scroll effect */}
-      <header className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'py-2 bg-white shadow-md' : 'py-4 bg-white/90'}`}>
-        <div className="container mx-auto px-6 flex justify-between items-center">
+      {/* Header - Fixed position with better mobile handling */}
+      <header className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'py-2 bg-white shadow-md' : 'py-3 bg-white/90'}`}>
+        <div className="container mx-auto px-4 sm:px-6 flex justify-between items-center">
           <motion.div 
             className="flex items-center" 
             initial={{ opacity: 0 }} 
@@ -161,20 +161,20 @@ export default function LandingPage() {
             transition={{ duration: 0.5 }}
           >
             <div className="flex items-center transform transition hover:scale-105">
-              <img src={logo} alt="logo" className=' w-48 h-14 object-cover '/>
+              <img src={logo} alt="logo" className="w-36 h-10 sm:w-48 sm:h-14 object-cover" />
             </div>
           </motion.div>
           
           {/* Desktop Navigation */}
-          <div className="hidden md:flex space-x-8">
+          <div className="hidden md:flex space-x-4 lg:space-x-8">
             <a href="#features" className="text-gray-600 hover:text-green-600 transition-colors">Features</a>
             <a href="#how-it-works" className="text-gray-600 hover:text-green-600 transition-colors">How It Works</a>
             <a href="#pricing" className="text-gray-600 hover:text-green-600 transition-colors">Pricing</a>
             <a href="#faq" className="text-gray-600 hover:text-green-600 transition-colors">FAQ</a>
-            <a onClick={handleBlogClick} className="text-gray-600 hover:text-green-600 transition-colors">Blogs</a>
+            <a onClick={handleBlogClick} className="text-gray-600 hover:text-green-600 transition-colors cursor-pointer">Blogs</a>
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <motion.button 
               className="bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent transition-colors hidden md:block"
               whileHover={{ scale: 1.05 }}
@@ -183,7 +183,7 @@ export default function LandingPage() {
               Log in
             </motion.button>
             <motion.button 
-              className="bg-gradient-to-r from-teal-600 to-blue-600 text-white px-5 py-2 rounded-lg transition-colors hidden md:block"
+              className="bg-gradient-to-r from-teal-600 to-blue-600 text-white px-3 py-2 sm:px-5 sm:py-2 rounded-lg transition-colors hidden md:block text-sm sm:text-base"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleSignupClick}
@@ -195,6 +195,7 @@ export default function LandingPage() {
             <button 
               className="md:hidden text-gray-600" 
               onClick={toggleMenu}
+              aria-label="Toggle menu"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
@@ -203,66 +204,71 @@ export default function LandingPage() {
           </div>
         </div>
         
-        {/* Mobile Navigation */}
-        <motion.div 
-          className={`md:hidden bg-white ${isMenuOpen ? 'block' : 'hidden'}`}
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: isMenuOpen ? 'auto' : 0, opacity: isMenuOpen ? 1 : 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="px-6 py-4 space-y-4 shadow-lg">
-            <a href="#features" className="block text-gray-600 hover:text-green-600 transition-colors">Features</a>
-            <a href="#how-it-works" className="block text-gray-600 hover:text-green-600 transition-colors">How It Works</a>
-            <a href="#pricing" className="block text-gray-600 hover:text-green-600 transition-colors">Pricing</a>
-            <a href="#faq" className="block text-gray-600 hover:text-green-600 transition-colors">FAQ</a>
-            <a onClick={handleBlogClick} className="text-gray-600 hover:text-green-600 transition-colors cursor-pointer">Blogs</a>
-            <div className="pt-4 flex flex-col space-y-3">
-              <button className="bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent transition-colors text-left" onClick={handleLoginClick}>Log in</button>
-              <button className="bg-gradient-to-r from-teal-600 to-blue-600  text-white px-4 py-2 rounded-lg transition-colors text-center" onClick={handleSignupClick}>Sign Up</button>
-            </div>
-          </div>
-        </motion.div>
+        {/* Mobile Navigation - Improved animation and positioning */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div 
+              className="md:hidden bg-white absolute top-full left-0 right-0 shadow-lg"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="px-6 py-4 space-y-4">
+                <a href="#features" className="block text-gray-600 hover:text-green-600 transition-colors py-2">Features</a>
+                <a href="#how-it-works" className="block text-gray-600 hover:text-green-600 transition-colors py-2">How It Works</a>
+                <a href="#pricing" className="block text-gray-600 hover:text-green-600 transition-colors py-2">Pricing</a>
+                <a href="#faq" className="block text-gray-600 hover:text-green-600 transition-colors py-2">FAQ</a>
+                <a onClick={handleBlogClick} className="block text-gray-600 hover:text-green-600 transition-colors cursor-pointer py-2">Blogs</a>
+                <div className="pt-4 flex flex-col space-y-3">
+                  <button className="bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent transition-colors text-left py-2" onClick={handleLoginClick}>Log in</button>
+                  <button className="bg-gradient-to-r from-teal-600 to-blue-600 text-white px-4 py-2 rounded-lg transition-colors text-center" onClick={handleSignupClick}>Sign Up</button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
-      <section className="bg-[#f0f7ff] w-full overflow-hidden">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-24 flex flex-col md:flex-row items-center justify-between">
+      {/* Hero Section - Improved responsiveness */}
+      <section className="bg-[#f0f7ff] w-full overflow-hidden pt-24 sm:pt-28 md:pt-32">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 flex flex-col md:flex-row items-center justify-between">
           {/* Left Content */}
-          <div className="w-full md:w-1/2 mb-10 md:mb-0 pr-0 md:pr-8">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 leading-tight">
+          <div className="w-full md:w-1/2 mb-8 md:mb-0 pr-0 md:pr-6 lg:pr-8">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 leading-tight">
               <span className="bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent">Ethical Investing Made Simple</span>
             </h1>
-            <p className="text-gray-700 mb-8 text-base sm:text-lg max-w-lg">
+            <p className="text-gray-700 mb-6 sm:mb-8 text-sm sm:text-base md:text-lg max-w-lg">
               Build your halal investment portfolio with confidence. Screen 
               stocks according to Islamic principles and make informed 
               investment decisions.
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-3 sm:gap-4">
               <button 
-                onClick={()=>{navigate('/signup')}}
-                className="bg-gradient-to-r from-teal-600 to-blue-600 text-white px-6 py-3 rounded-full font-medium hover:from-teal-700 hover:to-blue-700 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1"
+                onClick={() => {navigate('/signup')}}
+                className="bg-gradient-to-r from-teal-600 to-blue-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full font-medium hover:from-teal-700 hover:to-blue-700 transition duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1 text-sm sm:text-base"
               >
                 Start Investing
               </button>
-              
             </div>
           </div>
           
-          {/* Right Content - Image */}
-          <div className="w-full md:w-1/2 flex justify-center md:justify-end animate-float">
-            <div className="relative">
+          {/* Right Content - Image with better mobile rendering */}
+          <div className="w-full md:w-1/2 flex justify-center md:justify-end">
+            <div className="relative w-full max-w-sm sm:max-w-md md:max-w-lg">
               <div className="absolute -inset-1 bg-gradient-to-r from-teal-500 to-blue-500 rounded-xl blur opacity-30 group-hover:opacity-40 transition duration-1000"></div>
               <img 
                 src={land} 
                 alt="Ethical Investing" 
-                className="relative rounded-xl w-full max-w-md sm:max-w-lg md:max-w-xl object-cover shadow-2xl hover:shadow-3xl transition duration-300" 
+                className="relative rounded-xl w-full h-auto object-cover shadow-2xl hover:shadow-3xl transition duration-300" 
               />
             </div>
           </div>
         </div>
       </section>
 
-     {/* Combined Features Section */}
-<section id="features" className="py-20 px-6 bg-gradient-to-b from-[#f0f7ff] to-white">
+      {/* Combined Features Section */}
+      <section id="features" className="py-20 px-6 bg-gradient-to-b from-[#f0f7ff] to-white">
   <div className="max-w-6xl mx-auto">
     <motion.div
       initial="hidden"
@@ -398,7 +404,7 @@ export default function LandingPage() {
     
     
   </div>
-</section>
+      </section>
 
       {/* How It Works Section */}
       <section id="how-it-works" className="py-20 px-6 bg-[#f0f7ff]">
@@ -514,9 +520,9 @@ export default function LandingPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <h3 className="font-bold text-xl mb-3">Global Coverage</h3>
+                <h3 className="font-bold text-xl mb-3">Stocks Coverage</h3>
                 <p className="text-gray-600 text-center">
-                  Access to stocks from markets worldwide for diverse investment opportunities.
+                  Access to stocks from NSE - National Stock Exchange for diverse investment opportunities.
                 </p>
               </motion.div>
               
@@ -557,32 +563,32 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id='pricing' className="py-20 bg-white">
+      <section id='pricing' className="py-12 md:py-20 bg-white">
         <motion.div 
-          className="max-w-6xl mx-auto px-6"
+          className="max-w-6xl mx-auto px-4 md:px-6"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.1 }}
           variants={staggerContainer}
         >
           <motion.h2 
-            className="text-4xl font-bold text-center mb-3 bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent"
+            className="text-3xl md:text-4xl font-bold text-center mb-2 md:mb-3 bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent"
             variants={fadeIn}
           >
             Simple, Transparent Pricing
           </motion.h2>
           <motion.p 
-            className="text-center text-gray-600 mb-20"
+            className="text-center text-gray-600 mb-10 md:mb-20 text-sm md:text-base"
             variants={fadeIn}
           >
             Choose the plan that works best for your investment journey
           </motion.p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             {plans.map((plan, index) => (
               <motion.div 
                 key={plan.name}
-                className={`bg-white rounded-lg ${plan.popular ? 'border-2 border-teal-500 shadow-xl' : 'border border-gray-200 shadow-md'} p-8 relative transform transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl`}
+                className={`bg-white rounded-lg ${plan.popular ? 'border-2 border-teal-500 shadow-xl' : 'border border-gray-200 shadow-md'} p-4 md:p-8 relative transform transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl`}
                 variants={fadeIn}
                 onMouseEnter={() => setSelectedPlan(index)}
                 onMouseLeave={() => setSelectedPlan(null)}
@@ -590,31 +596,31 @@ export default function LandingPage() {
                 transition={{ type: "spring", stiffness: 300 }}
               >
                 {plan.popular && (
-                  <div className="absolute -top-4 right-6 bg-gradient-to-r from-teal-500 to-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium shadow-md">
+                  <div className="absolute -top-3 md:-top-4 right-4 md:right-6 bg-gradient-to-r from-teal-500 to-blue-500 text-white px-3 py-1 rounded-full text-xs md:text-sm font-medium shadow-md">
                     Most Popular
                   </div>
                 )}
-                <div className="mb-6">
-                  <h3 className="text-xl font-semibold mb-1">{plan.name}</h3>
-                  <div className="text-3xl font-bold mb-1">
-                    {plan.price} {plan.period && <span className="text-lg font-normal text-gray-500">{plan.period}</span>}
+                <div className="mb-4 md:mb-6">
+                  <h3 className="text-lg md:text-xl font-semibold mb-1">{plan.name}</h3>
+                  <div className="text-2xl md:text-3xl font-bold mb-1">
+                    {plan.price} {plan.period && <span className="text-base md:text-lg font-normal text-gray-500">{plan.period}</span>}
                   </div>
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6">
                     {plan.description}
                   </p>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-2 md:space-y-3">
                   {plan.features.map((feature, i) => (
                     <div key={i} className="flex items-center">
                       <svg 
-                        className={`h-5 w-5 ${feature.included ? 'text-green-500' : 'text-gray-300'} mr-2`} 
+                        className={`h-4 w-4 md:h-5 md:w-5 ${feature.included ? 'text-green-500' : 'text-gray-300'} mr-2`} 
                         viewBox="0 0 20 20" 
                         fill="currentColor"
                       >
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
-                      <span className={feature.included ? 'text-gray-700' : 'text-gray-400'}>
+                      <span className={`text-sm md:text-base ${feature.included ? 'text-gray-700' : 'text-gray-400'}`}>
                         {feature.name}
                       </span>
                     </div>
@@ -622,7 +628,7 @@ export default function LandingPage() {
                 </div>
 
                 <motion.button 
-                  className={`mt-8 w-full bg-${plan.color} hover:opacity-90 text-white py-3 px-4 rounded-md transition-all duration-300 transform ${selectedPlan === index ? 'scale-105' : ''}`}
+                  className={`mt-6 md:mt-8 w-full bg-${plan.color} hover:opacity-90 text-white py-2 md:py-3 px-4 rounded-md transition-all duration-300 transform ${selectedPlan === index ? 'scale-105' : ''} text-sm md:text-base`}
                   onClick={plan.onClick}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -740,9 +746,10 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
-      <footer className="bg-gradient-to-r from-blue-900 to-blue-800 text-white">
-        <div className="max-w-6xl mx-auto px-6 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+      {/* Footer - Improved responsiveness */}
+      <footer className="bg-gradient-to-r from-blue-900 to-blue-800 text-white mt-auto">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12">
             {/* Company Info */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -751,24 +758,29 @@ export default function LandingPage() {
               transition={{ duration: 0.6 }}
             >
               <div className="flex items-center mb-4">
-                <img src={logo1} alt="logo" className=' w-58 h-18 object-cover '/>
+                <img src={logo1} alt="logo" className="w-36 sm:w-48 h-auto object-contain" />
               </div>
-              <p className="text-gray-300 mb-6">
+              <p className="text-gray-300 mb-6 text-sm sm:text-base">
                 Your trusted platform for halal stock screening and investment guidance according to Islamic principles.
               </p>
               <div className="flex space-x-5">
-                {['facebook', 'twitter', 'instagram'].map(social => (
+                {[
+                  { name: 'facebook', url: 'https://www.facebook.com/profile.php?id=61574440572509' },
+                  { name: 'instagram', url: 'https://www.instagram.com/shariastocks.in?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==' }
+                ].map(social => (
                   <motion.a 
-                    key={social}
-                    href="#" 
+                    key={social.name}
+                    href={social.url}
                     className="text-gray-300 hover:text-white transition-colors duration-300"
                     whileHover={{ scale: 1.2 }}
                     whileTap={{ scale: 0.9 }}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Follow us on ${social.name}`}
                   >
-                    <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                      {social === 'facebook' && <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />}
-                      {social === 'twitter' && <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />}
-                      {social === 'instagram' && <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />}
+                    <svg className="h-5 w-5 sm:h-6 sm:w-6" fill="currentColor" viewBox="0 0 24 24">
+                      {social.name === 'facebook' && <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />}
+                      {social.name === 'instagram' && <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />}
                     </svg>
                   </motion.a>
                 ))}
@@ -782,18 +794,23 @@ export default function LandingPage() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <h3 className="text-lg font-bold mb-6">Quick Links</h3>
-              <ul className="space-y-3">
-                {['features', 'how-it-works', 'pricing', 'faq'].map((link, i) => (
+              <h3 className="text-base sm:text-lg font-bold mb-4 sm:mb-6">Quick Links</h3>
+              <ul className="space-y-2 sm:space-y-3">
+                {['Features', 'How It Works', 'Pricing', 'FAQ'].map((link, i) => (
                   <motion.li key={i} whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 400 }}>
-                    <a href={`#${link}`} className="text-gray-300 hover:text-white transition-colors duration-300">{link}</a>
+                    <a 
+                      href={`#${link.toLowerCase().replace(/\s+/g, '-')}`} 
+                      className="text-gray-300 hover:text-white transition-colors duration-300 text-sm sm:text-base"
+                    >
+                      {link}
+                    </a>
                   </motion.li>
                 ))}
               </ul>
             </motion.div>
 
             {/* Resources */}
-            {/* <motion.div
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -801,33 +818,37 @@ export default function LandingPage() {
             >
               <h3 className="text-lg font-bold mb-6">Resources</h3>
               <ul className="space-y-3">
-                {['Blog', 'Knowledge Center', 'Islamic Finance', 'Terms of Service', 'Privacy Policy'].map((link, i) => (
+              {[
+                  { title: 'Blog', path: '/blog-catalogue' },
+                  { title: 'About', path: '/about' },
+                  { title: 'Terms of Service', path: '/terms' },
+                  { title: 'Privacy Policy', path: '/privacy' }
+                ].map((link, i) => (
                   <motion.li key={i} whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 400 }}>
-                    <a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">{link}</a>
+                    <a href={`${link.path}`} className="text-gray-300 hover:text-white transition-colors duration-300">{link.title}</a>
                   </motion.li>
                 ))}
               </ul>
-            </motion.div> */}
+            </motion.div>
 
-            {/* Contact */}
+            {/* Contact - Adjusted for mobile */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.6 }}
+              className="sm:col-span-2 lg:col-span-1"
             >
-              <h3 className="text-lg font-bold mb-6">Contact Us</h3>
-              <ul className="space-y-5">
+              <h3 className="text-base sm:text-lg font-bold mb-4 sm:mb-6">Contact Us</h3>
+              <ul className="space-y-3 sm:space-y-5">
                 {[
                   { icon: 'email', text: 'contact@shariastocks.in' },
                 ].map((item, i) => (
                   <motion.li key={i} className="flex items-start" whileHover={{ x: 5 }}>
-                    <svg className="h-6 w-6 text-green-400 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 sm:h-6 sm:w-6 text-green-400 mr-2 sm:mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       {item.icon === 'email' && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />}
-                      {item.icon === 'phone' && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />}
-                      {item.icon === 'location' && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />}
                     </svg>
-                    <span className="text-gray-300">{item.text}</span>
+                    <span className="text-gray-300 text-sm sm:text-base">{item.text}</span>
                   </motion.li>
                 ))}
               </ul>
@@ -835,7 +856,7 @@ export default function LandingPage() {
           </div>
 
           <motion.div 
-            className="border-t border-blue-700 mt-16 pt-8 text-center text-gray-400"
+            className="border-t border-blue-700 mt-10 sm:mt-16 pt-6 sm:pt-8 text-center text-gray-400 text-xs sm:text-sm"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -845,6 +866,6 @@ export default function LandingPage() {
           </motion.div>
         </div>
       </footer>
-        </div>
-    )
+    </div>
+  );
 }

@@ -5,6 +5,7 @@ import { LineChart, Shield, Sparkles, Heart, ArrowLeft, LoaderCircle } from 'luc
 import Card from './Card';
 const PriceChart = lazy(() => import('./PriceChart'));
 const Header = lazy(() => import('./Header'));
+import { getUserData } from '../api/auth';
 
 const PriceChartSkeleton = () => (
     <div className="animate-pulse bg-gray-100 h-64 w-full rounded-lg">
@@ -17,11 +18,11 @@ const StockResults = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { symbol } = useParams();
-
+    const email = localStorage.getItem('userEmail')
     const prevSymbolRef = useRef(null);
 
     const [user, setUser] = useState(null);
-    const [userId, setUserId] = useState(null);
+    const userId = localStorage.getItem('userId');
     const [isFreePlan, setIsFreePlan] = useState(false);
     const [companyDetails, setCompanyDetails] = useState(null);
     const [stockData, setStockData] = useState(null);
@@ -36,7 +37,7 @@ const StockResults = () => {
     const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
     const [isDesktop, setIsDesktop] = useState(false);
     const [flippedCardId, setFlippedCardId] = useState(null);
-    
+
 
     const toggleCardFlip = useCallback((id) => {
         setFlippedCardId(current => current === id ? null : id);
@@ -77,18 +78,22 @@ const StockResults = () => {
     }, [stockData]);
 
     useEffect(() => {
-        const storedUser = location.state?.user;
-        const storedUserId = localStorage.getItem('userId');
+        if (email) {
+            fetchUserData();
+          }
+    }, []);
 
-        if (storedUser) {
-            setUser(storedUser);
-            setIsFreePlan(storedUser.subscription?.plan === 'free');
+    const fetchUserData = async () => {
+        try {
+          const userData = await getUserData(email);
+          setUser(userData);
+          setIsInWatchlist(userData.watchlist.some(item => item.symbol))
+            setWatchlist(userData.watchlist)
+            setIsFreePlan(userData.subscription?.plan === 'free');
+        } catch (error) {
+          console.error('Error fetching user data:', error);
         }
-
-        if (storedUserId) {
-            setUserId(storedUserId);
-        }
-    }, [location.state]);
+      };
 
     useEffect(() => {
         const checkDesktopSize = () => {
@@ -102,6 +107,28 @@ const StockResults = () => {
         };
     }, []);
 
+//     useEffect(() => {
+//             if (!userId) {
+//                 console.error("User ID is missing");
+//                 setLoading(false);
+//                 setError("User ID is missing. Please log in again.");
+//                 return;
+//             }
+//     const fetchWatchlist = async () => {
+//         try {
+//             const response = await axios.get(`/api/watchlist/${userId}`);
+//             setWatchlist(response.data.watchlist || []);
+//             console.log(watchlist)
+//         } catch (error) {
+//             console.error("Error fetching watchlist:", error);
+//             setError(error.response?.data?.message || "Failed to fetch watchlist");
+//         } finally {
+//             setLoading(false);
+//         }
+//     };
+
+//     fetchWatchlist();
+// }, [userId]);
    
 
     const fetchStockResults = useCallback(async () => {
@@ -260,41 +287,56 @@ const StockResults = () => {
 
 
 
-    const addToWatchlist = async () => {
+    const toggleWatchlist = async () => {
         try {
             const userId = localStorage.getItem('userId');
-            const symbolToAdd = symbol; 
-
-        
-        const isDuplicate = watchlist.some(item => item.symbol === symbolToAdd);
-        if (isDuplicate) {
-            setAlertMessage("Stock is already in your watchlist.");
-            setTimeout(() => setAlertMessage(""), 6000);
-            return; 
-        }
-            const response = await axios.post('/api/watchlist', {
-                userId,
-                symbol,
-                companyName: companyDetails.company_name,
-                stockData
-            });
-            setWatchlist([...watchlist, { symbol, companyName: companyDetails.company_name }]);
-            setAlertMessage(response.data.message);
-
-            if (response.status === 201) {
+            const symbolToToggle = symbol;
+            
+            // If already in watchlist, remove it
+            if (isInWatchlist) {
+                const response = await axios.delete(`/api/watchlist/${userId}/${symbolToToggle}`);
+                
+                // Update local state to remove the stock
+                setWatchlist(watchlist.filter(item => item.symbol !== symbolToToggle));
+                setIsInWatchlist(false);
+                setAlertMessage(response.data.message || "Stock removed from watchlist");
+            } 
+            // Otherwise add it to watchlist
+            else {
+                // Check for duplicates (although this should not happen with our state tracking)
+                const isDuplicate = watchlist.some(item => item.symbol === symbolToToggle);
+                if (isDuplicate) {
+                    setAlertMessage("Stock is already in your watchlist.");
+                    setTimeout(() => setAlertMessage(""), 6000);
+                    return;
+                }
+                
+                const response = await axios.post('/api/watchlist', {
+                    userId,
+                    symbol,
+                    companyName: companyDetails.company_name,
+                    stockData
+                });
+                
+                setWatchlist([...watchlist, { symbol, companyName: companyDetails.company_name }]);
                 setIsInWatchlist(true);
+                setAlertMessage(response.data.message || "Stock added to watchlist");
             }
         } catch (error) {
             if (error.response?.status === 400) {
                 setAlertMessage(error.response.data.message);
             } else if (error.response?.status === 403) {
                 setAlertMessage(error.response.data.error);
+            } else if (error.response?.status === 404) {
+                setAlertMessage(error.response.data.error);
             } else {
-                setAlertMessage("Error adding stock to watchlist.");
+                setAlertMessage(isInWatchlist ? 
+                    "Error removing stock from watchlist." : 
+                    "Error adding stock to watchlist.");
             }
         }
         setTimeout(() => setAlertMessage(""), 6000);
-    };
+    }
 
     const StatusBadge = () => (
         <div className={`flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl ${
@@ -309,9 +351,9 @@ const StockResults = () => {
 
     const Headers = () => {
         const [isTooltipVisible, setIsTooltipVisible] = useState(false);
+        
         return (
-            
-    <div className="  sticky top-0 bg-white p-3 sm:p-4  z-10">
+            <div className="sticky top-0 bg-white p-3 sm:p-4 z-10">
                 <div className="container mx-auto flex items-center justify-between">
                     <div className="flex items-center flex-1 min-w-0">
                         <ArrowLeft className="w-5 h-5 text-gray-700 mr-3 sm:mr-4 cursor-pointer flex-shrink-0" onClick={() => navigate(-1)} />
@@ -321,25 +363,26 @@ const StockResults = () => {
                     </div>
                     {!isFreePlan && 
                     <div className="relative ml-4" onMouseEnter={() => setIsTooltipVisible(true)} onMouseLeave={() => setIsTooltipVisible(false)}>
-                    <Heart className={`w-5 h-5 cursor-pointer ${isInWatchlist ? 'text-red-500 fill-current' : 'text-gray-700'}`} onClick={addToWatchlist} />
-                    {alertMessage && (
-                        <div className="alert bg-red-500 text-white p-2 absolute right-0 mt-2 w-48 sm:w-52 rounded-md z-20 shadow-md text-sm">
-                            {alertMessage}
-                        </div>
-                    )}
-                    {isTooltipVisible && (
-                        <div className="absolute right-0 mt-2 w-28 sm:w-32 bg-gray-800 text-white text-xs sm:text-sm rounded-md p-2 z-20 shadow-md">
-                            Add to watchlist
-                        </div>
-                    )}
-                </div>
+                        <Heart 
+                            className={`w-5 h-5 cursor-pointer ${isInWatchlist ? 'text-red-500 fill-current' : 'text-gray-700'}`} 
+                            onClick={toggleWatchlist} 
+                        />
+                        {alertMessage && (
+                            <div className="alert bg-red-500 text-white p-2 absolute right-0 mt-2 w-48 sm:w-52 rounded-md z-20 shadow-md text-sm">
+                                {alertMessage}
+                            </div>
+                        )}
+                        {isTooltipVisible && (
+                            <div className="absolute right-0 mt-2 w-28 sm:w-32 bg-gray-800 text-white text-xs sm:text-sm rounded-md p-2 z-20 shadow-md">
+                                {isInWatchlist ? 'Remove from watchlist' : 'Add to watchlist'}
+                            </div>
+                        )}
+                    </div>
                     }
-                    
                 </div>
-            </div>
-        );
-    };
-
+        </div>
+    )
+}
     
 
     if (viewLimitReached) {

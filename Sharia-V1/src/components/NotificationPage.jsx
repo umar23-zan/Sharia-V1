@@ -108,6 +108,8 @@ const NotificationsPage = () => {
     }
   ];
 
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
   return (
     <div>
       <div className="hidden lg:block">
@@ -126,23 +128,15 @@ const NotificationsPage = () => {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <div className="relative flex items-center">
-              <div className="absolute left-3 text-gray-600">
-                <Search size={18} />
-              </div>
-              <input 
-                type="text" 
-                placeholder="Search notifications..." 
-                className="pl-10 pr-4 py-2 border bg-white/90 rounded-full w-64 text-sm focus:outline-none focus:ring-1 focus:ring-blue-200"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
             <div className="relative">
               <Bell size={22} className="text-white" />
-              <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">
-                {notifications.filter(n => !n.isRead).length}
-              </div>
+              
+              {/* Only show badge if there are unread notifications */}
+              {unreadCount > 0 && (
+                <div className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">
+                  {unreadCount}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -159,26 +153,18 @@ const NotificationsPage = () => {
             <p className="text-white/80">Stay informed about your investments</p>
           </div>
           <div className="relative">
-            <Bell className="w-6 h-6 text-white" />
-            <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">
-              {notifications.filter(n => !n.isRead).length}
-            </div>
+            <Bell size={22} className="text-white" />
+            
+            {/* Only show badge if there are unread notifications */}
+            {unreadCount > 0 && (
+              <div className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">
+                {unreadCount}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Mobile Search */}
-        <div className="relative flex items-center mb-4">
-          <div className="absolute left-3 text-white/70">
-            <Search size={18} />
-          </div>
-          <input 
-            type="text" 
-            placeholder="Search notifications..." 
-            className="pl-10 pr-4 py-2 border bg-white/20 text-white rounded-lg w-full text-sm focus:outline-none focus:ring-1 focus:ring-white/30 placeholder-white/70"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+        
 
         {/* Mobile Tabs */}
         <div className="overflow-x-auto pb-2 -mx-4 px-4">

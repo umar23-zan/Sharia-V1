@@ -307,13 +307,15 @@ router.get('/user/:email', async (req, res) => {
 // Example of the updateUserData function
 router.put('/user/:email', async (req, res) => {
     const email = req.params.email;
-    const { name, contactNumber, doorNumber, streetName, city, country, pincode } = req.body;
+    const { name, contactNumber} = req.body;
+    // , doorNumber, streetName, city, country, pincode 
 
     try {
         // Update the user data
         const user = await User.findOneAndUpdate(
             { email },
-            { name, contactNumber, doorNumber, streetName, city, country, pincode },
+            { name, contactNumber},
+            // , doorNumber, streetName, city, country, pincode 
             { new: true } // Return the updated document
         );
 
@@ -325,11 +327,11 @@ router.put('/user/:email', async (req, res) => {
                 name: user.name,
                 email: user.email,
                 contactNumber: user.contactNumber,
-                doorNumber: user.doorNumber,
-                streetName: user.streetName,
-                city: user.city,
-                country: user.country,
-                pincode: user.pincode,
+                // doorNumber: user.doorNumber,
+                // streetName: user.streetName,
+                // city: user.city,
+                // country: user.country,
+                // pincode: user.pincode,
             }
         });
     } catch (error) {

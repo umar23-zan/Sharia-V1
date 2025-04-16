@@ -12,6 +12,7 @@ import {
   Clock,
   X, 
   ChevronRight, 
+  ChevronLeft,
   Trash2,
   Save
 } from 'lucide-react';
@@ -265,9 +266,19 @@ console.log(user)
     <div className=" min-h-screen">
       <Suspense fallback={<div>Loading...</div>}>
       <Header />
+      <div className='lg:ml-20'>
+            <button 
+              className="group flex items-center text-gray-600 hover:text-purple-700 mb-6 transition duration-200" 
+              onClick={() => navigate(-1)}
+              aria-label="Go Back"
+            >
+              <ChevronLeft className="w-5 h-5 mr-1 group-hover:transform group-hover:-translate-x-1 transition-transform duration-200" />
+              <span className="font-medium">Go Back</span>
+            </button>
+          </div>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 sm:py-0 lg:px-8 lg:py-8">
         <div className="flex flex-col lg:flex-row gap-8">
 
           {/* Main Content Area */}
@@ -490,16 +501,18 @@ console.log(user)
               
               {/* Save button */}
               {!hasPendingChange && (
-                <button
-                  onClick={handleSave}
-                  disabled={loading}
-                  className={`w-full flex items-center justify-center py-3 px-4 rounded-xl text-white font-medium ${
-                    loading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
-                  }`}
-                >
-                  <Save className="w-5 h-5 mr-2" />
-                  {loading ? 'Saving...' : 'Save Changes'}
-                </button>
+                <div className='flex justify-end'>
+                  <button
+                    onClick={handleSave}
+                    disabled={loading}
+                    className={` flex items-center justify-center py-3 px-4 rounded-xl text-white font-medium ${
+                      loading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
+                    }`}
+                  >
+                    <Save className="w-5 h-5 mr-2" />
+                    {loading ? 'Saving...' : 'Save Changes'}
+                  </button>
+                </div>
               )}
             </>
           )}
@@ -642,9 +655,9 @@ console.log(user)
                   </div>
                 </div>
               </div>
-            </div>
           </div>
         </div>
+      </div>
        
 
         {showDeactivateModal && (

@@ -32,6 +32,9 @@ import RoleAIBlog from './blogs/RoleAIBlog';
 import HalalStockblog from './blogs/HalalStockblog';
 import FinancialRatios from './blogs/FinancialRatios';
 import HowItWorks from './blogs/HowItWorks';
+import About from './components/About';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsAndConditions from './components/TermsAndConditions';
 
 const App = () => {
   const userId = localStorage.getItem('userId');
@@ -55,6 +58,9 @@ const App = () => {
                     <Route path="/halal-stock" element={<HalalStockblog />} />
                     <Route path="/financial-ratios" element={<FinancialRatios />} />
                     <Route path="/how-it-works" element={<HowItWorks />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/privacy" element={<PrivacyPolicy />} />
+                    <Route path="/terms" element={<TermsAndConditions />} />
                     {/* Protected Routes */}
                 <Route
                 path="/profile"

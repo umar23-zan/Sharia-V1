@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Camera, Settings, LogOut, ChevronLeft, AlertTriangle, Loader2 } from 'lucide-react';
+import { ArrowLeft, Camera, Settings, LogOut, ChevronLeft, AlertTriangle, Loader2, ClockIcon, EditIcon, UserIcon } from 'lucide-react';
 import account from '../images/account-icon.svg'
 import logo from '../images/ShariaStocks-logo/logo1.jpeg'
 const Header = lazy(() => import('./Header'));
@@ -226,7 +226,7 @@ const Profile = () => {
                 {[
                   { icon: '👤', title: 'Account Settings', subtitle: '', path: '/account' },
                   { icon: '🔔', title: 'Notifications', subtitle: 'Customize your alerts', badge: '', path: '/notificationpage' },
-                  { icon: '💳', title: 'Payment Methods', subtitle: 'Manage your payments', path: '/paymentmethods' }
+                  // { icon: '💳', title: 'Payment Methods', subtitle: 'Manage your payments', path: '/paymentmethods' }
                 ].map((item) => (
                   <button
                     key={item.title}
@@ -251,120 +251,134 @@ const Profile = () => {
 
             {/* Right Column - Premium Plan */}
             <div className="lg:col-span-2">
-              {isFree ? (
-                <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-8 text-white">
-                  <div className="flex justify-between items-start mb-8">
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-white/20 rounded-xl">
-                          <Settings className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <h2 className="text-2xl font-semibold sm:text-md">Premium Plan</h2>
-                          <p className="text-white/80 sm:text-md">Unlock exclusive features</p>
+                {isFree ? (
+                  <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-8 text-white shadow-lg overflow-hidden relative">
+                    {/* Decorative background elements */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32"></div>
+                    <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/5 rounded-full -ml-20 -mb-20"></div>
+                    
+                    <div className="flex flex-col sm:flex-row justify-between items-start mb-8 relative z-10">
+                      <div className="mb-4 sm:mb-0">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="p-2 bg-white/20 rounded-xl">
+                            <Settings className="w-6 h-6" />
+                          </div>
+                          <div>
+                            <h2 className="text-2xl font-semibold">Premium Plan</h2>
+                            <p className="text-white/80">Unlock exclusive features</p>
+                          </div>
                         </div>
                       </div>
+                      <button 
+                        className="px-6 py-2.5 bg-white text-blue-600 rounded-xl font-medium hover:bg-white/90 cursor-pointer transition-colors shadow-md transform hover:scale-105 transition-transform duration-200"
+                        onClick={() => navigate('/subscriptiondetails')}
+                        aria-label="Upgrade to Premium"
+                      >
+                        Upgrade Now
+                      </button>
                     </div>
-                    <button 
-                      className="px-6 py-2.5 bg-white text-blue-600 rounded-xl font-medium hover:bg-white/90 cursor-pointer transition-colors" 
-                      onClick={() => navigate('/subscriptiondetails')}
-                      aria-label="Upgrade to Premium"
-                    >
-                      Upgrade Now
-                    </button>
-                  </div>
 
-                  <div className="grid grid-cols-1 gap-6">
-                    {[
-                      {
-                        number: 1,
-                        title: 'Real-time Alerts',
-                        description: 'Get instant notifications for price changes and market movements',
-                        icon: '⚡'
-                      },
-                      {
-                        number: 2,
-                        title: 'Portfolio Analytics',
-                        description: 'Advanced insights and performance tracking with detailed metrics',
-                        icon: '📊'
-                      },
-                      {
-                        number: 3,
-                        title: 'Expert Reports',
-                        description: 'Comprehensive shariah compliance analysis and recommendations',
-                        icon: '📑'
-                      }
-                    ].map((feature) => (
-                      <div key={feature.number} className="flex gap-4 p-4 bg-white/10 rounded-xl">
-                        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-xl">
-                          {feature.icon}
+                    <div className="grid grid-cols-1 gap-4 relative z-10">
+                      {[
+                        {
+                          id: 1,
+                          title: 'Real-time Alerts',
+                          description: 'Get instant notifications for price changes and market movements',
+                          icon: '⚡'
+                        },
+                        {
+                          id: 2,
+                          title: 'Portfolio Analytics',
+                          description: 'Advanced insights and performance tracking with detailed metrics',
+                          icon: '📊'
+                        },
+                        {
+                          id: 3,
+                          title: 'Expert Reports',
+                          description: 'Comprehensive shariah compliance analysis and recommendations',
+                          icon: '📑'
+                        }
+                      ].map((feature) => (
+                        <div key={feature.id} className="flex gap-4 p-4 bg-white/10 rounded-xl hover:bg-white/20 transition-colors duration-200">
+                          <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-xl shadow-inner">
+                            {feature.icon}
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-medium mb-1">{feature.title}</h3>
+                            <p className="text-white/80">{feature.description}</p>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="text-lg font-medium mb-1">{feature.title}</h3>
-                          <p className="text-white/80">{feature.description}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-8 text-white">
-                  <div className="flex justify-between items-start mb-8">
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-white/20 rounded-xl">
-                          <Settings className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <h2 className="text-2xl font-semibold sm:text-md">Plan Details</h2>
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   </div>
-
-                  <div className="grid grid-cols-1 gap-6">
-                    {[
-                      {
-                        number: 1,
-                        title: 'Plan',
-                        description: `${user.subscription.plan}`,
-                        icon: '⚡'
-                      },
-                      {
-                        number: 2,
-                        title: 'Status',
-                        description: `${user.subscription.status}`,
-                        icon: '📊'
-                      },
-                      {
-                        number: 3,
-                        title: 'Billing Cycle',
-                        description: `${user.subscription.billingCycle}`,
-                        icon: '📑'
-                      },
-                    ].map((feature) => (
-                      <div key={feature.number} className="flex gap-4 p-4 bg-white/10 rounded-xl">
-                        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-xl">
-                          {feature.icon}
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-medium mb-1">{feature.title}</h3>
-                          <p className="text-white/80">{feature.description}</p>
+                ) : (
+                  <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-8 text-white shadow-lg overflow-hidden relative">
+                    {/* Decorative background elements */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32"></div>
+                    <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/5 rounded-full -ml-20 -mb-20"></div>
+                    
+                    <div className="flex justify-between items-start mb-8 relative z-10">
+                      <div>
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="p-2 bg-white/20 rounded-xl">
+                            <Settings className="w-6 h-6" />
+                          </div>
+                          <div>
+                            <h2 className="text-2xl font-semibold">Plan Details</h2>
+                            <p className="text-white/80">Your current subscription</p>
+                          </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+                      
+                      <div className="px-4 py-1.5 bg-green-500/20 rounded-lg text-green-100 font-medium">
+                        Active
+                      </div>
+                    </div>
 
-              <button 
-                onClick={handleLogout}
-                className="w-full mt-4 p-4 border-2 border-red-50 border-solid bg-white rounded-xl text-red-600 font-medium hover:bg-red-50 transition-colors flex items-center justify-center gap-2"
-                aria-label="Log Out"
-              >
-                <LogOut className="w-5 h-5" />
-                Log Out of Account
-              </button>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 relative z-10">
+                      {[
+                        {
+                          id: 1,
+                          title: 'Plan',
+                          description: `${user.subscription.plan}`,
+                          icon: '⭐'
+                        },
+                        {
+                          id: 2,
+                          title: 'Status',
+                          description: `${user.subscription.status}`,
+                          icon: '✅'
+                        },
+                        {
+                          id: 3,
+                          title: 'Billing Cycle',
+                          description: `${user.subscription.billingCycle}`,
+                          icon: '🔄'
+                        },
+                      ].map((detail) => (
+                        <div key={detail.id} className="flex gap-3 p-4 bg-white/10 rounded-xl">
+                          <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-lg">
+                            {detail.icon}
+                          </div>
+                          <div>
+                            <h3 className="text-md font-medium mb-0.5">{detail.title}</h3>
+                            <p className="text-white/90 font-semibold">{detail.description}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                 )}
+            
+                
+                <button 
+                  onClick={handleLogout}
+                  className="w-full mt-4 p-4 border border-red-100 bg-white rounded-xl text-red-600 font-medium hover:bg-red-50 transition-colors flex items-center justify-center gap-2 shadow-sm"
+                  aria-label="Log Out"
+                >
+                  <LogOut className="w-5 h-5" />
+                  Log Out
+                </button>
             </div>
           </div>
         </div>
