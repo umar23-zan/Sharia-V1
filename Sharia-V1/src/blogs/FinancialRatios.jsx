@@ -1,8 +1,9 @@
 import React from 'react';
 import { Calculator, DollarSign, PieChart, BarChart3, TrendingUp, ArrowRight } from 'lucide-react';
-import ratios from '../images/Blog-pics/ratios.png'
+import { useNavigate } from 'react-router-dom';
 
 function FinancialRatios() {
+  const navigate = useNavigate()
   const IslamicImage = ({ src, alt, caption }) => {
     return (
       <div className="my-8">
@@ -57,10 +58,7 @@ function FinancialRatios() {
             </div>
           </div>
         </section>
-        <IslamicImage 
-          src={ratios}
-          alt="Islamic finance concept" 
-        />
+       
 
         {/* Introduction */}
         <section className="bg-white rounded-lg shadow-md p-6 md:p-8 mb-10">
@@ -331,7 +329,7 @@ function FinancialRatios() {
               <span>Consider consulting with a Shariah-compliant financial advisor</span>
             </li>
           </ul>
-          <button className="bg-white text-emerald-700 font-medium py-2 px-6 rounded-full hover:bg-emerald-100 transition duration-300">
+          <button onClick={() => navigate('/signup')} className="bg-white text-emerald-700 font-medium py-2 px-6 rounded-full hover:bg-emerald-100 transition duration-300">
             Start Investing Today
           </button>
         </section>
@@ -398,29 +396,6 @@ function FinancialRatios() {
         </section>
       </main>
 
-      <footer className="bg-emerald-900 text-white py-10">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between">
-            <div className="mb-6 md:mb-0">
-              <h3 className="text-xl font-bold mb-4">Islamic Finance Insights</h3>
-              <p className="text-emerald-200 max-w-md">
-                Providing educational content on ethical investing through Islamic principles.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-medium mb-2">Connect With Us</h4>
-              <div className="flex space-x-4">
-                <a href="#" className="text-emerald-200 hover:text-white transition duration-300">Twitter</a>
-                <a href="#" className="text-emerald-200 hover:text-white transition duration-300">LinkedIn</a>
-                <a href="#" className="text-emerald-200 hover:text-white transition duration-300">Facebook</a>
-              </div>
-            </div>
-          </div>
-          <div className="border-t border-emerald-800 mt-8 pt-6 text-sm text-emerald-300">
-            <p>© {new Date().getFullYear()} Islamic Finance Insights. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

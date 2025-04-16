@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { BookOpen, AlertTriangle, Check, X, Filter, ChevronDown, ChevronUp, ExternalLink, HelpCircle, CheckSquare, AlertCircle, Shield, List, Book, Briefcase, Home, Users } from 'lucide-react';
-import halalHaram from '../images/Blog-pics/halal_haram.png'
+import halalHaram from '../images/Blog-pics/halal_haram.png';
 
 function HalalHaramStocksBlog() {
   const [expandedSection, setExpandedSection] = useState('introduction');
@@ -16,47 +16,50 @@ function HalalHaramStocksBlog() {
 
   const SectionHeader = ({ id, title, icon: Icon }) => (
     <button 
-      className="w-full flex justify-between items-center py-4 text-left focus:outline-none" 
+      className="w-full flex justify-between items-center py-5 text-left focus:outline-none group transition-all duration-300" 
       onClick={() => toggleSection(id)}
+      aria-expanded={expandedSection === id}
+      aria-controls={`content-${id}`}
     >
       <div className="flex items-center">
-        <Icon className="mr-3 h-6 w-6 text-teal-600" />
+        <div className="p-2 rounded-full bg-teal-100 group-hover:bg-teal-200 transition-colors duration-300 mr-4">
+          <Icon className="h-6 w-6 text-teal-700" />
+        </div>
         <h2 className="text-xl md:text-2xl font-bold text-gray-800">{title}</h2>
       </div>
-      {expandedSection === id ? 
-        <ChevronUp className="h-5 w-5 text-gray-600" /> : 
-        <ChevronDown className="h-5 w-5 text-gray-600" />
-      }
+      <div className="bg-teal-100 rounded-full p-1 group-hover:bg-teal-200 transition-colors duration-300">
+        {expandedSection === id ? 
+          <ChevronUp className="h-5 w-5 text-teal-700" /> : 
+          <ChevronDown className="h-5 w-5 text-teal-700" />
+        }
+      </div>
     </button>
   );
 
-  const IslamicImage = ({ src, alt }) => {
-    return (
-      <div className="my-8">
-        <div className="border-8 border-emerald-100 p-1">
-          <div className="max-h-64 md:max-h-80 lg:max-h-96 ">
-            <img 
-              src={src} 
-              alt={alt} 
-              className="w-full h-112 object-fill rounded-sm"
-            />
-          </div>
-        </div>
+  const IslamicImage = ({ src, alt }) => (
+    <div className="my-8 max-w-4xl mx-auto">
+      <div className="border-8 border-emerald-100 p-1 rounded-lg shadow-lg overflow-hidden">
+        <img 
+          src={src} 
+          alt={alt} 
+          className="w-full object-cover rounded-sm transform hover:scale-105 transition-transform duration-300"
+        />
       </div>
-    );
-  };
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
-      
       {/* Hero Section */}
       <header className="bg-gradient-to-r from-teal-700 to-teal-500 text-white py-16 px-4 md:px-8">
-        <div className=" mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Difference Between Halal and Haram Stocks</h1>
-          <p className="text-xl opacity-90 mb-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+            Difference Between Halal and Haram Stocks
+          </h1>
+          <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
             A comprehensive guide to ethical investing according to Islamic principles
           </p>
-          
+          <div className="w-24 h-1 bg-white opacity-60 mx-auto"></div>
         </div>
       </header>
 
@@ -65,175 +68,223 @@ function HalalHaramStocksBlog() {
         alt="Islamic finance concept" 
       />
 
-      <main className=" mx-auto px-4 md:px-8 py-8">
+      <main className="max-w-4xl mx-auto px-4 md:px-8 py-8">
         {/* Introduction */}
-        <section className="mb-12 bg-white rounded-lg shadow-sm p-6 md:p-8">
+        <section className="mb-8 bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
           <SectionHeader 
             id="introduction" 
             title="Introduction" 
             icon={BookOpen} 
           />
           
-          {expandedSection === 'introduction' && (
-            <div className="mt-4 text-gray-700 space-y-4">
-              <p className="leading-relaxed">
-                Are you wondering how to make investment choices that align with Islamic principles? 
-                You're not alone! Many Muslim investors face the challenge of navigating the stock 
-                market while staying true to their faith.
-              </p>
-              
-              <p className="leading-relaxed">
-                The difference between <strong className="text-teal-700">Halal</strong> (permissible) and 
-                <strong className="text-red-600"> Haram</strong> (forbidden) stocks isn't just about following 
-                religious rules - it's also about making ethical investment decisions that benefit both your 
-                portfolio and society.
-              </p>
-              
-              <div className="bg-teal-50 border-l-4 border-teal-500 p-4 my-6">
-                <h3 className="font-semibold text-teal-800 mb-2">In today's world, ethical investing has become increasingly popular:</h3>
-                <ul className="space-y-2">
-                  <li className="flex items-start">
-                    <span className="text-teal-600 mr-2">🌱</span>
-                    <span>Sustainable investments reached $35.3 trillion in 2020</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-teal-600 mr-2">📈</span>
-                    <span>Islamic finance assets are projected to hit $3.69 trillion by 2024</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-teal-600 mr-2">💡</span>
-                    <span>More investors are looking for investment options that align with their values</span>
-                  </li>
-                </ul>
-              </div>
-              
-              <p className="leading-relaxed">This guide will help you:</p>
-              <ul className="list-disc ml-6 space-y-2">
-                <li>Understand what makes a stock Halal or Haram</li>
-                <li>Learn how Islamic-compliant investments are screened</li>
-                <li>Discover practical tools to identify suitable stocks</li>
-                <li>Navigate common challenges in ethical investing</li>
+          <div 
+            id="content-introduction"
+            className={`px-6 pb-6 text-gray-700 space-y-4 transition-all duration-500 ${
+              expandedSection === 'introduction' ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
+            }`}
+          >
+            <p className="leading-relaxed">
+              Are you wondering how to make investment choices that align with Islamic principles? 
+              You're not alone! Many Muslim investors face the challenge of navigating the stock 
+              market while staying true to their faith.
+            </p>
+            
+            <p className="leading-relaxed">
+              The difference between <strong className="text-teal-700">Halal</strong> (permissible) and 
+              <strong className="text-red-600"> Haram</strong> (forbidden) stocks isn't just about following 
+              religious rules - it's also about making ethical investment decisions that benefit both your 
+              portfolio and society.
+            </p>
+            
+            <div className="bg-teal-50 border-l-4 border-teal-500 p-5 my-6 rounded-r-lg">
+              <h3 className="font-semibold text-teal-800 mb-3">In today's world, ethical investing has become increasingly popular:</h3>
+              <ul className="space-y-3">
+                <li className="flex items-start">
+                  <span className="text-teal-600 mr-3 text-lg">🌱</span>
+                  <span>Sustainable investments reached $35.3 trillion in 2020</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-teal-600 mr-3 text-lg">📈</span>
+                  <span>Islamic finance assets are projected to hit $3.69 trillion by 2024</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-teal-600 mr-3 text-lg">💡</span>
+                  <span>More investors are looking for investment options that align with their values</span>
+                </li>
               </ul>
-              
-              <p className="leading-relaxed">
-                Are you ready to explore how you can grow your wealth while honoring your religious values? 
-                Let's dive into the world of Islamic-compliant investing together! 🚀
-              </p>
             </div>
-          )}
+            
+            <p className="leading-relaxed font-medium text-gray-800">This guide will help you:</p>
+            <ul className="space-y-2 ml-6">
+              <li className="flex items-center">
+                <div className="w-2 h-2 bg-teal-500 rounded-full mr-3"></div>
+                <span>Understand what makes a stock Halal or Haram</span>
+              </li>
+              <li className="flex items-center">
+                <div className="w-2 h-2 bg-teal-500 rounded-full mr-3"></div>
+                <span>Learn how Islamic-compliant investments are screened</span>
+              </li>
+              <li className="flex items-center">
+                <div className="w-2 h-2 bg-teal-500 rounded-full mr-3"></div>
+                <span>Discover practical tools to identify suitable stocks</span>
+              </li>
+              <li className="flex items-center">
+                <div className="w-2 h-2 bg-teal-500 rounded-full mr-3"></div>
+                <span>Navigate common challenges in ethical investing</span>
+              </li>
+            </ul>
+            
+            <p className="leading-relaxed mt-4 text-lg font-medium text-teal-800">
+              Are you ready to explore how you can grow your wealth while honoring your religious values? 
+              Let's dive into the world of Islamic-compliant investing together! 🚀
+            </p>
+          </div>
         </section>
         
         {/* Understanding Halal Stocks */}
-        <section className="mb-12 bg-white rounded-lg shadow-sm p-6 md:p-8">
+        <section className="mb-8 bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
           <SectionHeader 
             id="halal-stocks" 
             title="Understanding Halal Stocks" 
             icon={Check} 
           />
           
-          {expandedSection === 'halal-stocks' && (
-            <div className="mt-4 text-gray-700 space-y-4">
-              <p className="leading-relaxed">
-                Halal stocks are shares in companies that operate according to Islamic principles, making them 
-                <a href="https://www.investopedia.com/articles/07/islamic_investing.asp" className="text-teal-600 hover:underline"> permissible investments</a> for 
-                Muslim investors. These stocks come from businesses that create value through ethical means and avoid 
-                activities prohibited under <a href="https://en.wikipedia.org/wiki/Islamic_banking_and_finance" className="text-teal-600 hover:underline">Shariah law</a>.
-              </p>
-              
-              <div className="bg-green-50 p-4 rounded-md border border-green-200 my-6">
-                <h3 className="font-semibold text-green-800 mb-2">Key Characteristics of Halal Stocks:</h3>
-                <ul className="space-y-2">
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-600 mr-2" />
-                    <span>Products and services that benefit society</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-600 mr-2" />
-                    <span>Transparent business operations</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-600 mr-2" />
-                    <span>Asset-backed transactions</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-600 mr-2" />
-                    <span>Limited debt levels</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-600 mr-2" />
-                    <span>Ethical revenue sources</span>
-                  </li>
-                </ul>
+          <div 
+            id="content-halal-stocks"
+            className={`px-6 pb-6 text-gray-700 space-y-4 transition-all duration-500 ${
+              expandedSection === 'halal-stocks' ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
+            }`}
+          >
+            <p className="leading-relaxed">
+              Halal stocks are shares in companies that operate according to Islamic principles, making them 
+              <a href="https://www.investopedia.com/articles/07/islamic_investing.asp" className="text-teal-600 hover:text-teal-800 font-medium mx-1 hover:underline inline-flex items-center">
+                permissible investments
+                <ExternalLink className="h-3 w-3 ml-1" />
+              </a> 
+              for Muslim investors. These stocks come from businesses that create value through ethical means and avoid 
+              activities prohibited under 
+              <a href="https://en.wikipedia.org/wiki/Islamic_banking_and_finance" className="text-teal-600 hover:text-teal-800 font-medium mx-1 hover:underline inline-flex items-center">
+                Shariah law
+                <ExternalLink className="h-3 w-3 ml-1" />
+              </a>.
+            </p>
+            
+            <div className="bg-green-50 p-5 rounded-lg border border-green-200 my-6">
+              <h3 className="font-semibold text-green-800 mb-3 text-lg">Key Characteristics of Halal Stocks:</h3>
+              <ul className="space-y-3">
+                <li className="flex items-center">
+                  <div className="p-1 bg-green-200 rounded-full mr-3">
+                    <Check className="h-4 w-4 text-green-700" />
+                  </div>
+                  <span>Products and services that benefit society</span>
+                </li>
+                <li className="flex items-center">
+                  <div className="p-1 bg-green-200 rounded-full mr-3">
+                    <Check className="h-4 w-4 text-green-700" />
+                  </div>
+                  <span>Transparent business operations</span>
+                </li>
+                <li className="flex items-center">
+                  <div className="p-1 bg-green-200 rounded-full mr-3">
+                    <Check className="h-4 w-4 text-green-700" />
+                  </div>
+                  <span>Asset-backed transactions</span>
+                </li>
+                <li className="flex items-center">
+                  <div className="p-1 bg-green-200 rounded-full mr-3">
+                    <Check className="h-4 w-4 text-green-700" />
+                  </div>
+                  <span>Limited debt levels</span>
+                </li>
+                <li className="flex items-center">
+                  <div className="p-1 bg-green-200 rounded-full mr-3">
+                    <Check className="h-4 w-4 text-green-700" />
+                  </div>
+                  <span>Ethical revenue sources</span>
+                </li>
+              </ul>
+            </div>
+            
+            <p className="leading-relaxed">
+              A company qualifies as Halal when its primary business activities fall within permissible 
+              categories under Islamic law. Think of it like a restaurant earning its Halal certification - 
+              the business must meet specific standards to be considered compliant.
+            </p>
+            
+            <h3 className="font-bold text-lg mt-6 mb-4 text-gray-800">Examples of Halal Stock Sectors:</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-teal-50 p-4 rounded-lg border-l-4 border-teal-500 hover:shadow-md transition-shadow duration-300">
+                <span className="font-medium text-teal-800">Healthcare companies</span> developing life-saving medications
               </div>
-              
-              <p className="leading-relaxed">
-                A company qualifies as Halal when its primary business activities fall within permissible 
-                categories under Islamic law. Think of it like a restaurant earning its Halal certification - 
-                the business must meet specific standards to be considered compliant.
-              </p>
-              
-              <h3 className="font-bold text-lg mt-6 mb-3">Examples of Halal Stock Sectors:</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-teal-50 p-3 rounded">
-                  <span className="font-medium">Healthcare companies</span> developing life-saving medications
-                </div>
-                <div className="bg-teal-50 p-3 rounded">
-                  <span className="font-medium">Technology firms</span> creating innovative solutions
-                </div>
-                <div className="bg-teal-50 p-3 rounded">
-                  <span className="font-medium">Renewable energy providers</span>
-                </div>
-                <div className="bg-teal-50 p-3 rounded">
-                  <span className="font-medium">Halal food producers</span>
-                </div>
-                <div className="bg-teal-50 p-3 rounded">
-                  <span className="font-medium">Ethical retail businesses</span>
-                </div>
-                <div className="bg-teal-50 p-3 rounded">
-                  <span className="font-medium">Infrastructure development companies</span>
-                </div>
+              <div className="bg-teal-50 p-4 rounded-lg border-l-4 border-teal-500 hover:shadow-md transition-shadow duration-300">
+                <span className="font-medium text-teal-800">Technology firms</span> creating innovative solutions
               </div>
-              
-              <div className="bg-blue-50 p-5 rounded-md my-6 border-l-4 border-blue-500">
-                <p className="italic">
-                  <span className="font-semibold">Real-world example:</span> A medical device manufacturer creating equipment for hospitals would typically qualify as a Halal investment. Their business directly contributes to human wellbeing, operates with tangible assets, and provides clear societal benefits.
-                </p>
+              <div className="bg-teal-50 p-4 rounded-lg border-l-4 border-teal-500 hover:shadow-md transition-shadow duration-300">
+                <span className="font-medium text-teal-800">Renewable energy providers</span>
               </div>
-              
-              <p className="leading-relaxed">
-                The growing demand for Shariah-compliant investments has led many companies to adapt their 
-                business models to meet Islamic ethical standards. This shift benefits both Muslim investors 
-                seeking permissible options and companies looking to tap into the expanding 
-                <a href="https://www.aljazeera.com/news/2024/3/28/what-is-islamic-and-halal-investment-is-it-on-the-rise" className="text-teal-600 hover:underline"> Islamic finance market</a>.
-              </p>
-              
-              <div className="bg-yellow-50 p-4 rounded-md border border-yellow-200 mt-6">
-                <h3 className="font-semibold text-yellow-800 mb-2">Red Flags to Watch:</h3>
-                <ul className="space-y-2">
-                  <li className="flex items-center">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600 mr-2" />
-                    <span>High interest-bearing debt</span>
-                  </li>
-                  <li className="flex items-center">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600 mr-2" />
-                    <span>Income from prohibited activities</span>
-                  </li>
-                  <li className="flex items-center">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600 mr-2" />
-                    <span>Unclear revenue sources</span>
-                  </li>
-                  <li className="flex items-center">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600 mr-2" />
-                    <span>Excessive speculation</span>
-                  </li>
-                  <li className="flex items-center">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600 mr-2" />
-                    <span>Non-transparent operations</span>
-                  </li>
-                </ul>
+              <div className="bg-teal-50 p-4 rounded-lg border-l-4 border-teal-500 hover:shadow-md transition-shadow duration-300">
+                <span className="font-medium text-teal-800">Halal food producers</span>
+              </div>
+              <div className="bg-teal-50 p-4 rounded-lg border-l-4 border-teal-500 hover:shadow-md transition-shadow duration-300">
+                <span className="font-medium text-teal-800">Ethical retail businesses</span>
+              </div>
+              <div className="bg-teal-50 p-4 rounded-lg border-l-4 border-teal-500 hover:shadow-md transition-shadow duration-300">
+                <span className="font-medium text-teal-800">Infrastructure development companies</span>
               </div>
             </div>
-          )}
+            
+            <div className="bg-blue-50 p-5 rounded-lg my-6 border-l-4 border-blue-500 shadow-sm">
+              <p className="italic">
+                <span className="font-semibold text-blue-800">Real-world example:</span> A medical device manufacturer creating equipment for hospitals would typically qualify as a Halal investment. Their business directly contributes to human wellbeing, operates with tangible assets, and provides clear societal benefits.
+              </p>
+            </div>
+            
+            <p className="leading-relaxed">
+              The growing demand for Shariah-compliant investments has led many companies to adapt their 
+              business models to meet Islamic ethical standards. This shift benefits both Muslim investors 
+              seeking permissible options and companies looking to tap into the expanding
+              <a href="https://www.aljazeera.com/news/2024/3/28/what-is-islamic-and-halal-investment-is-it-on-the-rise" className="text-teal-600 hover:text-teal-800 font-medium mx-1 hover:underline inline-flex items-center">
+                Islamic finance market
+                <ExternalLink className="h-3 w-3 ml-1" />
+              </a>.
+            </p>
+            
+            <div className="bg-yellow-50 p-5 rounded-lg border border-yellow-200 mt-6">
+              <h3 className="font-semibold text-yellow-800 mb-3 text-lg">Red Flags to Watch:</h3>
+              <ul className="space-y-3">
+                <li className="flex items-center">
+                  <div className="p-1 bg-yellow-200 rounded-full mr-3">
+                    <AlertTriangle className="h-4 w-4 text-yellow-700" />
+                  </div>
+                  <span>High interest-bearing debt</span>
+                </li>
+                <li className="flex items-center">
+                  <div className="p-1 bg-yellow-200 rounded-full mr-3">
+                    <AlertTriangle className="h-4 w-4 text-yellow-700" />
+                  </div>
+                  <span>Income from prohibited activities</span>
+                </li>
+                <li className="flex items-center">
+                  <div className="p-1 bg-yellow-200 rounded-full mr-3">
+                    <AlertTriangle className="h-4 w-4 text-yellow-700" />
+                  </div>
+                  <span>Unclear revenue sources</span>
+                </li>
+                <li className="flex items-center">
+                  <div className="p-1 bg-yellow-200 rounded-full mr-3">
+                    <AlertTriangle className="h-4 w-4 text-yellow-700" />
+                  </div>
+                  <span>Excessive speculation</span>
+                </li>
+                <li className="flex items-center">
+                  <div className="p-1 bg-yellow-200 rounded-full mr-3">
+                    <AlertTriangle className="h-4 w-4 text-yellow-700" />
+                  </div>
+                  <span>Non-transparent operations</span>
+                </li>
+              </ul>
+            </div>
+          </div>
         </section>
         
         {/* Principles and Screening */}

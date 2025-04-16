@@ -267,8 +267,8 @@ const PrivacyPolicy = () => {
                 </p>
                 <div className="bg-indigo-50/70 rounded-lg p-4 space-y-2">
                   <p><strong>Email:</strong> contact@shariastocks.in</p>
-                  <p><strong>Phone:</strong> +91 98765 43210</p>
-                  <p><strong>Address:</strong> ShariaStocks, 123 Financial District, Mumbai, Maharashtra 400001</p>
+                  {/* <p><strong>Phone:</strong> +91 98765 43210</p>
+                  <p><strong>Address:</strong> ShariaStocks, 123 Financial District, Mumbai, Maharashtra 400001</p> */}
                 </div>
               </div>
             </div>

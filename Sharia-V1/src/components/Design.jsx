@@ -821,7 +821,7 @@ export default function LandingPage() {
               {[
                   { title: 'Blog', path: '/blog-catalogue' },
                   { title: 'About', path: '/about' },
-                  { title: 'Terms of Service', path: '/terms' },
+                  { title: 'Terms & Conditions', path: '/terms' },
                   { title: 'Privacy Policy', path: '/privacy' }
                 ].map((link, i) => (
                   <motion.li key={i} whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 400 }}>
