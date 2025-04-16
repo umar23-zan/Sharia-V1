@@ -4,6 +4,8 @@ import { Eye, EyeOff, ArrowLeft, Loader2 } from 'lucide-react';
 import { signup, initiateGoogleSignIn } from '../api/auth';
 import logo from '../images/ShariaStocks-logo/ShariaStocks1.png';
 import googleLogo from '../images/ShariaStocks-logo/google.png';
+import TermsModal from './TermsModal'
+import PrivacyModal from './PrivacyModal';
 
 const Signup = () => {
     const [formData, setFormData] = useState({
@@ -16,6 +18,9 @@ const Signup = () => {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [agreedToTerms, setAgreedToTerms] = useState(false);
+    const [showTermsModal, setShowTermsModal] = useState(false);
+    const [showPrivacyModal, setShowPrivacyModal] = useState(false);
     const navigate = useNavigate();
 
     const onChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -51,6 +56,11 @@ const Signup = () => {
             return;
         }
 
+        if (!agreedToTerms) {
+            setMessage({ type: 'error', text: 'You must agree to the Terms and Conditions' });
+            return;
+        }
+
         setLoading(true);
         try {
             await signup(formData);
@@ -65,6 +75,7 @@ const Signup = () => {
                 password: '',
                 confirmPassword: '',
             });
+            setAgreedToTerms(false);
             
             // Optional: Navigate to login after successful signup
             // setTimeout(() => navigate('/login'), 3000);
@@ -79,6 +90,12 @@ const Signup = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const openTermsModal = () => {
+        // You can implement a modal to show terms and conditions
+        // For simplicity, we'll just navigate to a terms page
+        window.open('/terms', '_blank');
     };
 
     return (
@@ -210,6 +227,41 @@ const Signup = () => {
                         </div>
                     </div>
 
+                    {/* Terms and Conditions Checkbox */}
+                    <div className="flex items-start">
+                        <div className="flex items-center h-5">
+                            <input
+                                id="terms"
+                                name="terms"
+                                type="checkbox"
+                                checked={agreedToTerms}
+                                onChange={() => setAgreedToTerms(!agreedToTerms)}
+                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                required
+                            />
+                        </div>
+                        <div className="ml-3 text-sm">
+                            <label htmlFor="terms" className="font-medium text-gray-700">
+                                I agree to the{' '}
+                                <button
+                                    type="button"
+                                    onClick={() => setShowTermsModal(true)}
+                                    className="text-indigo-600 hover:text-indigo-800 underline focus:outline-none"
+                                >
+                                    Terms and Conditions
+                                </button>
+                                {' '}and{' '}
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPrivacyModal(true)}
+                                    className="text-indigo-600 hover:text-indigo-800 underline focus:outline-none"
+                                >
+                                    Privacy Policy
+                                </button>
+                            </label>
+                        </div>
+                    </div>
+
                     <div className="pt-2">
                         <button
                             type="submit"
@@ -260,6 +312,14 @@ const Signup = () => {
                     </p>
                 </div>
             </div>
+            <TermsModal 
+                isOpen={showTermsModal} 
+                onClose={() => setShowTermsModal(false)} 
+            />
+            <PrivacyModal 
+                isOpen={showPrivacyModal} 
+                onClose={() => setShowPrivacyModal(false)} 
+            />
         </div>
     );
 };
