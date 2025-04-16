@@ -153,7 +153,7 @@ const Dashboard = () => {
           />
 
           {/* Hero Section with Search */}
-          <section className="relative px-4 py-8 md:py-16 overflow-hidden">
+          <section className="relative px-4 py-8 md:py-16 ">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 to-purple-50 opacity-70"></div>
             
             {/* Decorative Elements */}
@@ -197,7 +197,7 @@ const Dashboard = () => {
                 }}
               >
                 <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl blur opacity-30 group-hover:opacity-100 transition duration-500"></div>
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl blur opacity-30 group-hover:opacity-100 transition duration-500 "></div>
                   <div className="relative bg-white rounded-xl shadow-xl">
                     <input
                       type="text"
@@ -217,7 +217,7 @@ const Dashboard = () => {
                   </div>
 
                   {isSearchActive && suggestions.length > 0 && (
-                    <ul className="absolute w-full mt-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-20">
+                    <ul className="absolute w-full mt-2 bg-white rounded-xl shadow-lg border border-gray-100 z-20">
                       {suggestions.map((suggestion) => (
                         <li
                           key={suggestion.SYMBOL}
@@ -231,7 +231,12 @@ const Dashboard = () => {
                           className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors"
                         >
                           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center overflow-hidden text-indigo-600 font-medium">
-                            {suggestion.SYMBOL.substring(0, 2)}
+                          <img
+                              src={suggestion.Company_Logo}
+                              alt={`${suggestion["NAME OF COMPANY"]} logo`}
+                              className="w-6 h-6 object-cover"
+                              onError={(e) => { e.target.src = "https://via.placeholder.com/32" }}
+                            />
                           </div>
                           <div className="flex flex-col flex-1">
                             <span className="text-sm font-medium">{truncateText(suggestion["NAME OF COMPANY"], 25)}</span>

@@ -144,6 +144,8 @@ const StockResults = () => {
               timeout: 10000 
             }
           );
+          setCompanyDetails(companyDetailsResponse.data);
+          localStorage.setItem(`companyDetails_${symbol}`, JSON.stringify(companyDetailsResponse.data));
     
           const stockDataResponse = await axios.get(
             `/api/stocks/${symbol.toUpperCase()}?userId=${userId}`,
@@ -153,10 +155,10 @@ const StockResults = () => {
             }
           );
     
-          localStorage.setItem(`companyDetails_${symbol}`, JSON.stringify(companyDetailsResponse.data));
+          
           localStorage.setItem(`stockData_${symbol}`, JSON.stringify(stockDataResponse.data));
     
-          setCompanyDetails(companyDetailsResponse.data);
+          
           setStockData(stockDataResponse.data);
     
           const newsResponse = await axios.get("https://newsdata.io/api/1/news", {
@@ -178,10 +180,14 @@ const StockResults = () => {
           // Detailed error handling
           if (axios.isCancel(err)) {
             console.log('Request canceled');
-          } else if (err.code === 'ECONNABORTED') {
+          } else if (err.response?.status === 403){
+            setViewLimitReached(true);
+            setShowSubscriptionModal(true);
+          }else if (err.code === 'ECONNABORTED') {
             setError('Request timed out. Please check your connection.');
           } else {
-            setError(err.message);
+            setError("Could not load stock results. Please check the symbol and try again.");
+            setStockData(null); 
           }
         } finally {
           setLoading(false);
@@ -358,7 +364,7 @@ const StockResults = () => {
                     <div className="flex items-center flex-1 min-w-0">
                         <ArrowLeft className="w-5 h-5 text-gray-700 mr-3 sm:mr-4 cursor-pointer flex-shrink-0" onClick={() => navigate(-1)} />
                         <div className="flex items-center min-w-0">
-                            <span className="text-base sm:text-lg font-semibold text-gray-900 truncate">{companyDetails.company_name}</span>
+                            <span className="text-base sm:text-lg font-semibold text-gray-900 truncate">{companyDetails?.company_name}</span>
                         </div>
                     </div>
                     {!isFreePlan && 
