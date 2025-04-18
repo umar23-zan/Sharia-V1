@@ -196,6 +196,8 @@ const Profile = () => {
                     <button 
                       onClick={uploadPicture}
                       className="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600"
+                      data-testid="save-button"
+                      aria-label='Save'
                     >
                       Save
                     </button>
@@ -205,6 +207,7 @@ const Profile = () => {
                         setPreviewUrl(null);
                       }}
                       className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
+                      aria-label='Cancel'
                     >
                       Cancel
                     </button>

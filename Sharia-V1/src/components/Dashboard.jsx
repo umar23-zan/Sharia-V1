@@ -176,7 +176,7 @@ const Dashboard = () => {
 
               {/* Heading */}
               <div className="space-y-4">
-                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent" >
                   Invest with Purpose
                 </h1>
 
@@ -238,7 +238,7 @@ const Dashboard = () => {
                               onError={(e) => { e.target.src = "https://via.placeholder.com/32" }}
                             />
                           </div>
-                          <div className="flex flex-col flex-1">
+                          <div className="flex flex-col flex-1" data-testid="stock-symbol-section">
                             <span className="text-sm font-medium">{truncateText(suggestion["NAME OF COMPANY"], 25)}</span>
                             <span className="text-xs text-gray-500">{suggestion.SYMBOL}</span>
                           </div>
@@ -271,6 +271,7 @@ const Dashboard = () => {
                       className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition-colors"
                       onClick={() => scrollSlider('left')}
                       aria-label="Previous stocks"
+                      data-testid="prev-button"
                     >
                       <ChevronLeft className="w-5 h-5" />
                     </button>
@@ -278,6 +279,7 @@ const Dashboard = () => {
                       className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition-colors"
                       onClick={() => scrollSlider('right')}
                       aria-label="Next stocks"
+                      data-testid="next-button"
                     >
                       <ChevronRight className="w-5 h-5" />
                     </button>
@@ -290,6 +292,7 @@ const Dashboard = () => {
                     ref={sliderRef}
                     className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth gap-4 py-2 px-1"
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                    data-testid="trending-slider"
                   >
                     {trendingStocks.map((stock, index) => (
                       <div 
@@ -437,7 +440,7 @@ const Dashboard = () => {
                   </div>
                   
                   {/* Table Content */}
-                  <div className="space-y-1 mt-3">
+                  <div className="space-y-1 mt-3" data-testid="halal-stocks-section">
                     {halalStocks.map((stock, index) => {
                       // Check if the user is on a free plan and this row should be blurred
                       const shouldBlur = user?.subscription?.plan === 'free' && index > 2;
@@ -594,9 +597,9 @@ const Dashboard = () => {
                   
                   <div className="space-y-4">
                     {[
-                      { index: 'NIFTY 50', value: '22,435.30', change: '+0.8%', trend: 'up' },
-                      { index: 'SENSEX', value: '73,876.45', change: '+0.7%', trend: 'up' },
-                      { index: 'NIFTY BANK', value: '48,123.90', change: '-0.3%', trend: 'down' }
+                      { index: 'NIFTY 50', value: '23,851.65', change: '+1.77%', trend: 'up' },
+                      { index: 'SENSEX', value: '78,553.20', change: '+1.96%', trend: 'up' },
+                      { index: 'NIFTY BANK', value: '54,290.20', change: '+2.21%', trend: 'up' }
                     ].map((item, index) => (
                       <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100">
                         <div className="font-medium">{item.index}</div>

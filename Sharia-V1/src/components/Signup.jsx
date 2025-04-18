@@ -106,6 +106,7 @@ const Signup = () => {
                     className="text-gray-600 hover:text-gray-900 transition-colors mb-6 flex items-center gap-1 text-sm"
                     onClick={() => navigate('/')}
                     aria-label="Back to home"
+                    data-testid="back-button"
                 >
                     <ArrowLeft size={16} />
                     <span>Back to home</span>
@@ -137,7 +138,7 @@ const Signup = () => {
                 )}
 
                 {/* Signup Form */}
-                <form onSubmit={onSubmit} className="space-y-5">
+                <form onSubmit={onSubmit} className="space-y-5" noValidate>
                     <div>
                         <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                             Full Name
@@ -151,7 +152,7 @@ const Signup = () => {
                             disabled={loading}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                             placeholder="Enter your full name"
-                            required
+                           data-testid="name-input"
                         />
                     </div>
 
@@ -168,7 +169,7 @@ const Signup = () => {
                             disabled={loading}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                             placeholder="name@example.com"
-                            required
+                            data-testid="email-input"
                         />
                     </div>
 
@@ -186,9 +187,10 @@ const Signup = () => {
                                 disabled={loading}
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                                 placeholder="Create a strong password"
-                                required
+                                data-testid="password-input"
                             />
                             <button
+                                data-testid="toggle-password-visibility"
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
                                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
@@ -214,9 +216,10 @@ const Signup = () => {
                                 disabled={loading}
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                                 placeholder="Confirm your password"
-                                required
+                                data-testid="confirm-password-input"
                             />
                             <button
+                                data-testid="toggle-confirm-password-visibility"
                                 type="button"
                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
@@ -237,7 +240,7 @@ const Signup = () => {
                                 checked={agreedToTerms}
                                 onChange={() => setAgreedToTerms(!agreedToTerms)}
                                 className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                required
+                                data-testid="terms-input"
                             />
                         </div>
                         <div className="ml-3 text-sm">
@@ -264,6 +267,7 @@ const Signup = () => {
 
                     <div className="pt-2">
                         <button
+                            data-testid="signup-button"
                             type="submit"
                             disabled={loading}
                             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-medium transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center justify-center"
@@ -289,6 +293,7 @@ const Signup = () => {
                     </div>
 
                     <button
+                        data-testid="google-signup-button"
                         type="button"
                         onClick={initiateGoogleSignIn}
                         className="w-full py-3 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"

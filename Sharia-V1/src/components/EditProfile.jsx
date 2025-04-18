@@ -236,6 +236,7 @@ const EditProfile = () => {
                       onChange={handleFileChange}
                       accept="image/jpeg,image/png,image/jpg"
                       className="hidden"
+                      aria-label='profile-input'
                     />
                   </div>
                   <p className="text-sm text-gray-500">Click to change profile picture</p>
