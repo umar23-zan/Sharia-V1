@@ -56,7 +56,7 @@ const Header = () => {
       return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
     };
   return (
-    <div >
+    <div data-testid="header-component">
       <header className="sticky top-0 z-30 bg-white rounded-2xl p-4 shadow-sm mb-6">
         <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
@@ -117,7 +117,7 @@ const Header = () => {
                                             onError={(e) => { e.target.src = "https://via.placeholder.com/32" }}
                                         />
                                     </div>
-                                    <div className="flex flex-col flex-1">
+                                    <div className="flex flex-col flex-1" data-testid="header-symbol-section">
                                         <span className="text-sm font-medium">{truncateText(suggestion["NAME OF COMPANY"], 25)}</span>
                                         <span className="text-xs text-gray-500">{suggestion.SYMBOL}</span>
                                     </div>
@@ -139,6 +139,7 @@ const Header = () => {
                     className="relative flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
                     onClick={() => navigate('/notificationpage')}
                     aria-label="Notifications"
+                    data-testid="notification-bell"
                 >
                     <Bell className="w-5 h-5 text-gray-700" />
                 </button>
@@ -195,7 +196,7 @@ const Header = () => {
                                     onError={(e) => { e.target.src = "https://via.placeholder.com/32" }}
                                 />
     
-                                <div className="flex flex-col flex-1">
+                                <div className="flex flex-col flex-1" data-testid="header-symbol-section">
                                     <span className="text-sm font-medium">{truncateText(suggestion["NAME OF COMPANY"], 20)}</span>
                                     <span className="text-xs text-gray-500">{suggestion.SYMBOL}</span>
                                 </div>

@@ -31,7 +31,7 @@ export default function LandingPage() {
   const handleSignupClick = () => navigate('/signup');
   const toggleFAQ = (index) => setOpenIndex(openIndex === index ? null : index);
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  const handleBlogClick = () => navigate('/blog-catalogue');
+  const handleBlogClick = () => navigate('/blogs');
 
   const faqs = [
     {

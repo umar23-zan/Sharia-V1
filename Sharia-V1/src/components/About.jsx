@@ -336,7 +336,7 @@ const About = () => {
             </div>
             
             <div className="border-t border-gray-100 pt-4">
-              <p>© 2025 Zansphere. All rights reserved.</p>
+              <p>© 2025 ShariaStocks. All rights reserved.</p>
             </div>
           </div>
         </footer>

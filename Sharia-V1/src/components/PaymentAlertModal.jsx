@@ -36,7 +36,7 @@ const PaymentAlertModal = ({
   const config = alertConfig[type];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center  bg-opacity-70 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center  bg-opacity-70 backdrop-blur-sm" data-testid="mock-payment-alert">
       <div className={`relative w-full max-w-md p-6 rounded-xl shadow-lg bg-white border-l-4 ${config.color}`}>
         <button
           onClick={onClose}

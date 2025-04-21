@@ -211,7 +211,7 @@ const NotificationsPage = () => {
         {/* Notifications List */}
         <div className="flex-1 px-4 lg:px-0">
           {loading ? (
-            <div className="flex justify-center py-12">
+            <div className="flex justify-center py-12" data-testid="loading-spinner">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
             </div>
           ) : filteredNotifications.length > 0 ? (

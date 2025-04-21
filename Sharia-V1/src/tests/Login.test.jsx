@@ -2,7 +2,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { BrowserRouter } from 'react-router-dom'
-import Login from './Login'
+import Login from '../components/Login'
 import { login, initiateGoogleSignIn } from '../api/auth'
 
 // Mock the modules

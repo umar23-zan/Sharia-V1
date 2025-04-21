@@ -3,7 +3,7 @@ import { Search, TrendingUp, ChevronLeft, ChevronRight, Star } from 'lucide-reac
 import { useNavigate } from 'react-router-dom';
 import niftyCompanies from '../nifty_symbols.json';
 import { Helmet } from 'react-helmet';
-const Header = lazy(() => import('./Header'));
+const HeaderDash = lazy(() => import('./HeaderDash'));
 import logo from '../images/ShariaStocks-logo/logo1.jpeg';
 import { getUserData } from '../api/auth';
 import PaymentAlertModal from './PaymentAlertModal';
@@ -142,7 +142,7 @@ const Dashboard = () => {
       <Suspense fallback={<div className="flex items-center justify-center h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
       </div>}>
-        <Header />
+        <HeaderDash />
         <main className="max-w-7xl mx-auto pb-16">
           <PaymentAlertModal
             isOpen={isOpen}
@@ -162,17 +162,7 @@ const Dashboard = () => {
             <div className="absolute -bottom-8 left-40 w-56 h-56 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
             
             <div className="relative max-w-3xl mx-auto text-center space-y-8">
-              {/* Logo */}
-              <div className="mb-6 inline-block relative">
-                <div className="absolute -top-4 -left-4 w-20 h-20 bg-indigo-100 rounded-full opacity-60 blur-xl"></div>
-                <div className="absolute -top-2 -right-2 w-12 h-12 bg-purple-100 rounded-full opacity-60 blur-lg"></div>
-                <img
-                  src={logo}
-                  alt="ShariaStocks Company Logo"
-                  className="h-20 relative z-10 rounded-full shadow-lg"
-                  onError={(e) => { e.target.src = "https://via.placeholder.com/200x80?text=Company+Logo" }}
-                />
-              </div>
+              
 
               {/* Heading */}
               <div className="space-y-4">
@@ -719,7 +709,7 @@ const Dashboard = () => {
                 </div>
                 
                 <div className="flex space-x-4">
-                  {['About', 'Privacy', 'Terms'].map((item, index) => (
+                  {['About', 'Privacy', 'Terms', 'Blogs'].map((item, index) => (
                     <a key={index} href={`/${item.toLowerCase()}`} className="text-gray-600 hover:text-indigo-600 transition-colors">
                       {item}
                     </a>
@@ -728,7 +718,7 @@ const Dashboard = () => {
               </div>
               
               <div className="border-t border-gray-100 pt-4 pb-8">
-                <p>© 2025 Zansphere. All rights reserved.</p>
+                <p>© 2025 ShariaStocks. All rights reserved.</p>
               </div>
             </div>
           </footer>

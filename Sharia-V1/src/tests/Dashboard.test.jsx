@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import React from 'react';
-import Dashboard from './Dashboard';
+import Dashboard from '../components/Dashboard';
 import { getUserData } from '../api/auth';
 import * as router from 'react-router-dom';
 import { Helmet } from 'react-helmet';
@@ -293,9 +293,9 @@ describe('Dashboard Component', () => {
     
     expect(screen.getByText('Market Summary')).toBeInTheDocument();
     expect(screen.getByText('NIFTY 50')).toBeInTheDocument();
-    expect(screen.getByText('22,435.30')).toBeInTheDocument();
+    expect(screen.getByText('23,851.65')).toBeInTheDocument();
     expect(screen.getByText('SENSEX')).toBeInTheDocument();
-    expect(screen.getByText('73,876.45')).toBeInTheDocument();
+    expect(screen.getByText('78,553.20')).toBeInTheDocument();
   });
 
   it('renders SEO meta tags correctly using Helmet', () => {

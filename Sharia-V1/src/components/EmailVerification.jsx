@@ -137,7 +137,7 @@ const EmailVerification = () => {
 
           {verificationStatus === 'success' && (
             <>
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Email Verified!</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4" data-testid="verify-email">Email Verified!</h2>
               <p className="text-gray-600 mb-6">{message}</p>
               <button
                 onClick={() => navigate('/login')}
@@ -150,7 +150,7 @@ const EmailVerification = () => {
 
           {verificationStatus === 'error' && (
             <>
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Verification Failed</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4" data-testid="verify-fail">Verification Failed</h2>
               <p className="text-gray-600 mb-6">{message}</p>
               <div className="space-y-4">
                 <button

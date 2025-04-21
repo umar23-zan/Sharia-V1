@@ -1,0 +1,319 @@
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
+import axios from 'axios';
+
+// Mock modules - IMPORTANT: Define mockNavigate here
+const mockNavigate = vi.fn();
+
+// Mock react-router-dom
+vi.mock('react-router-dom', () => ({
+  useNavigate: () => mockNavigate,
+  useLocation: () => ({ pathname: '/account' }),
+  MemoryRouter: ({ children }) => <div>{children}</div>
+}));
+
+vi.mock('../api/auth', () => ({
+  getUserData: vi.fn()
+}));
+
+vi.mock('axios');
+
+// Mock components
+vi.mock('./Header', () => ({
+  default: () => <div data-testid="header">Header Component</div>
+}));
+
+vi.mock('./DeactivateAccount', () => ({
+  default: ({ onDeactivationSuccess, onCancel }) => (
+    <div data-testid="deactivate-account">
+      <button onClick={onDeactivationSuccess} data-testid="confirm-deactivate">
+        Confirm Deactivation
+      </button>
+      <button onClick={onCancel} data-testid="cancel-deactivate">
+        Cancel
+      </button>
+    </div>
+  )
+}));
+
+// Import the component after mocking dependencies
+import AccountInformationPage from './AccountSettings';
+import { getUserData } from '../api/auth';
+
+describe('AccountInformationPage', () => {
+  const mockUser = {
+    _id: 'user123',
+    name: 'Test User',
+    email: 'test@example.com',
+    createdAt: '2023-01-01T00:00:00.000Z',
+    subscription: {
+      plan: 'premium',
+      status: 'active',
+      billingCycle: 'monthly',
+      paymentMode: 'automatic',
+      endDate: '2025-05-01T00:00:00.000Z',
+      subscriptionId: 'sub_123456'
+    }
+  };
+
+  beforeEach(() => {
+    // Setup mocks
+    vi.clearAllMocks();
+    localStorage.setItem('userEmail', 'test@example.com');
+    getUserData.mockResolvedValue(mockUser);
+    axios.post.mockResolvedValue({ 
+      data: { 
+        status: 'success',
+        message: 'Operation successful',
+        user: mockUser
+      } 
+    });
+  });
+
+  afterEach(() => {
+    localStorage.clear();
+  });
+
+  it('renders loading state initially and then user data', async () => {
+    render(
+      <MemoryRouter>
+        <AccountInformationPage />
+      </MemoryRouter>
+    );
+
+    // Check loading state
+    expect(screen.getByText(/Loading account information/i)).toBeInTheDocument();
+
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText('Test User')).toBeInTheDocument();
+    });
+
+    // Check that user data is displayed
+    expect(screen.getByText('test@example.com')).toBeInTheDocument();
+    expect(screen.getByText('Premium')).toBeInTheDocument();
+    expect(screen.getByText(/per month/i)).toBeInTheDocument();
+  });
+
+  it('handles back navigation', async () => {
+    render(
+      <MemoryRouter>
+        <AccountInformationPage />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Test User')).toBeInTheDocument();
+    });
+
+    const backButton = screen.getByText('Go Back');
+    fireEvent.click(backButton);
+
+    expect(mockNavigate).toHaveBeenCalledWith(-1);
+  });
+
+  it('toggles payment mode selection', async () => {
+    render(
+      <MemoryRouter>
+        <AccountInformationPage />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Test User')).toBeInTheDocument();
+    });
+
+    // Find and click manual payment mode option
+    const manualOption = screen.getByText('Manual Renewal');
+    fireEvent.click(manualOption);
+
+    // Should show confirmation modal
+    expect(screen.getByText(/Change Payment Mode/i)).toBeInTheDocument();
+    expect(screen.getByText(/Important Notice/i)).toBeInTheDocument();
+
+    // Confirm switch to manual mode
+    const confirmButton = screen.getByText('Switch to Manual');
+    fireEvent.click(confirmButton);
+
+    // Verify payment mode was updated
+    expect(screen.getByText(/Full control but requires timely action/i)).toBeInTheDocument();
+
+    // Save changes
+    const saveButton = screen.getByText('Save Changes');
+    fireEvent.click(saveButton);
+
+    await waitFor(() => {
+      expect(axios.post).toHaveBeenCalledWith('/api/transaction/update-payment-mode', {
+        userId: 'user123',
+        paymentMode: 'manual',
+        effectiveDate: '2025-05-01T00:00:00.000Z'
+      });
+    });
+  });
+
+  it('shows deactivate account modal and handles account deactivation', async () => {
+    render(
+      <MemoryRouter>
+        <AccountInformationPage />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Test User')).toBeInTheDocument();
+    });
+
+    // Click delete account button
+    const deleteButton = screen.getByLabelText('delete-button');
+    fireEvent.click(deleteButton);
+
+    // Check modal is displayed
+    expect(screen.getByTestId('deactivate-account')).toBeInTheDocument();
+
+    // Confirm deactivation
+    const confirmButton = screen.getByTestId('confirm-deactivate');
+    fireEvent.click(confirmButton);
+
+    expect(localStorage.getItem('userEmail')).toBeNull();
+    expect(mockNavigate).toHaveBeenCalledWith('/signup');
+  });
+
+  it('shows cancel subscription modal and handles cancellation', async () => {
+    render(
+      <MemoryRouter>
+        <AccountInformationPage />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Test User')).toBeInTheDocument();
+    });
+
+    // Click cancel subscription button
+    const cancelSubButton = screen.getByTestId('cancel-subscription-btn');
+fireEvent.click(cancelSubButton);
+
+
+    // Check modal is displayed
+    expect(screen.getByText(/Before cancelling, please note:/i)).toBeInTheDocument();
+
+    // Select reason and provide feedback
+    const reasonSelect = screen.getByText('Too expensive');
+    fireEvent.change(reasonSelect, { target: { value: 'Not using the service enough' } });
+
+    const feedbackField = screen.getByPlaceholderText('Tell us how we can improve...');
+    fireEvent.change(feedbackField, { target: { value: 'Testing feedback' } });
+
+    // Confirm cancellation
+    const confirmButton = screen.getByText(/Cancel Subscription/i, { selector: 'button' });
+    fireEvent.click(confirmButton);
+
+    await waitFor(() => {
+      expect(axios.post).toHaveBeenCalledWith('/api/transaction/cancel-subscription', {
+        userId: 'user123',
+        subscriptionId: 'sub_123456',
+        reason: 'Not using the service enough',
+        feedback: 'Testing feedback'
+      });
+    });
+  });
+
+  it('handles errors during data fetching', async () => {
+    getUserData.mockRejectedValueOnce(new Error('Failed to fetch user data'));
+    
+    render(
+      <MemoryRouter>
+        <AccountInformationPage />
+      </MemoryRouter>
+    );
+
+    // Check loading state shows then disappears
+    expect(screen.getByText(/Loading account information/i)).toBeInTheDocument();
+    
+    await waitFor(() => {
+      expect(screen.queryByText(/Loading account information/i)).not.toBeInTheDocument();
+    });
+    
+    // User data shouldn't be populated
+    expect(screen.queryByText('Test User')).not.toBeInTheDocument();
+  });
+
+  it('displays pending payment mode change correctly', async () => {
+    // Create a user with pending payment mode change
+    const userWithPendingChange = {
+      ...mockUser,
+      subscription: {
+        ...mockUser.subscription,
+        pendingPaymentMode: 'manual',
+        paymentModeChangeDate: '2025-05-01T00:00:00.000Z'
+      }
+    };
+    
+    getUserData.mockResolvedValueOnce(userWithPendingChange);
+    
+    render(
+      <MemoryRouter>
+        <AccountInformationPage />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/Scheduled Payment Mode Change/i)).toBeInTheDocument();
+    });
+    
+    // Check cancel change button works
+    const cancelChangeButton = screen.getByText('Cancel Change');
+    fireEvent.click(cancelChangeButton);
+    
+    await waitFor(() => {
+      expect(axios.post).toHaveBeenCalledWith('/api/transaction/cancel-manual-payment-change', {
+        userId: 'user123'
+      });
+    });
+  });
+
+  it('navigates to subscription details page when view all plans is clicked', async () => {
+    render(
+      <MemoryRouter>
+        <AccountInformationPage />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Test User')).toBeInTheDocument();
+    });
+
+    const viewAllPlansButton = screen.getByText('View All Plans');
+    fireEvent.click(viewAllPlansButton);
+
+    expect(mockNavigate).toHaveBeenCalledWith('/subscriptiondetails');
+  });
+
+  it('renders correctly for inactive subscription', async () => {
+    const inactiveUser = {
+      ...mockUser,
+      subscription: {
+        ...mockUser.subscription,
+        status: 'inactive'
+      }
+    };
+    
+    getUserData.mockResolvedValueOnce(inactiveUser);
+    
+    render(
+      <MemoryRouter>
+        <AccountInformationPage />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/You need an active subscription/i)).toBeInTheDocument();
+    });
+    
+    const viewPlansButton = screen.getByText('View Subscription Plans');
+    fireEvent.click(viewPlansButton);
+    
+    expect(mockNavigate).toHaveBeenCalledWith('/subscriptiondetails');
+  });
+});

@@ -324,6 +324,7 @@ const Signup = () => {
             <PrivacyModal 
                 isOpen={showPrivacyModal} 
                 onClose={() => setShowPrivacyModal(false)} 
+                
             />
         </div>
     );

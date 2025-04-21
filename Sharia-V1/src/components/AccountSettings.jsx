@@ -641,7 +641,7 @@ console.log(user)
                 <div className="border border-gray-200 rounded-lg p-4">
                   <div className="flex justify-between items-center">
                     <div>
-                      <h3 className="font-medium">Delete Account</h3>
+                      <h3 className="font-medium" aria-label='delete-button'>Delete Account</h3>
                       <p className="text-gray-500 text-sm mt-1">
                         Permanently remove your account and all associated data.
                       </p>
@@ -662,12 +662,13 @@ console.log(user)
 
         {showDeactivateModal && (
         <div className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg">
+          <div className="bg-white p-6 rounded-lg" data-testid="deactivate-account">
             <DeactivateAccount
               user={user}
               userEmail={email}
               onDeactivationSuccess={handleDeactivationSuccess}
               onCancel={() => setShowDeactivateModal(false)}
+              
             />
             
           </div>
@@ -678,10 +679,11 @@ console.log(user)
         <div className="fixed inset-0  bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
             <div className="flex justify-between items-start mb-4">
-              <h3 className="text-xl font-bold text-gray-900">Cancel Subscription</h3>
+              <h3 className="text-xl font-bold text-gray-900" aria-label='cancel-button'>Cancel Subscription</h3>
               <button 
                 onClick={() => setShowCancelSubscriptionModal(false)} 
                 className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100"
+                data-testid="cancel-subscription-btn"
               >
                 <X size={20} />
               </button>

@@ -3,7 +3,7 @@ import React from 'react';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import { vi } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
-import EditProfile from './EditProfile';
+import EditProfile from '../components/EditProfile';
 import { getUserData, updateUserData, uploadProfilePicture } from '../api/auth';
 import '@testing-library/jest-dom';
 
@@ -29,7 +29,7 @@ vi.mock('lucide-react', () => ({
   Loader2: () => <div data-testid="loader-icon">Loader Icon</div>
 }));
 
-vi.mock('./Header', () => ({
+vi.mock('../components/Header', () => ({
   default: () => <div data-testid="header-component">Header</div>
 }));
 

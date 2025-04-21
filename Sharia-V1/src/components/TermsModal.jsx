@@ -22,7 +22,7 @@ const TermsModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="fixed inset-0 z-50 overflow-y-auto" data-testid="terms-modal">
       {/* Backdrop */}
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose}></div>
       

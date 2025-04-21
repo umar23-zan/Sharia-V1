@@ -114,7 +114,7 @@ function BlogCatalogue() {
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
       {/* Header */}
-      <header className="bg-gradient-to-r from-green-900 to-green-700 text-white py-12 px-4 md:px-8">
+      <header className="bg-gradient-to-r from-green-900 to-green-700 text-white py-12 px-4 md:px-8" data-testid="blog-header">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-4xl font-bold mb-4">Islamic Finance Blog</h1>
           <p className="text-xl max-w-3xl">
@@ -127,7 +127,7 @@ function BlogCatalogue() {
       <div className="bg-white shadow-md">
         <div className="max-w-6xl mx-auto px-4 md:px-8 py-6">
           {/* Search Box */}
-          <div className="relative mb-8">
+          <div className="relative mb-8" data-testid="search-container">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-gray-400" />
             </div>
@@ -137,16 +137,18 @@ function BlogCatalogue() {
               placeholder="Search articles by title or content..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              data-testid="search-input"
             />
           </div>
           
           {/* Categories */}
-          <div className="flex flex-wrap gap-2 md:gap-4">
+          <div className="flex flex-wrap gap-2 md:gap-4" data-testid="categories-container">
             {categories.map((category) => {
               const Icon = category.icon;
               return (
                 <button
                   key={category.id}
+                  data-testid={`category-${category.id}`}
                   className={`flex items-center px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                     activeCategory === category.id
                       ? 'bg-green-600 text-white'
@@ -167,11 +169,15 @@ function BlogCatalogue() {
       <main className="max-w-6xl mx-auto px-4 md:px-8 py-12">
         {/* Featured Posts Section - Only show if no search term and category is 'all' */}
         {!searchTerm && activeCategory === 'all' && (
-          <section className="mb-16">
+          <section className="mb-16" data-testid="featured-articles-section">
             <h2 className="text-3xl font-bold mb-8">Featured Articles</h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {featuredPosts.map((post) => (
-                <div key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:shadow-lg hover:-translate-y-1">
+                <div 
+                  key={post.id} 
+                  className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:shadow-lg hover:-translate-y-1"
+                  data-testid={`featured-post-${post.id}`}
+                >
                   <img 
                     src={post.imageUrl} 
                     alt={post.title} 
@@ -189,6 +195,7 @@ function BlogCatalogue() {
                       <a 
                         href={post.path}
                         className="text-green-600 font-medium flex items-center hover:text-green-700"
+                        data-testid={`featured-read-more-${post.id}`}
                       >
                         Read More <ArrowRight className="ml-1 h-4 w-4" />
                       </a>
@@ -201,25 +208,30 @@ function BlogCatalogue() {
         )}
 
         {/* All Blog Posts */}
-        <section>
-          <h2 className="text-3xl font-bold mb-8">
+        <section data-testid="blog-posts-section">
+          <h2 className="text-3xl font-bold mb-8" data-testid="section-title">
             {searchTerm ? 'Search Results' : activeCategory !== 'all' ? `${categories.find(c => c.id === activeCategory).name}` : 'All Articles'}
           </h2>
           
           {filteredPosts.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="text-center py-12" data-testid="no-results">
               <p className="text-xl text-gray-600">No articles found matching your criteria.</p>
               <button 
                 onClick={() => {setSearchTerm(''); setActiveCategory('all');}}
                 className="mt-4 px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                data-testid="clear-filters-btn"
               >
                 Clear Filters
               </button>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8" data-testid="all-articles-section">
               {filteredPosts.map((post) => (
-                <div key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:shadow-lg hover:-translate-y-1">
+                <div 
+                  key={post.id} 
+                  className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:shadow-lg hover:-translate-y-1"
+                  data-testid={`post-card-${post.id}`}
+                >
                   <img 
                     src={post.imageUrl} 
                     alt={post.title} 
@@ -230,13 +242,14 @@ function BlogCatalogue() {
                       <span className="text-xs text-gray-500">{post.date}</span>
                       <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">{post.readTime}</span>
                     </div>
-                    <h3 className="text-xl font-bold mb-2">{post.title}</h3>
+                    <h3 className="text-xl font-bold mb-2" data-testid={`post-title-${post.id}`}>{post.title}</h3>
                     <p className="text-gray-600 mb-4">{post.excerpt}</p>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-500">By {post.author}</span>
                       <a 
                         href={post.path}
                         className="text-green-600 font-medium flex items-center hover:text-green-700"
+                        data-testid={`read-more-${post.id}`}
                       >
                         Read More <ArrowRight className="ml-1 h-4 w-4" />
                       </a>
@@ -249,26 +262,8 @@ function BlogCatalogue() {
         </section>
       </main>
 
-      {/* Newsletter Section */}
-      {/* <section className="bg-green-50 py-16 px-4 md:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">Stay Updated</h2>
-          <p className="text-lg mb-8">Subscribe to our newsletter for the latest articles, guides, and insights on halal investing.</p>
-          <div className="flex flex-col md:flex-row gap-4 max-w-lg mx-auto">
-            <input 
-              type="email" 
-              placeholder="Your email address" 
-              className="flex-grow px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-            <button className="bg-green-600 text-white px-6 py-3 rounded-md font-medium hover:bg-green-700 transition-colors">
-              Subscribe
-            </button>
-          </div>
-        </div>
-      </section> */}
-
       {/* Footer */}
-      <footer className="bg-gradient-to-r from-blue-900 to-blue-800 text-white mt-auto">
+      <footer className="bg-gradient-to-r from-blue-900 to-blue-800 text-white mt-auto" data-testid="blog-footer">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12">
             {/* Company Info */}
@@ -298,6 +293,7 @@ function BlogCatalogue() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={`Follow us on ${social.name}`}
+                    data-testid={`social-${social.name}`}
                   >
                     <svg className="h-5 w-5 sm:h-6 sm:w-6" fill="currentColor" viewBox="0 0 24 24">
                       {social.name === 'facebook' && <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />}
@@ -308,14 +304,13 @@ function BlogCatalogue() {
               </div>
             </div>
 
-            
-
             {/* Resources */}
             <div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.4 }}
+              data-testid="resources-section"
             >
               <h3 className="text-lg font-bold mb-6">Resources</h3>
               <ul className="space-y-3">
@@ -326,7 +321,13 @@ function BlogCatalogue() {
                   { title: 'Privacy Policy', path: '/privacy' }
                 ].map((link, i) => (
                   <li key={i} whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 400 }}>
-                    <a href={`${link.path}`} className="text-gray-300 hover:text-white transition-colors duration-300">{link.title}</a>
+                    <a 
+                      href={`${link.path}`} 
+                      className="text-gray-300 hover:text-white transition-colors duration-300"
+                      data-testid={`footer-link-${link.title.toLowerCase().replace(/\s+/g, '-')}`}
+                    >
+                      {link.title}
+                    </a>
                   </li>
                 ))}
               </ul>
@@ -339,13 +340,14 @@ function BlogCatalogue() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.6 }}
               className="sm:col-span-2 lg:col-span-1"
+              data-testid="contact-section"
             >
               <h3 className="text-base sm:text-lg font-bold mb-4 sm:mb-6">Contact Us</h3>
               <ul className="space-y-3 sm:space-y-5">
                 {[
                   { icon: 'email', text: 'contact@shariastocks.in' },
                 ].map((item, i) => (
-                  <li key={i} className="flex items-start" whileHover={{ x: 5 }}>
+                  <li key={i} className="flex items-start" whileHover={{ x: 5 }} data-testid={`contact-item-${i}`}>
                     <svg className="h-5 w-5 sm:h-6 sm:w-6 text-green-400 mr-2 sm:mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       {item.icon === 'email' && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />}
                     </svg>
@@ -362,6 +364,7 @@ function BlogCatalogue() {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.8 }}
+            data-testid="copyright-section"
           >
             © 2025 ShariaStocks. All rights reserved.
           </div>

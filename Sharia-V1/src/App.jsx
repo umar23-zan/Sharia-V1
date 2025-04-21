@@ -9,14 +9,14 @@ import Design from './components/Design'
 import Dashboard from './components/Dashboard';
 import PrivateRoute from './components/PrivateRoute';
 import StockResults from './components/StockResults';
-import CategoryResultsPage from './components/CategoryResultsPage';
+
 import WatchList from './components/Watchlist';
 import Profile from './components/Profile';
 import NotificationsPage from './components/NotificationPage';
 import News from './components/News';
-import TrendingStocks from './components/TrendingStocks';
+
 import EditProfile from './components/EditProfile';
-import PersonalDetails from './components/PersonalDetails';
+
 import PaymentMethods from './components/PaymentMethods';
 import SubscriptionDetails from './components/SubscriptionDetails';
 import PaymentCheckout from './components/PaymentCheckout';
@@ -51,7 +51,7 @@ const App = () => {
                     <Route path="/verify/:token" element={<EmailVerification />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/reset-password/:token" element={<ResetPassword />} />
-                    <Route path='/blog-catalogue' element={<BlogCatalogue/>} />
+                    <Route path='/blogs' element={<BlogCatalogue/>} />
                     <Route path="/understand-haram" element={<UnderstandingHaram />} />
                     <Route path="/halal-haram-diff" element={<HalalHaramStocksBlog />} />
                     <Route path="/role-ai" element={<RoleAIBlog />} />
@@ -94,27 +94,12 @@ const App = () => {
                         </PrivateRoute>
                     }
                 />
-                <Route
-                    path="/trendingstocks"
-                    element={
-                        <PrivateRoute>
-                            <TrendingStocks />
-                        </PrivateRoute>
-                    }
-                />
+                
                 <Route
                     path="/stockresults/:symbol"
                     element={
                         <PrivateRoute>
                             <StockResults />
-                        </PrivateRoute>
-                    }
-                />
-                <Route
-                    path="/categoryresultspage/:categoryName"
-                    element={
-                        <PrivateRoute>
-                            <CategoryResultsPage />
                         </PrivateRoute>
                     }
                 />
@@ -142,14 +127,7 @@ const App = () => {
                         </PrivateRoute>
                     }
                 />
-                <Route
-                    path="/personaldetails"
-                    element={
-                        <PrivateRoute>
-                            <PersonalDetails />
-                        </PrivateRoute>
-                    }
-                />
+                
                 <Route
                     path="/paymentmethods"
                     element={
