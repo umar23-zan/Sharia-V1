@@ -117,6 +117,7 @@ const AccountInformationPage = () => {
     try {
       const userData = await getUserData(email);
       setUser(userData);
+      console.log(userData)
     } catch (error) {
       console.error('Error fetching user data:', error);
     } finally {
