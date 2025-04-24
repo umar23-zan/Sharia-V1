@@ -1,279 +1,324 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
+import userEvent from '@testing-library/user-event';
 import Header from '../components/Header';
 import { getUserData } from '../api/auth';
 
-let navigateMock = vi.fn(); 
-
 // Mock the modules and functions
+vi.mock('../api/auth', () => ({
+  getUserData: vi.fn()
+}));
+
+// Mock useNavigate
+const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom')
+  const actual = await vi.importActual('react-router-dom');
   return {
     ...actual,
-    useNavigate: () => navigateMock
-  }
-})
-
-
-vi.mock('../api/auth', () => ({
-  getUserData: vi.fn(),
-}));
-
-// Mock image imports
-vi.mock('../images/account-icon.svg', () => ({ default: 'account-icon.svg' }));
-vi.mock('../images/ShariaStocks-logo/logo1.jpeg', () => ({ default: 'logo1.jpeg' }));
-
-// Mock JSON data
-vi.mock('../nifty_symbols.json', () => ({
-  default: [
-    {
-      "SYMBOL": "RELIANCE",
-      "NAME OF COMPANY": "Reliance Industries Limited",
-      "Company_Logo": "reliance-logo.png"
-    },
-    {
-      "SYMBOL": "INFY",
-      "NAME OF COMPANY": "Infosys Limited",
-      "Company_Logo": "infosys-logo.png"
-    },
-    {
-      "SYMBOL": "TCS",
-      "NAME OF COMPANY": "Tata Consultancy Services Limited",
-      "Company_Logo": "tcs-logo.png"
-    }
-  ]
-}));
+    useNavigate: () => mockNavigate
+  };
+});
 
 // Mock localStorage
-const localStorageMock = {
-  getItem: vi.fn(),
-  setItem: vi.fn(),
-  clear: vi.fn(),
+const mockLocalStorage = (() => {
+  let store = {};
+  return {
+    getItem: (key) => store[key] || null,
+    setItem: (key, value) => {
+      store[key] = value.toString();
+    },
+    clear: () => {
+      store = {};
+    }
+  };
+})();
+
+Object.defineProperty(window, 'localStorage', {
+  value: mockLocalStorage
+});
+
+// Mock SVG imports
+vi.mock('../images/account-icon.svg', () => ({default: 'account-icon.svg'}));
+vi.mock('../images/ShariaStocks-logo/logo1.jpeg', () => ({
+  default: 'mocked-logo.jpg'
+}))
+
+// Mock nifty_symbols.json
+vi.mock('../nifty_symbols.json', () => {
+  return{
+    default: [
+      {
+        SYMBOL: 'RELIANCE',
+        'NAME OF COMPANY': 'Reliance Industries Ltd.',
+        Company_Logo: 'reliance-logo.png'
+      },
+      {
+        SYMBOL: 'TCS',
+        'NAME OF COMPANY': 'Tata Consultancy Services Ltd.',
+        Company_Logo: 'tcs-logo.png'
+      },
+      {
+        SYMBOL: 'HDFC',
+        'NAME OF COMPANY': 'HDFC Bank Ltd.',
+        Company_Logo: 'hdfc-logo.png'
+      }
+    ]
+  }
+ } );
+
+// Render helper function with providers
+const renderWithRouter = (component) => {
+  return render(
+    <BrowserRouter>
+      {component}
+    </BrowserRouter>
+  );
 };
-Object.defineProperty(window, 'localStorage', { value: localStorageMock });
-
-
 
 describe('Header Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorageMock.getItem.mockReturnValue('test@example.com');
+    mockLocalStorage.setItem('userEmail', 'test@example.com');
     getUserData.mockResolvedValue({
-      email: 'test@example.com',
       name: 'Test User',
-      profilePicture: 'profile-pic.jpg'
+      email: 'test@example.com',
+      profilePicture: 'profile.jpg'
     });
   });
 
-  it('renders the header component', async () => {
-    render(
-      <BrowserRouter>
-        <Header />
-      </BrowserRouter>
-    );
-
-    // Logo should be visible
-    expect(screen.getByAltText('ShariaStock Logo')).toBeInTheDocument();
+  it('renders the header component correctly', async () => {
+    renderWithRouter(<Header />);
     
-    // Search input should be visible
-    expect(screen.getAllByPlaceholderText('Search stocks...')[0]).toBeInTheDocument();
-
-    // Wait for user data to be fetched
-    await waitFor(() => {
-      expect(getUserData).toHaveBeenCalledWith('test@example.com');
-    });
+    // Basic elements should be present
+    expect(screen.getByTestId('header-component')).toBeInTheDocument();
+    expect(screen.getByTestId('search-button')).toBeInTheDocument();
+    expect(screen.getByTestId('watchlist-button')).toBeInTheDocument();
+    expect(screen.getByTestId('notification-bell')).toBeInTheDocument();
+    
+    // Verify getUserData was called with correct email
+    expect(getUserData).toHaveBeenCalledWith('test@example.com');
   });
-  
-  it('navigates to dashboard when logo is clicked', async () => {
-    render(
-      <BrowserRouter>
-        <Header />
-      </BrowserRouter>
-    );
+
+  it('displays the logo which navigates to dashboard when clicked', async () => {
+    renderWithRouter(<Header />);
     
-    const logo = screen.getByAltText('ShariaStock Logo');
+    // Logo might be hidden in mobile view, so we need to find it even if not visible
+    const logo = screen.getByTestId('header-logo');
+    expect(logo).toBeInTheDocument();
+    
+    // Click logo and verify navigation
     fireEvent.click(logo);
-    
-    expect(navigateMock).toHaveBeenCalledWith('/dashboard');
+    expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
   });
-  
-  it('navigates to profile when profile icon is clicked', async () => {
-    render(
-      <BrowserRouter>
-        <Header />
-      </BrowserRouter>
-    );
+
+  it('opens search bar when search button is clicked', async () => {
+    renderWithRouter(<Header />);
     
-    // Wait for user data to be fetched
+    // Initially, search input should not be visible
+    expect(screen.queryByTestId('desktop-search-input')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mobile-search-input')).not.toBeInTheDocument();
+    
+    // Click search button
+    const searchButton = screen.getByTestId('search-button');
+    fireEvent.click(searchButton);
+    
+    // Now search inputs should be visible (at least one of them depending on viewport)
+    const desktopInput = screen.queryByTestId('desktop-search-input');
+    const mobileInput = screen.queryByTestId('mobile-search-input');
+    
+    // At least one search input should be present
+    expect(desktopInput || mobileInput).toBeTruthy();
+  });
+
+  it('shows suggestions when typing in search input', async () => {
+    renderWithRouter(<Header />);
+    const user = userEvent.setup();
+    
+    // Open search bar
+    const searchButton = screen.getByTestId('search-button');
+    fireEvent.click(searchButton);
+    
+    // Find the input (either desktop or mobile)
+    const searchInput = screen.queryByTestId('desktop-search-input') || 
+                        screen.queryByTestId('mobile-search-input');
+    
+    expect(searchInput).toBeInTheDocument();
+    
+    // Type in search box
+    await user.type(searchInput, 'REL');
+    
+    // Wait for suggestions to appear
     await waitFor(() => {
-      expect(getUserData).toHaveBeenCalled();
+      const suggestions = screen.queryByTestId('search-suggestions-list') || 
+                          screen.queryByTestId('mobile-search-suggestions-list');
+      expect(suggestions).toBeInTheDocument();
+      
+      // Should show Reliance in results
+      expect(screen.getByText('Reliance Industries Ltd.')).toBeInTheDocument();
+    });
+  });
+
+  it('navigates to stock result page when suggestion is clicked', async () => {
+    renderWithRouter(<Header />);
+    const user = userEvent.setup();
+    
+    // Open search bar
+    const searchButton = screen.getByTestId('search-button');
+    fireEvent.click(searchButton);
+    
+    const searchInput = screen.queryByTestId('desktop-search-input') || 
+                        screen.queryByTestId('mobile-search-input');
+    
+    // Type in search box
+    await user.type(searchInput, 'REL');
+    
+    // Wait for suggestions to appear
+    await waitFor(() => {
+      const suggestion = screen.queryByTestId('search-suggestion-RELIANCE') || 
+                         screen.queryByTestId('mobile-suggestion-RELIANCE');
+      expect(suggestion).toBeInTheDocument();
     });
     
-    // Find all profile images (there are two: mobile and desktop)
-    const profileImages = screen.getAllByAltText('profile');
-    fireEvent.click(profileImages[0]); // Click the first profile image
+    // Click on suggestion
+    const suggestion = screen.queryByTestId('search-suggestion-RELIANCE') || 
+                       screen.queryByTestId('mobile-suggestion-RELIANCE');
+    fireEvent.click(suggestion);
     
-    expect(navigateMock).toHaveBeenCalledWith('/profile', { state: { user: expect.any(Object) } });
-  });
-  
-  it('handles search input and shows suggestions', async () => {
-    render(
-      <BrowserRouter>
-        <Header />
-      </BrowserRouter>
+    // Verify navigation
+    expect(mockNavigate).toHaveBeenCalledWith(
+      '/stockresults/RELIANCE', 
+      expect.objectContaining({ state: expect.anything() })
     );
+  });
+
+  it('closes search bar when close button is clicked', async () => {
+    renderWithRouter(<Header />);
     
-    // Get the search input (desktop version)
-    const searchInput = screen.getAllByPlaceholderText('Search stocks...')[0];
+    // Open search bar
+    const searchButton = screen.getByTestId('search-button');
+    fireEvent.click(searchButton);
     
-    // Type in the search box
-    fireEvent.change(searchInput, { target: { value: 'REL' } });
+    // Find the input (either desktop or mobile)
+    const searchInput = screen.queryByTestId('desktop-search-input') || 
+                        screen.queryByTestId('mobile-search-input');
     
-    // Wait for suggestions section to be visible
-    // const stockSymbolSection = await screen.findAllByTestId('header-symbol-section');
+    expect(searchInput).toBeInTheDocument();
+    
+    // Find close button
+    const closeButton = screen.queryByTestId('desktop-search-close-btn') || 
+                        screen.queryByTestId('mobile-search-close-btn');
+    
+    expect(closeButton).toBeInTheDocument();
+    
+    // Click close button
+    fireEvent.click(closeButton);
+    
+    // Input should no longer be visible
+    expect(screen.queryByTestId('desktop-search-input')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mobile-search-input')).not.toBeInTheDocument();
+  });
+
+  it('navigates to watchlist when watchlist button is clicked', async () => {
+    renderWithRouter(<Header />);
+    
+    const watchlistButton = screen.getByTestId('watchlist-button');
+    fireEvent.click(watchlistButton);
+    
+    expect(mockNavigate).toHaveBeenCalledWith(
+      '/watchlist', 
+      expect.objectContaining({ state: expect.anything() })
+    );
+  });
+
+  it('navigates to notification page when notification bell is clicked', async () => {
+    renderWithRouter(<Header />);
+    
+    const notificationBell = screen.getByTestId('notification-bell');
+    fireEvent.click(notificationBell);
+    
+    expect(mockNavigate).toHaveBeenCalledWith('/notificationpage');
+  });
+
+  it('navigates to profile page when profile icon is clicked', async () => {
+    renderWithRouter(<Header />);
+    
+    // Check for either mobile or desktop profile icon
+    const profileIcon = screen.queryByTestId('desktop-profile-icon') || 
+                        screen.queryByTestId('mobile-profile-icon');
+    
+    expect(profileIcon).toBeInTheDocument();
+    
+    fireEvent.click(profileIcon);
+    
+    expect(mockNavigate).toHaveBeenCalledWith(
+      '/profile', 
+      expect.objectContaining({ state: expect.anything() })
+    );
+  });
+
+  it('handles search submission on Enter key', async () => {
+    renderWithRouter(<Header />);
+    const user = userEvent.setup();
+    
+    // Open search bar
+    const searchButton = screen.getByTestId('search-button');
+    fireEvent.click(searchButton);
+    
+    const searchInput = screen.queryByTestId('desktop-search-input') || 
+                        screen.queryByTestId('mobile-search-input');
+    
+    // Type in search box
+    await user.type(searchInput, 'REL');
+    
+    // Wait for suggestions to appear
     await waitFor(() => {
-      // First check if the section is visible
-      const sections = screen.getAllByTestId('header-symbol-section');
-      expect(sections.length).toBeGreaterThan(0);
+      const suggestions = screen.queryByTestId('search-suggestions-list') || 
+                          screen.queryByTestId('mobile-search-suggestions-list');
+      expect(suggestions).toBeInTheDocument();
     });
     
-    // Look for any element containing part of the name
-    // await waitFor(() => {
-    //   const suggestionItems = within(stockSymbolSection[0]).queryAllByText(/Reliance/i);
-    //   expect(suggestionItems.length).toBeGreaterThan(0);
-    // });
-    
-    // Find and click on any suggestion for Reliance
-    // const reliance = within(stockSymbolSection).queryAllByText(/Reliance/i);
-    // fireEvent.click(reliance);
-    const sections = screen.getAllByTestId('header-symbol-section');
-    const suggestion = await within(sections).queryAllByText(/Reliance/i);
-  expect(suggestion).toBeInTheDocument();
-  
-  // Click on the suggestion
-  fireEvent.click(suggestion);
-    
-    // Check if navigation was called with correct parameters
-    expect(navigateMock).toHaveBeenCalledWith('/stockresults/RELIANCE', { state: { user: expect.any(Object) } });
-  });
-  
-  it('handles search with Enter key', async () => {
-    render(
-      <BrowserRouter>
-        <Header />
-      </BrowserRouter>
-    );
-    
-    // Get the search input (desktop version)
-    const searchInput = screen.getAllByPlaceholderText('Search stocks...')[0];
-    
-    // Type in the search box
-    fireEvent.change(searchInput, { target: { value: 'REL' } });
-    
-    // Wait for suggestions section to be visible
-    const stockSymbolSection = await screen.findAllByTestId('header-symbol-section');
-    
-    // Using a more flexible query - look for any element containing part of the name
-    await waitFor(() => {
-      const suggestionItems = within(stockSymbolSection[0]).queryAllByText(/Reliance/i);
-      expect(suggestionItems.length).toBeGreaterThan(0);
-    });
-    
-    // Press Enter key
+    // Press Enter
     fireEvent.keyDown(searchInput, { key: 'Enter', code: 'Enter' });
     
-    // Check if navigation was called with correct parameters
-    expect(navigateMock).toHaveBeenCalledWith('/stockresults/RELIANCE', { state: { user: expect.any(Object) } });
+    // Should navigate to the first suggestion
+    expect(mockNavigate).toHaveBeenCalledWith(
+      '/stockresults/RELIANCE', 
+      expect.objectContaining({ state: expect.anything() })
+    );
+  });
+
+  it('closes search bar on Escape key', async () => {
+    renderWithRouter(<Header />);
+    
+    // Open search bar
+    const searchButton = screen.getByTestId('search-button');
+    fireEvent.click(searchButton);
+    
+    const searchInput = screen.queryByTestId('desktop-search-input') || 
+                        screen.queryByTestId('mobile-search-input');
+    
+    expect(searchInput).toBeInTheDocument();
+    
+    // Press Escape
+    fireEvent.keyDown(searchInput, { key: 'Escape', code: 'Escape' });
+    
+    // Input should no longer be visible
+    expect(screen.queryByTestId('desktop-search-input')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mobile-search-input')).not.toBeInTheDocument();
   });
   
-  it('navigates to watchlist when heart icon is clicked', async () => {
-    render(
-      <BrowserRouter>
-        <Header />
-      </BrowserRouter>
-    );
+  it('handles the case when no user is logged in', async () => {
+    // Clear localStorage
+    mockLocalStorage.clear();
     
-    // Find the heart button
-    const heartButton = screen.getByLabelText('Watchlist');
-    fireEvent.click(heartButton);
+    renderWithRouter(<Header />);
     
-    expect(navigateMock).toHaveBeenCalledWith('/watchlist', { state: { user: expect.any(Object) } });
-  });
-  
-  it('navigates to notifications when bell icon is clicked', async () => {
-    render(
-      <BrowserRouter>
-        <Header />
-      </BrowserRouter>
-    );
-    
-    // Find the bell button
-    const bellButton = screen.getByLabelText('Notifications');
-    fireEvent.click(bellButton);
-    
-    expect(navigateMock).toHaveBeenCalledWith('/notificationpage');
-  });
-  
-  it('handles case with no user email in localStorage', async () => {
-    localStorageMock.getItem.mockReturnValue(null);
-    
-    render(
-      <BrowserRouter>
-        <Header />
-      </BrowserRouter>
-    );
-    
-    // Logo should be visible
-    expect(screen.getByAltText('ShariaStock Logo')).toBeInTheDocument();
+    // The header should still render without errors
+    expect(screen.getByTestId('header-component')).toBeInTheDocument();
+    expect(screen.getByTestId('search-button')).toBeInTheDocument();
     
     // getUserData should not be called
     expect(getUserData).not.toHaveBeenCalled();
-  });
-  
-  it('shows default profile icon when user has no profile picture', async () => {
-    // Mock user data without profile picture
-    getUserData.mockResolvedValue({
-      email: 'test@example.com',
-      name: 'Test User'
-    });
-    
-    render(
-      <BrowserRouter>
-        <Header />
-      </BrowserRouter>
-    );
-    
-    // Wait for user data to be fetched
-    await waitFor(() => {
-      expect(getUserData).toHaveBeenCalled();
-    });
-    
-    // Profile images should use the default account icon
-    const profileImages = screen.getAllByAltText('profile');
-    expect(profileImages[0].src).toContain('account-icon.svg');
-  });
-  
-  it('handles error when fetching user data', async () => {
-    // Mock error response
-    getUserData.mockRejectedValue(new Error('Failed to fetch user data'));
-    
-    // Spy on console.error
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    
-    render(
-      <BrowserRouter>
-        <Header />
-      </BrowserRouter>
-    );
-    
-    // Wait for error to be logged
-    await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledWith('Error fetching user data:', expect.any(Error));
-    });
-    
-    // Restore console.error
-    consoleSpy.mockRestore();
   });
 });

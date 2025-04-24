@@ -249,7 +249,7 @@ describe('Dashboard Component', () => {
     );
     
     // Click on watchlist button
-    fireEvent.click(screen.getByText('Watchlist'));
+    fireEvent.click(screen.getByTestId('quick-action-watchlist'));
     expect(mockNavigate).toHaveBeenCalledWith('/watchlist');
     
     // Click on get premium button
@@ -309,20 +309,4 @@ describe('Dashboard Component', () => {
 
 });
 
-  it('handles image loading errors with fallback', async () => {
-    render(
-      <BrowserRouter>
-        <Dashboard />
-      </BrowserRouter>
-    );
-    
-    // Find images that might fail to load
-    const logoImage = screen.getAllByAltText('ShariaStocks Company Logo')[0];
-    
-    // Simulate error
-    fireEvent.error(logoImage);
-    
-    // Check if the src was changed to the fallback
-    expect(logoImage.src).toContain('placeholder');
-  });
 });

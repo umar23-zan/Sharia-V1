@@ -99,8 +99,8 @@ const Signup = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex items-center justify-center p-4 sm:p-6 md:p-8">
-            <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+        <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex items-center justify-center p-4 sm:p-6 md:p-8" data-testid="signup-page-container">
+            <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 sm:p-8" data-testid="signup-form-container">
                 {/* Back button */}
                 <button 
                     className="text-gray-600 hover:text-gray-900 transition-colors mb-6 flex items-center gap-1 text-sm"
@@ -113,15 +113,16 @@ const Signup = () => {
                 </button>
 
                 {/* Logo */}
-                <div className="flex justify-center mb-6">
+                <div className="flex justify-center mb-6" data-testid="logo-container">
                     <img 
                         src={logo} 
                         alt="ShariaStocks Logo" 
                         className="w-64 h-auto" 
+                        data-testid="company-logo"
                     />
                 </div>
 
-                <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">Create Your Account</h1>
+                <h1 className="text-2xl font-bold text-center text-gray-800 mb-6" data-testid="signup-heading">Create Your Account</h1>
 
                 {/* Status message */}
                 {message && (
@@ -132,15 +133,16 @@ const Signup = () => {
                                 : 'bg-red-50 text-red-700 border border-red-200'
                         }`}
                         role="alert"
+                        data-testid={`${message.type}-message`}
                     >
                         {message.text}
                     </div>
                 )}
 
                 {/* Signup Form */}
-                <form onSubmit={onSubmit} className="space-y-5" noValidate>
-                    <div>
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                <form onSubmit={onSubmit} className="space-y-5" noValidate data-testid="signup-form">
+                    <div data-testid="name-field-container">
+                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1" data-testid="name-label">
                             Full Name
                         </label>
                         <input
@@ -152,29 +154,30 @@ const Signup = () => {
                             disabled={loading}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                             placeholder="Enter your full name"
-                           data-testid="name-input"
+                            data-testid="name-input"
                         />
                     </div>
 
-                    <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                    <div data-testid="email-field-container">
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1" data-testid="email-label">
                             Email Address
                         </label>
                         <input
                             type="email"
                             id="email"
                             name="email"
+                            disabled={loading}
                             value={formData.email}
                             onChange={onChange}
-                            disabled={loading}
+                            
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                             placeholder="name@example.com"
                             data-testid="email-input"
                         />
                     </div>
 
-                    <div>
-                        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                    <div data-testid="password-field-container">
+                        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1" data-testid="password-label">
                             Password
                         </label>
                         <div className="relative">
@@ -182,9 +185,10 @@ const Signup = () => {
                                 type={showPassword ? 'text' : 'password'}
                                 id="password"
                                 name="password"
+                                disabled={loading}
                                 value={formData.password}
                                 onChange={onChange}
-                                disabled={loading}
+                                
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                                 placeholder="Create a strong password"
                                 data-testid="password-input"
@@ -199,11 +203,11 @@ const Signup = () => {
                                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>
                         </div>
-                        <p className="mt-1 text-xs text-gray-500">Must be at least 6 characters</p>
+                        <p className="mt-1 text-xs text-gray-500" data-testid="password-hint">Must be at least 6 characters</p>
                     </div>
 
-                    <div>
-                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                    <div data-testid="confirm-password-field-container">
+                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1" data-testid="confirm-password-label">
                             Confirm Password
                         </label>
                         <div className="relative">
@@ -211,9 +215,10 @@ const Signup = () => {
                                 type={showConfirmPassword ? 'text' : 'password'}
                                 id="confirmPassword"
                                 name="confirmPassword"
+                                disabled={loading}
                                 value={formData.confirmPassword}
                                 onChange={onChange}
-                                disabled={loading}
+                                
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                                 placeholder="Confirm your password"
                                 data-testid="confirm-password-input"
@@ -231,7 +236,7 @@ const Signup = () => {
                     </div>
 
                     {/* Terms and Conditions Checkbox */}
-                    <div className="flex items-start">
+                    <div className="flex items-start" data-testid="terms-container">
                         <div className="flex items-center h-5">
                             <input
                                 id="terms"
@@ -244,12 +249,13 @@ const Signup = () => {
                             />
                         </div>
                         <div className="ml-3 text-sm">
-                            <label htmlFor="terms" className="font-medium text-gray-700">
+                            <label htmlFor="terms" className="font-medium text-gray-700" data-testid="terms-label">
                                 I agree to the{' '}
                                 <button
                                     type="button"
                                     onClick={() => setShowTermsModal(true)}
                                     className="text-indigo-600 hover:text-indigo-800 underline focus:outline-none"
+                                    data-testid="terms-link"
                                 >
                                     Terms and Conditions
                                 </button>
@@ -258,6 +264,7 @@ const Signup = () => {
                                     type="button"
                                     onClick={() => setShowPrivacyModal(true)}
                                     className="text-indigo-600 hover:text-indigo-800 underline focus:outline-none"
+                                    data-testid="privacy-link"
                                 >
                                     Privacy Policy
                                 </button>
@@ -265,7 +272,7 @@ const Signup = () => {
                         </div>
                     </div>
 
-                    <div className="pt-2">
+                    <div className="pt-2" data-testid="signup-button-container">
                         <button
                             data-testid="signup-button"
                             type="submit"
@@ -274,7 +281,7 @@ const Signup = () => {
                         >
                             {loading ? (
                                 <>
-                                    <Loader2 size={18} className="animate-spin mr-2" />
+                                    <Loader2 size={18} className="animate-spin mr-2" data-testid="loading-spinner" />
                                     Creating Account...
                                 </>
                             ) : (
@@ -283,7 +290,7 @@ const Signup = () => {
                         </button>
                     </div>
 
-                     <div className="relative my-6">
+                     <div className="relative my-6" data-testid="divider">
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t border-gray-300"></div>
                         </div>
@@ -298,12 +305,12 @@ const Signup = () => {
                         onClick={initiateGoogleSignIn}
                         className="w-full py-3 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
-                        <img src={googleLogo} alt="" className="w-5 h-5" />
+                        <img src={googleLogo} alt="" className="w-5 h-5" data-testid="google-logo" />
                         Sign up with Google
                     </button>
                 </form>
 
-                <div className="mt-8 text-center">
+                <div className="mt-8 text-center" data-testid="login-redirect-container">
                     <p className="text-sm text-gray-600">
                         Already have an account?{' '}
                         <button
@@ -311,6 +318,7 @@ const Signup = () => {
                             onClick={() => navigate('/login')}
                             disabled={loading}
                             className="font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+                            data-testid="login-link"
                         >
                             Log in here
                         </button>
@@ -320,11 +328,12 @@ const Signup = () => {
             <TermsModal 
                 isOpen={showTermsModal} 
                 onClose={() => setShowTermsModal(false)} 
+                data-testid="terms-modal"
             />
             <PrivacyModal 
                 isOpen={showPrivacyModal} 
                 onClose={() => setShowPrivacyModal(false)} 
-                
+                data-testid="privacy-modal"
             />
         </div>
     );

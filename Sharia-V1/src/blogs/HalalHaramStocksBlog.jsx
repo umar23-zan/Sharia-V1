@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { BookOpen, AlertTriangle, Check, X, Filter, ChevronDown, ChevronUp, ExternalLink, HelpCircle, CheckSquare, AlertCircle, Shield, List, Book, Briefcase, Home, Users } from 'lucide-react';
 import halalHaram from '../images/Blog-pics/halal_haram.png';
+import Footer from '../components/Footer'
 
 function HalalHaramStocksBlog() {
   const [expandedSection, setExpandedSection] = useState('introduction');
@@ -882,6 +883,7 @@ function HalalHaramStocksBlog() {
     </div>
   )}
 </section>
+    <Footer />
     </main>
     </div>
     );

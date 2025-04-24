@@ -1,14 +1,12 @@
-// SubscriptionDetails.test.jsx
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import SubscriptionDetails from '../components/SubscriptionDetails';
-import { getUserData } from '../api/auth';
-import { getSubscriptionPlans } from '../api/subscriptionService';
+import * as authApi from '../api/auth';
+import * as subscriptionService from '../api/subscriptionService';
 import axios from 'axios';
 
-// Mock the necessary modules and functions
+// Mock the router
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
@@ -17,6 +15,21 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
+// Mock lazy loaded components
+vi.mock('react', async () => {
+  const actual = await vi.importActual('react');
+  return {
+    ...actual,
+    lazy: () => {
+      const MockComponent = () => <div data-testid="mock-header">Header Component</div>;
+      MockComponent.displayName = 'MockLazyComponent';
+      return MockComponent;
+    },
+    Suspense: ({ children }) => <div data-testid="suspense-wrapper">{children}</div>
+  };
+});
+
+// Mock API calls
 vi.mock('../api/auth', () => ({
   getUserData: vi.fn()
 }));
@@ -29,316 +42,306 @@ vi.mock('../api/subscriptionService', () => ({
 
 vi.mock('axios');
 
-vi.mock('react', async () => {
-  const actual = await vi.importActual('react');
-  return {
-    ...actual,
-    lazy: () => () => import('../components/Header'),
-  };
-});
-
-vi.mock('./Header', () => ({
-  default: () => <div data-testid="header-component">Header</div>,
-}));
-
-
-vi.mock('../PaymentModeSelector', () => ({
-  default: ({ selected, onChange }) => (
-    <div data-testid="payment-mode-selector">
-      <button 
-        data-testid="auto-payment" 
-        onClick={() => onChange('automatic')}
-        className={selected === 'automatic' ? 'selected' : ''}
-      >
-        Automatic
-      </button>
-      <button 
-        data-testid="manual-payment" 
-        onClick={() => onChange('manual')}
-        className={selected === 'manual' ? 'selected' : ''}
-      >
-        Manual
-      </button>
-    </div>
-  )
-}));
-
 // Mock localStorage
-const localStorageMock = (() => {
-  let store = {
-    userEmail: 'test@example.com',
-    userId: '123456'
-  };
-  return {
-    getItem: (key) => store[key],
-    setItem: (key, value) => {
-      store[key] = value.toString();
-    },
-    removeItem: (key) => {
-      delete store[key];
-    },
-    clear: () => {
-      store = {};
-    }
-  };
-})();
-
-Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock
-});
+const localStorageMock = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  clear: vi.fn()
+};
+global.localStorage = localStorageMock;
 
 // Mock window.Razorpay
-window.Razorpay = class Razorpay {
-  constructor(options) {
-    this.options = options;
-  }
-  on = vi.fn();
-  open = vi.fn();
-};
-
-// Sample data for mocks
-const mockUserData = {
-  name: 'Test User',
-  email: 'test@example.com',
-  phone: '1234567890',
-  subscription: {
-    plan: 'free',
-    billingCycle: 'monthly',
-    status: 'active'
-  }
-};
-
-const mockPlansData = {
-  planPrices: {
-    free: { monthly: 0, annual: 0 },
-    basic: { monthly: 299, annual: 2512 },
-    premium: { monthly: 499, annual: 4192 }
-  },
-  planFeatures: {
-    free: ['Basic Shariah compliance verification', 'Stock search (up to 3 stocks)', 'No portfolio tracking', 'No advanced analytics'],
-    basic: ['Detailed Shariah compliance reports', 'Unlimited stock search', 'Store up to 10 stocks', 'Basic market alerts'],
-    premium: ['Expert Shariah compliance analysis', 'Unlimited stock search', 'Store up to 25 stocks', 'Priority market alerts', 'Personalized investment advice']
-  }
-};
+global.window.Razorpay = vi.fn().mockImplementation(() => ({
+  on: vi.fn(),
+  open: vi.fn()
+}));
 
 describe('SubscriptionDetails Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Setup the mock implementations
-    getUserData.mockResolvedValue(mockUserData);
-    getSubscriptionPlans.mockResolvedValue(mockPlansData);
-    axios.post.mockResolvedValue({ 
-      data: { 
-        status: 'success', 
-        subscription: { id: 'sub_123' },
-        order: { id: 'order_123', amount: 35282, currency: 'INR' },
-        transactionId: 'txn_123'
-      } 
-    });
-  });
-
-  it('renders the component with initial free plan', async () => {
-    render(
-      <BrowserRouter>
-        <SubscriptionDetails />
-      </BrowserRouter>
-    );
-
-    // Check loading state
-    expect(screen.getByText('Loading subscription plans...')).toBeInTheDocument();
-
-    // Wait for data to load
-    await waitFor(() => {
-      expect(screen.getByText('Choose your plan')).toBeInTheDocument();
+    
+    // Setup localStorage mock values
+    localStorage.getItem.mockImplementation((key) => {
+      if (key === 'userEmail') return 'test@example.com';
+      if (key === 'userId') return '123456';
+      return null;
     });
 
-    // Check that plan cards are rendered
-    expect(screen.getByText('Free')).toBeInTheDocument();
-    expect(screen.getByText('Basic')).toBeInTheDocument();
-    expect(screen.getByText('Premium')).toBeInTheDocument();
-
-    // Verify that the billing cycle toggle is present
-    expect(screen.getByText('Monthly')).toBeInTheDocument();
-    expect(screen.getByText('Annual')).toBeInTheDocument();
-
-    // Current plan should be "free" as per mock data
-    const freePlanButton = screen.getAllByText('Current Plan')[0];
-    expect(freePlanButton).toBeInTheDocument();
-  });
-
-  it('changes billing cycle when toggle is clicked', async () => {
-    const user = userEvent.setup();
-    render(
-      <BrowserRouter>
-        <SubscriptionDetails />
-      </BrowserRouter>
-    );
-
-    // Wait for component to load
-    await waitFor(() => {
-      expect(screen.getByText('Choose your plan')).toBeInTheDocument();
-    });
-
-    // Initially monthly prices should be displayed
-    expect(screen.getByText('₹299')).toBeInTheDocument();
-    expect(screen.getByText('₹499')).toBeInTheDocument();
-
-    // Click annual billing toggle
-    await user.click(screen.getByText('Annual'));
-
-    // Now annual prices should be displayed
-    expect(screen.getByText('₹2512')).toBeInTheDocument();
-    expect(screen.getByText('₹4192')).toBeInTheDocument();
-  });
-
-  it('opens confirmation modal when selecting a paid plan', async () => {
-    const user = userEvent.setup();
-    render(
-      <BrowserRouter>
-        <SubscriptionDetails />
-      </BrowserRouter>
-    );
-
-    // Wait for component to load
-    await waitFor(() => {
-      expect(screen.getByText('Choose your plan')).toBeInTheDocument();
-    });
-
-    // Click on Basic plan
-    const basicPlanButtons = screen.getAllByText('Select Plan');
-    await user.click(basicPlanButtons[0]); // Basic plan button
-
-    // Confirmation modal should appear
-    await waitFor(() => {
-      expect(screen.getByText('Confirm Subscription')).toBeInTheDocument();
-      expect(screen.getByText(/You're about to subscribe to the Basic plan/)).toBeInTheDocument();
-    });
-
-    // Check if payment mode selector is rendered
-    expect(screen.getByTestId('payment-mode-selector')).toBeInTheDocument();
-
-    // Check price breakdown
-    expect(screen.getByText('Subtotal')).toBeInTheDocument();
-    expect(screen.getByText('Tax (18% GST)')).toBeInTheDocument();
-    expect(screen.getByText('₹299.00')).toBeInTheDocument(); // Subtotal amount
-  });
-
-  it('changes payment mode when selecting different options', async () => {
-    const user = userEvent.setup();
-    render(
-      <BrowserRouter>
-        <SubscriptionDetails />
-      </BrowserRouter>
-    );
-
-    // Wait for component to load
-    await waitFor(() => {
-      expect(screen.getByText('Choose your plan')).toBeInTheDocument();
-    });
-
-    // Click on Premium plan
-    const premiumPlanButtons = screen.getAllByText('Select Plan');
-    await user.click(premiumPlanButtons[1]); // Premium plan button
-
-    // Confirmation modal should appear
-    await waitFor(() => {
-      expect(screen.getByText('Confirm Subscription')).toBeInTheDocument();
-    });
-
-    // Default payment mode should be automatic
-    expect(screen.getByTestId('auto-payment').className).toContain('selected');
-
-    // Change to manual payment
-    await user.click(screen.getByTestId('manual-payment'));
-    expect(screen.getByTestId('manual-payment').className).toContain('selected');
-  });
-
-  it('initiates payment when confirm button is clicked', async () => {
-    const user = userEvent.setup();
-    render(
-      <BrowserRouter>
-        <SubscriptionDetails />
-      </BrowserRouter>
-    );
-
-    // Wait for component to load
-    await waitFor(() => {
-      expect(screen.getByText('Choose your plan')).toBeInTheDocument();
-    });
-
-    // Click on Basic plan
-    const basicPlanButtons = screen.getAllByText('Select Plan');
-    await user.click(basicPlanButtons[0]); // Basic plan button
-
-    // Wait for confirmation modal
-    await waitFor(() => {
-      expect(screen.getByText('Confirm Subscription')).toBeInTheDocument();
-    });
-
-    // Click confirm payment
-    await user.click(screen.getByText('Confirm Payment'));
-
-    // Check if payment processing is initiated
-    await waitFor(() => {
-      expect(axios.post).toHaveBeenCalledWith(
-        "/api/transaction/create-subscription",
-        expect.objectContaining({
-          plan: 'basic',
-          billingCycle: 'monthly',
-          userId: '123456'
-        })
-      );
-    });
-
-    // Verify Razorpay was initialized
-    expect(window.Razorpay.prototype.open).toHaveBeenCalled();
-  });
-
-  it('shows upgrade confirmation modal when basic user tries to upgrade to premium', async () => {
-    // Mock user with basic plan
-    getUserData.mockResolvedValue({
-      ...mockUserData,
+    // Setup API mock responses
+    authApi.getUserData.mockResolvedValue({
+      name: 'Test User',
+      email: 'test@example.com',
       subscription: {
-        plan: 'basic',
-        billingCycle: 'monthly',
-        status: 'active'
+        plan: 'free',
+        billingCycle: 'monthly'
       }
     });
 
-    const user = userEvent.setup();
+    subscriptionService.getSubscriptionPlans.mockResolvedValue({
+      planPrices: {
+        free: { monthly: 0, annual: 0 },
+        basic: { monthly: 299, annual: 2512 },
+        premium: { monthly: 499, annual: 4192 }
+      },
+      planFeatures: {
+        free: [
+          'Basic stock information',
+          'Limited search functionality',
+          'No portfolio tracking',
+          'No alerts'
+        ],
+        basic: [
+          'Unlimited stock search',
+          'Stock portfolio tracking (10 stocks)',
+          'Basic Shariah compliance details',
+          'Email alerts for major events'
+        ],
+        premium: [
+          'Unlimited stock search',
+          'Stock portfolio tracking (25 stocks)',
+          'Advanced Shariah compliance analysis',
+          'Priority alerts for all events',
+          'Personalized investment insights'
+        ]
+      }
+    });
+
+    axios.post.mockResolvedValue({
+      data: {
+        status: 'success',
+        subscription: { id: 'sub_123456' },
+        order: { id: 'order_123456', amount: 499, currency: 'INR' },
+        transactionId: 'txn_123456'
+      }
+    });
+  });
+
+  it('renders the SubscriptionDetails component correctly', async () => {
     render(
       <BrowserRouter>
         <SubscriptionDetails />
       </BrowserRouter>
     );
 
-    // Wait for component to load
+    // Initial loading state should be shown
+    expect(screen.getByTestId('loading-state')).toBeInTheDocument();
+    
+    // Wait for data to load
     await waitFor(() => {
-      expect(screen.getByText('Choose your plan')).toBeInTheDocument();
-    });
-
-    // Click on Premium plan
-    const premiumPlanButtons = screen.getAllByText('Select Plan');
-    await user.click(premiumPlanButtons[0]); // Premium plan button
-
-    // Upgrade confirmation modal should appear
-    await waitFor(() => {
-      expect(screen.getByText('Upgrade Confirmation')).toBeInTheDocument();
-      expect(screen.getByText(/You are currently subscribed to the basic plan/i)).toBeInTheDocument();
-    });
-
-    // Click confirm upgrade
-    await user.click(screen.getByText('Confirm Upgrade'));
-
-    // Now the payment confirmation modal should appear
-    await waitFor(() => {
-      expect(screen.getByText('Confirm Subscription')).toBeInTheDocument();
+      expect(screen.getByTestId('subscription-details-container')).toBeInTheDocument();
     });
   });
 
-  it('shows success modal after payment completion', async () => {
-    const user = userEvent.setup();
+  it('displays plan information correctly after loading', async () => {
+    render(
+      <BrowserRouter>
+        <SubscriptionDetails />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('subscription-main-content')).toBeInTheDocument();
+    });
+
+    // Verify page title
+    expect(screen.getByTestId('page-title')).toHaveTextContent('Choose your plan');
     
+    // Verify plan cards
+    expect(screen.getByTestId('free-plan-card')).toBeInTheDocument();
+    expect(screen.getByTestId('basic-plan-card')).toBeInTheDocument();
+    expect(screen.getByTestId('premium-plan-card')).toBeInTheDocument();
+    
+    // Verify plan prices (assuming monthly billing is default)
+    expect(screen.getByTestId('free-plan-price')).toHaveTextContent('₹0');
+    expect(screen.getByTestId('basic-plan-price')).toHaveTextContent('₹299');
+    expect(screen.getByTestId('premium-plan-price')).toHaveTextContent('₹499');
+  });
+
+  it('toggles between monthly and annual billing cycles', async () => {
+    render(
+      <BrowserRouter>
+        <SubscriptionDetails />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('billing-toggle-container')).toBeInTheDocument();
+    });
+
+    // Initially on monthly billing
+    expect(screen.getByTestId('monthly-billing-button')).toHaveClass('bg-purple-600');
+    
+    // Switch to annual billing
+    fireEvent.click(screen.getByTestId('annual-billing-button'));
+    
+    // Verify annual billing is active
+    expect(screen.getByTestId('annual-billing-button')).toHaveClass('bg-purple-600');
+    expect(screen.getByTestId('monthly-billing-button')).not.toHaveClass('bg-purple-600');
+    
+    // Verify annual prices are displayed
+    expect(screen.getByTestId('basic-plan-price')).toHaveTextContent('₹2512');
+    expect(screen.getByTestId('premium-plan-price')).toHaveTextContent('₹4192');
+  });
+
+  it('selects a plan and opens confirmation modal', async () => {
+    render(
+      <BrowserRouter>
+        <SubscriptionDetails />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('basic-plan-card')).toBeInTheDocument();
+    });
+
+    // Click on the Basic plan button
+    fireEvent.click(screen.getByTestId('select-basic-plan-button'));
+    
+    // Confirmation modal should appear
+    await waitFor(() => {
+      expect(screen.getByTestId('subscription-confirmation-modal')).toBeInTheDocument();
+    });
+    
+    // Verify modal content
+    expect(screen.getByTestId('subscription-confirmation-title')).toHaveTextContent('Confirm Subscription');
+    expect(screen.getByTestId('subscription-details')).toHaveTextContent(/You're about to subscribe to the Basic plan/);
+  });
+
+  it('handles payment mode selection in the confirmation modal', async () => {
+    render(
+      <BrowserRouter>
+        <SubscriptionDetails />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('basic-plan-card')).toBeInTheDocument();
+    });
+
+    // Click on Basic plan to open confirmation modal
+    fireEvent.click(screen.getByTestId('select-basic-plan-button'));
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('payment-mode-selector')).toBeInTheDocument();
+    });
+    
+    // Test payment mode selection (assuming PaymentModeSelector renders radio inputs with data-testid attributes)
+    // Note: You may need to adjust this based on the actual implementation of PaymentModeSelector
+    const manualPaymentOption = screen.getByTestId('manual-payment-option');
+    fireEvent.click(manualPaymentOption);
+    
+    // Verify payment info is updated
+    expect(screen.getByTestId('total-price')).toHaveTextContent('₹352.82'); // Base price + 18% GST
+  });
+
+  it('handles payment process when clicking confirm payment', async () => {
+    render(
+      <BrowserRouter>
+        <SubscriptionDetails />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('premium-plan-card')).toBeInTheDocument();
+    });
+
+    // Select Premium plan
+    fireEvent.click(screen.getByTestId('select-premium-plan-button'));
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('confirm-payment-button')).toBeInTheDocument();
+    });
+    
+    // Click on confirm payment button
+    fireEvent.click(screen.getByTestId('confirm-payment-button'));
+    
+    // Verify the payment process starts
+    expect(axios.post).toHaveBeenCalledWith("/api/transaction/create-subscription", expect.objectContaining({
+      plan: 'premium',
+      billingCycle: 'monthly',
+      userId: '123456'
+    }));
+    
+    // Verify Razorpay is initialized
+    await waitFor(() => {
+      expect(window.Razorpay).toHaveBeenCalled();
+    });
+  });
+
+  it('handles failed payment and displays error message', async () => {
+    // Mock axios to simulate a payment error
+    axios.post.mockRejectedValueOnce({
+      response: {
+        data: {
+          error: 'Payment processing failed',
+          pendingId: 'pending_123'
+        }
+      }
+    });
+
+    render(
+      <BrowserRouter>
+        <SubscriptionDetails />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('basic-plan-card')).toBeInTheDocument();
+    });
+
+    // Select Basic plan
+    fireEvent.click(screen.getByTestId('select-basic-plan-button'));
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('confirm-payment-button')).toBeInTheDocument();
+    });
+    
+    // Click confirm payment
+    fireEvent.click(screen.getByTestId('confirm-payment-button'));
+    
+    // Verify error message is displayed
+    await waitFor(() => {
+      expect(screen.getByTestId('payment-error-container')).toBeInTheDocument();
+      expect(screen.getByTestId('payment-error-message')).toHaveTextContent(/pending subscription/);
+      expect(screen.getByTestId('cancel-pending-payment-button')).toBeInTheDocument();
+    });
+  });
+
+  it('shows upgrade confirmation modal when upgrading from Basic to Premium', async () => {
+    // Mock user already on Basic plan
+    authApi.getUserData.mockResolvedValue({
+      name: 'Test User',
+      email: 'test@example.com',
+      subscription: {
+        plan: 'basic',
+        billingCycle: 'monthly'
+      }
+    });
+
+    render(
+      <BrowserRouter>
+        <SubscriptionDetails />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('premium-plan-card')).toBeInTheDocument();
+    });
+
+    // Click on Premium plan
+    fireEvent.click(screen.getByTestId('select-premium-plan-button'));
+    
+    // Verify upgrade confirmation modal is shown
+    await waitFor(() => {
+      expect(screen.getByTestId('upgrade-confirmation-modal')).toBeInTheDocument();
+    });
+    
+    // Verify modal content
+    expect(screen.getByTestId('upgrade-confirmation-title')).toHaveTextContent('Upgrade Confirmation');
+    expect(screen.getByTestId('upgrade-confirmation-message')).toHaveTextContent(/currently subscribed to the basic plan/i);
+  });
+
+  it('handles successful payment and shows success modal', async () => {
     // Mock successful payment verification
     axios.post.mockImplementation((url) => {
       if (url === "/api/transaction/verify-subscription" || url === "/api/transaction/verify-order") {
@@ -346,158 +349,193 @@ describe('SubscriptionDetails Component', () => {
           data: {
             status: 'success',
             user: {
-              ...mockUserData,
               subscription: {
-                plan: 'basic',
-                billingCycle: 'monthly',
-                status: 'active'
+                plan: 'premium',
+                billingCycle: 'monthly'
               }
             }
           }
         });
       }
-      return Promise.resolve({ 
-        data: { 
-          status: 'success', 
-          subscription: { id: 'sub_123' },
-          order: { id: 'order_123', amount: 35282, currency: 'INR' },
-          transactionId: 'txn_123'
-        } 
-      });
-    });
-
-    render(
-      <BrowserRouter>
-        <SubscriptionDetails />
-      </BrowserRouter>
-    );
-
-    // Wait for component to load
-    await waitFor(() => {
-      expect(screen.getByText('Choose your plan')).toBeInTheDocument();
-    });
-
-    // Click on Basic plan
-    const basicPlanButtons = screen.getAllByText('Select Plan');
-    await user.click(basicPlanButtons[0]); // Basic plan button
-
-    // Wait for confirmation modal
-    await waitFor(() => {
-      expect(screen.getByText('Confirm Subscription')).toBeInTheDocument();
-    });
-
-    // Click confirm payment
-    await user.click(screen.getByText('Confirm Payment'));
-
-    // Simulate payment completion by directly calling the handler
-    const razorpayInstance = window.Razorpay.prototype;
-    const handlerFunction = razorpayInstance.open.mock.calls[0][0].handler;
-    
-    // Call the handler with mock response
-    await handlerFunction({
-      razorpay_payment_id: 'pay_123',
-      razorpay_subscription_id: 'sub_123',
-      razorpay_signature: 'sig_123'
-    });
-
-    // Success modal should appear
-    await waitFor(() => {
-      expect(screen.getByText('Payment Successful!')).toBeInTheDocument();
-      expect(screen.getByText(/Your subscription has been updated to the Basic plan/)).toBeInTheDocument();
-    });
-  });
-
-  it('handles payment errors correctly', async () => {
-    // Mock payment error
-    axios.post.mockImplementationOnce(() => {
-      return Promise.reject({
-        response: {
-          data: {
-            error: 'Payment failed',
-            pendingId: 'pending_123' // This will trigger the pending payment scenario
-          }
+      return Promise.resolve({
+        data: {
+          status: 'success',
+          subscription: { id: 'sub_123456' },
+          order: { id: 'order_123456', amount: 499, currency: 'INR' },
+          transactionId: 'txn_123456'
         }
       });
     });
+  
+    // Setup global method to simulate Razorpay payment success callback
+    // This would typically be called by the component after payment
+    global.simulatePaymentSuccess = null;
+  
+    // Override the Razorpay mock to capture the success handler
+    window.Razorpay = vi.fn().mockImplementation((options) => {
+      // Store the success handler globally so we can call it later
+      global.simulatePaymentSuccess = options.handler;
+      
+      return {
+        on: vi.fn(),
+        open: vi.fn()
+      };
+    });
+  
+    render(
+      <BrowserRouter>
+        <SubscriptionDetails />
+      </BrowserRouter>
+    );
+  
+    await waitFor(() => {
+      expect(screen.getByTestId('premium-plan-card')).toBeInTheDocument();
+    });
+  
+    // Select Premium plan
+    fireEvent.click(screen.getByTestId('select-premium-plan-button'));
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('confirm-payment-button')).toBeInTheDocument();
+    });
+    
+    // Click confirm payment
+    fireEvent.click(screen.getByTestId('confirm-payment-button'));
+    
+    // Wait for the create subscription API to be called
+    await waitFor(() => {
+      expect(axios.post).toHaveBeenCalledWith(
+        "/api/transaction/create-subscription", 
+        expect.anything()
+      );
+    });
+  
+    // Now manually trigger the payment success handler if it was captured
+    if (global.simulatePaymentSuccess) {
+      global.simulatePaymentSuccess({
+        razorpay_payment_id: 'pay_123456',
+        razorpay_subscription_id: 'sub_123456',
+        razorpay_signature: 'sig_123456'
+      });
+    }
+    
+    // Now look for the success modal
+    await waitFor(() => {
+      expect(screen.getByTestId('success-modal')).toBeInTheDocument();
+    });
+    
+    expect(screen.getByTestId('success-title')).toHaveTextContent('Payment Successful');
+    
+    // Clean up
+    delete global.simulatePaymentSuccess;
+  });
 
-    const user = userEvent.setup();
+  it('renders comparison table with correct plan features', async () => {
     render(
       <BrowserRouter>
         <SubscriptionDetails />
       </BrowserRouter>
     );
 
-    // Wait for component to load
     await waitFor(() => {
-      expect(screen.getByText('Choose your plan')).toBeInTheDocument();
+      expect(screen.getByTestId('plan-comparison-container')).toBeInTheDocument();
     });
 
-    // Click on Basic plan
-    const basicPlanButtons = screen.getAllByText('Select Plan');
-    await user.click(basicPlanButtons[0]); // Basic plan button
-
-    // Wait for confirmation modal
-    await waitFor(() => {
-      expect(screen.getByText('Confirm Subscription')).toBeInTheDocument();
-    });
-
-    // Click confirm payment
-    await user.click(screen.getByText('Confirm Payment'));
-
-    // Error message should appear
-    await waitFor(() => {
-      expect(screen.getByText(/You already have a pending subscription for this plan/)).toBeInTheDocument();
-      expect(screen.getByText('Cancel Pending Payment')).toBeInTheDocument();
-    });
-
-    // Click cancel pending payment
-    await user.click(screen.getByText('Cancel Pending Payment'));
-
-    // Success message for cancellation should appear
-    await waitFor(() => {
-      expect(axios.post).toHaveBeenCalledWith(
-        "/api/transaction/cancel-pending-subscription",
-        expect.any(Object)
-      );
-    });
+    // Verify comparison table headers
+    expect(screen.getByTestId('table-header-feature')).toHaveTextContent('Feature');
+    expect(screen.getByTestId('table-header-free')).toHaveTextContent('Free');
+    expect(screen.getByTestId('table-header-basic')).toHaveTextContent('Basic');
+    expect(screen.getByTestId('table-header-premium')).toHaveTextContent('Premium');
+    
+    // Verify some feature rows
+    expect(screen.getByTestId('free-search-limit')).toHaveTextContent('3 stocks');
+    expect(screen.getByTestId('basic-search-limit')).toHaveTextContent('Unlimited');
+    expect(screen.getByTestId('premium-storage')).toHaveTextContent('25 stocks');
   });
 
-  it('prevents downgrading directly from premium to free', async () => {
-    // Mock user with premium plan
-    getUserData.mockResolvedValue({
-      ...mockUserData,
+  it('prevents downgrading from premium to basic or free plan', async () => {
+    // Mock user on Premium plan
+    authApi.getUserData.mockResolvedValue({
+      name: 'Test User',
+      email: 'test@example.com',
       subscription: {
         plan: 'premium',
-        billingCycle: 'monthly',
-        status: 'active'
+        billingCycle: 'monthly'
       }
     });
 
-    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
-
-    const user = userEvent.setup();
     render(
       <BrowserRouter>
         <SubscriptionDetails />
       </BrowserRouter>
     );
 
-    // Wait for component to load
     await waitFor(() => {
-      expect(screen.getByText('Choose your plan')).toBeInTheDocument();
+      expect(screen.getByTestId('basic-plan-card')).toBeInTheDocument();
     });
 
-    // Current plan should show as Premium
-    expect(screen.getByText('Current Plan')).toBeInTheDocument();
+    // Spy on window.alert
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    
+    // Try to select Basic plan
+    expect(screen.getByTestId('select-basic-plan-button')).toBeDisabled();
+    fireEvent.click(screen.getByTestId('select-basic-plan-button'));
+    
+    // Clean up
+    alertSpy.mockRestore();
+  });
 
-    // Try to click on Free plan
-    await user.click(screen.getByText('Contact Support to Downgrade'));
+  it('disables upgrade button when already on premium plan', async () => {
+    // Mock user on Premium plan
+    authApi.getUserData.mockResolvedValue({
+      name: 'Test User',
+      email: 'test@example.com',
+      subscription: {
+        plan: 'premium',
+        billingCycle: 'monthly'
+      }
+    });
 
-    // Alert should be shown
-    expect(alertMock).toHaveBeenCalledWith(
-      "You're currently on our Premium plan. Please contact customer support if you wish to downgrade."
+    render(
+      <BrowserRouter>
+        <SubscriptionDetails />
+      </BrowserRouter>
     );
 
-    alertMock.mockRestore();
+    await waitFor(() => {
+      expect(screen.getByTestId('upgrade-button')).toBeInTheDocument();
+    });
+
+    // Verify upgrade button is disabled
+    const upgradeButton = screen.getByTestId('upgrade-button');
+    expect(upgradeButton).toHaveClass('opacity-50');
+    expect(upgradeButton).toHaveTextContent('You Have Premium');
+  });
+
+  it('handles closing confirmation modal', async () => {
+    render(
+      <BrowserRouter>
+        <SubscriptionDetails />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('basic-plan-card')).toBeInTheDocument();
+    });
+
+    // Click on Basic plan
+    fireEvent.click(screen.getByTestId('select-basic-plan-button'));
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('subscription-confirmation-modal')).toBeInTheDocument();
+    });
+    
+    // Click close button
+    fireEvent.click(screen.getByTestId('subscription-confirmation-close'));
+    
+    // Verify modal is closed
+    await waitFor(() => {
+      expect(screen.queryByTestId('subscription-confirmation-modal')).not.toBeInTheDocument();
+    });
   });
 });

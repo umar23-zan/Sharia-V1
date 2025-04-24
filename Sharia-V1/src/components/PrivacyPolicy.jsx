@@ -2,6 +2,7 @@ import React, { Suspense, useEffect, useState } from 'react';
 import { ArrowLeft, Shield, Lock, Eye, FileText, Database, Globe, UserCheck, Bell } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
+import Footer from './Footer';
 
 
 const PrivacyPolicy = () => {
@@ -273,6 +274,7 @@ const PrivacyPolicy = () => {
               </div>
             </div>
           </section>
+          <Footer />
         </main>
       </Suspense>
     </div>

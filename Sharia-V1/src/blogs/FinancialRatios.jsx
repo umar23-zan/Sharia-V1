@@ -1,6 +1,7 @@
 import React from 'react';
 import { Calculator, DollarSign, PieChart, BarChart3, TrendingUp, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Footer from '../components/Footer'
 
 function FinancialRatios() {
   const navigate = useNavigate()
@@ -329,7 +330,7 @@ function FinancialRatios() {
               <span>Consider consulting with a Shariah-compliant financial advisor</span>
             </li>
           </ul>
-          <button onClick={() => navigate('/signup')} className="bg-white text-emerald-700 font-medium py-2 px-6 rounded-full hover:bg-emerald-100 transition duration-300">
+          <button onClick={() => navigate('/')} className="bg-white text-emerald-700 font-medium py-2 px-6 rounded-full hover:bg-emerald-100 transition duration-300">
             Start Investing Today
           </button>
         </section>
@@ -394,6 +395,7 @@ function FinancialRatios() {
             </div>
           </div>
         </section>
+        <Footer />
       </main>
 
     </div>

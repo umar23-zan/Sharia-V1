@@ -73,28 +73,30 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex items-center justify-center p-4 sm:p-6 md:p-8">
-            <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+        <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex items-center justify-center p-4 sm:p-6 md:p-8" data-testid="login-page">
+            <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 sm:p-8" data-testid="login-card">
                 {/* Back button */}
                 <button 
                     className="text-gray-600 hover:text-gray-900 transition-colors mb-6 flex items-center gap-1 text-sm"
                     onClick={() => navigate('/')}
                     aria-label="Back to home"
+                    data-testid="back-button"
                 >
                     <ArrowLeft size={16} />
                     <span>Back to home</span>
                 </button>
 
                 {/* Logo */}
-                <div className="flex justify-center mb-8">
+                <div className="flex justify-center mb-8" data-testid="logo-container">
                     <img 
                         src={shariastocks} 
                         alt="ShariaStocks Logo" 
-                        className="w-64 h-auto" 
+                        className="w-64 h-auto"
+                        data-testid="app-logo" 
                     />
                 </div>
 
-                <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">Welcome Back</h1>
+                <h1 className="text-2xl font-bold text-center text-gray-800 mb-6" data-testid="welcome-heading">Welcome Back</h1>
 
                 {/* Status message */}
                 {message && (
@@ -105,19 +107,20 @@ const Login = () => {
                                 : 'bg-red-50 text-red-700 border border-red-200'
                         }`}
                         role="alert"
+                        data-testid="status-message"
                     >
                         {message.text}
                     </div>
                 )}
 
                 {/* Login Form */}
-                <form onSubmit={onSubmit} className="space-y-5">
+                <form onSubmit={onSubmit} className="space-y-5" data-testid="login-form">
                     <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1" data-testid="email-label">
                             Email Address
                         </label>
                         <input
-                            type="email"
+                            
                             id="email"
                             name="email"
                             autoComplete="email"
@@ -126,13 +129,14 @@ const Login = () => {
                             disabled={loading}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                             placeholder="name@example.com"
-                            required
+                           
+                            data-testid="email-input"
                         />
                     </div>
 
                     <div>
                         <div className="flex justify-between items-center mb-1">
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                            <label htmlFor="password" className="block text-sm font-medium text-gray-700" data-testid="password-label">
                                 Password
                             </label>
                             <button
@@ -140,6 +144,7 @@ const Login = () => {
                                 onClick={() => navigate('/forgot-password')}
                                 disabled={loading}
                                 className="text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+                                data-testid="forgot-password-link"
                             >
                                 Forgot password?
                             </button>
@@ -154,13 +159,15 @@ const Login = () => {
                                 disabled={loading}
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                                 placeholder="Enter your password"
-                                required
+                                
+                                data-testid="password-input"
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
                                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
                                 aria-label={showPassword ? "Hide password" : "Show password"}
+                                data-testid="toggle-password-visibility"
                             >
                                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>
@@ -172,6 +179,7 @@ const Login = () => {
                             type="submit"
                             disabled={loading}
                             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-medium transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center justify-center"
+                            data-testid="login-button"
                         >
                             {loading ? (
                                 <>
@@ -184,7 +192,7 @@ const Login = () => {
                         </button>
                     </div>
 
-                     <div className="relative my-6">
+                     <div className="relative my-6" data-testid="divider">
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t border-gray-300"></div>
                         </div>
@@ -197,13 +205,14 @@ const Login = () => {
                         type="button"
                         onClick={initiateGoogleSignIn}
                         className="w-full py-3 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        data-testid="google-login-button"
                     >
-                        <img src={googleLogo} alt="" className="w-5 h-5" />
+                        <img src={googleLogo} alt="" className="w-5 h-5" data-testid="google-logo" />
                         Continue with Google
                     </button>
                 </form>
 
-                <div className="mt-8 text-center">
+                <div className="mt-8 text-center" data-testid="signup-container">
                     <p className="text-sm text-gray-600">
                         Don't have an account?{' '}
                         <button
@@ -211,6 +220,7 @@ const Login = () => {
                             onClick={() => navigate('/signup')}
                             disabled={loading}
                             className="font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+                            data-testid="signup-link"
                         >
                             Sign up here
                         </button>

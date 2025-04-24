@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Shield, Sparkles, Heart, TrendingUp, ArrowLeft, X, Search, Star, StarOff, Filter, BarChart3, AlertCircle, CheckCircle } from 'lucide-react';
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
+import Footer from "./Footer";
 
 const WatchList = () => {
     const [activeTab, setActiveTab] = useState("all");
@@ -642,6 +643,7 @@ const WatchList = () => {
 {/* Padding at bottom */}
 <div className="h-24"></div>
             </div>
+            <Footer />
         </div>
     );
 };

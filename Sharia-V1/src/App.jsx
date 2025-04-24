@@ -31,10 +31,14 @@ import HalalHaramStocksBlog from './blogs/HalalHaramStocksBlog';
 import RoleAIBlog from './blogs/RoleAIBlog';
 import HalalStockblog from './blogs/HalalStockblog';
 import FinancialRatios from './blogs/FinancialRatios';
+import Top10 from './blogs/Top10Halal'
 import HowItWorks from './blogs/HowItWorks';
 import About from './components/About';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsAndConditions from './components/TermsAndConditions';
+import FAQPage from './components/Faq';
+import HaramStock from './blogs/HaramStock';
+import AIcompliance from './blogs/AIcompliance';
 
 const App = () => {
   const userId = localStorage.getItem('userId');
@@ -58,9 +62,13 @@ const App = () => {
                     <Route path="/halal-stock" element={<HalalStockblog />} />
                     <Route path="/financial-ratios" element={<FinancialRatios />} />
                     <Route path="/how-it-works" element={<HowItWorks />} />
+                    <Route path="/top10" element={<Top10 />} />
+                    <Route path="/haram" element={<HaramStock />} />
+                    <Route path="/aicompliance" element={<AIcompliance />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/privacy" element={<PrivacyPolicy />} />
                     <Route path="/terms" element={<TermsAndConditions />} />
+                    <Route path="/faq" element={<FAQPage />} />
                     {/* Protected Routes */}
                 <Route
                 path="/profile"

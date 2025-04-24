@@ -7,6 +7,7 @@ const Header = lazy(() => import('./Header'));
 import PaymentAlertModal from './PaymentAlertModal'
 import usePaymentAlert from './usePaymentAlert';
 import { getUserData, uploadProfilePicture } from '../api/auth';
+import Footer from './Footer';
 
 const ErrorBoundary = ({ children }) => {
   const [hasError, setHasError] = useState(false);
@@ -177,7 +178,7 @@ const Profile = () => {
                     src={previewUrl || user.profilePicture || account} 
                     alt="profile" 
                     className="w-full h-full rounded-full object-cover group-hover:opacity-70 transition"
-                    data-testid="profile-image"
+                    data-testid="profile-image" 
                   />
                   <input 
                     type="file" 
@@ -401,6 +402,7 @@ const Profile = () => {
             </div>
           </div>
         </div>
+        <Footer />
         </Suspense>
       </div>
     </ErrorBoundary>

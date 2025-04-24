@@ -20,6 +20,7 @@ import {
   Shield,
   List
 } from 'lucide-react';
+import Footer from '../components/Footer'
 
 export default function RoleAIBlog() {
   const [activeSection, setActiveSection] = useState(null);
@@ -715,6 +716,7 @@ export default function RoleAIBlog() {
             </div>
           </div>
         </section>
+        <Footer />
       </main>
     </div>
   )

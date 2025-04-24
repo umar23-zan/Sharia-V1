@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ChevronDown, ChevronUp, Book, DollarSign, Filter, Shield, Users, HelpCircle, Share2, ArrowRight, Check, Home } from 'lucide-react';
 import understandHaram from '../images/Blog-pics/understand_haram.jpg';
 import { useNavigate } from 'react-router-dom';
+import Footer from '../components/Footer'
 
 function UnderstandingHaram() {
   const [activeSection, setActiveSection] = useState('section1'); // Start with first section open
@@ -507,7 +508,7 @@ function UnderstandingHaram() {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <a 
-              href="https://shariastocks.in/signup" 
+              href="https://shariastocks.in/" 
               className="bg-white text-green-800 font-bold py-3 px-8 rounded-full hover:bg-green-100 transition-all flex items-center"
             >
               Start with ShariaStocks Now
@@ -534,7 +535,7 @@ function UnderstandingHaram() {
         <ChevronUp className="h-6 w-6" />
       </button>
 
-      
+      <Footer />
     </div>
   );
 }

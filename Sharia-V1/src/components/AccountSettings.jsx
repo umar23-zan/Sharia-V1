@@ -16,6 +16,7 @@ import {
   Trash2,
   Save
 } from 'lucide-react';
+import Footer from './Footer';
 const Header = lazy(() => import('./Header'));
 
 const AccountInformationPage = () => {
@@ -43,8 +44,8 @@ const AccountInformationPage = () => {
   const [notificationType, setNotificationType] = useState('success'); 
   const [subscriptionStatus, setSubscriptionStatus] = useState(user.subscription?.status);
   const [isCancelling, setIsCancelling] = useState(false);
-  const [cancelError, setCancelError] = useState(null);
-  const [cancelSuccess, setCancelSuccess] = useState(false);
+  const [cancelError, setCancelError] = useState(null);
+  const [cancelSuccess, setCancelSuccess] = useState(false);
 
   useEffect(() => {
     setSubscriptionStatus(user.subscription?.status);
@@ -139,14 +140,14 @@ console.log(user)
   };
 
   if (deactivated) {
-    return <div>Account deactivated successfully.</div>;
+    return <div data-testid="account-deactivated-message">Account deactivated successfully.</div>;
   }
 
   const handlePaymentModeChange = (mode) => {
     console.log(mode)
     if (hasPendingChange) {
-            return;
-    }
+            return;
+    }
     if (user?.subscription?.paymentMode === 'automatic' && mode === 'manual') {
       // setPaymentMode(mode);
       setShowAlertModal(true);
@@ -170,8 +171,8 @@ console.log(user)
       setError(null);
       setSuccess(false);
       if (hasPendingChange) {
-          return;
-        }
+          return;
+        }
       
       const response = await axios.post('/api/transaction/update-payment-mode', {
         userId: user._id,
@@ -200,29 +201,29 @@ console.log(user)
   };
 
   const handleCancelManualChange = async () => {
-        setIsCancelling(true);
-        setCancelError(null);
-        setCancelSuccess(false);
-        try {
-          const response = await axios.post('/api/transaction/cancel-manual-payment-change', {
-            userId: user._id,
-          });
-          if (response.data.status === 'success') {
-            setHasPendingChange(false);
-            setPendingChangeDate(null);
-            setPaymentMode('automatic'); 
-            setCancelSuccess(true);
-          
-          } else {
-            setCancelError(response.data.error || 'Failed to cancel payment mode change.');
-          }
-        } catch (error) {
-          console.error("Error cancelling manual payment change:", error);
-          setCancelError(error.response?.data?.error || 'Failed to cancel payment mode change.');
-        } finally {
-          setIsCancelling(false);
-        }
-      };
+        setIsCancelling(true);
+        setCancelError(null);
+        setCancelSuccess(false);
+        try {
+          const response = await axios.post('/api/transaction/cancel-manual-payment-change', {
+            userId: user._id,
+          });
+          if (response.data.status === 'success') {
+            setHasPendingChange(false);
+            setPendingChangeDate(null);
+            setPaymentMode('automatic'); 
+            setCancelSuccess(true);
+          
+          } else {
+            setCancelError(response.data.error || 'Failed to cancel payment mode change.');
+          }
+        } catch (error) {
+          console.error("Error cancelling manual payment change:", error);
+          setCancelError(error.response?.data?.error || 'Failed to cancel payment mode change.');
+        } finally {
+          setIsCancelling(false);
+        }
+      };
 
 
   const handleCancelSubscription = async () => {
@@ -259,11 +260,11 @@ console.log(user)
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading account information...</div>;
+    return <div className="flex items-center justify-center min-h-screen" data-testid="loading-indicator">Loading account information...</div>;
   }
 
   return (
-    <div className=" min-h-screen">
+    <div className=" min-h-screen" data-testid="account-information-page">
       <Suspense fallback={<div>Loading...</div>}>
       <Header />
       <div className='lg:ml-20'>
@@ -271,6 +272,7 @@ console.log(user)
               className="group flex items-center text-gray-600 hover:text-purple-700 mb-6 transition duration-200" 
               onClick={() => navigate(-1)}
               aria-label="Go Back"
+              data-testid="go-back-button"
             >
               <ChevronLeft className="w-5 h-5 mr-1 group-hover:transform group-hover:-translate-x-1 transition-transform duration-200" />
               <span className="font-medium">Go Back</span>
@@ -283,24 +285,24 @@ console.log(user)
 
           {/* Main Content Area */}
           <div className="w-full">
-            <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div className="bg-white rounded-xl shadow-sm p-6 mb-6" data-testid="user-info-section">
               <div className="flex items-center mb-4">
                 <div className="bg-purple-100 rounded-full p-3 mr-4">
                   <User size={24} className="text-purple-700" />
                 </div>
                 <div>
-                  <h2 className="font-bold text-lg">{user.name || 'User'}</h2>
-                  <p className="text-gray-600 text-sm">{user.email || email}</p>
+                  <h2 className="font-bold text-lg" data-testid="user-name">{user.name }</h2>
+                  <p className="text-gray-600 text-sm" data-testid="user-email">{user.email }</p>
                 </div>
               </div>
               <div className="border-t border-gray-100 pt-4 mt-2">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-gray-600">Member since</span>
-                  <span className="font-medium">{formattedDate}</span>
+                  <span className="font-medium" data-testid="member-since-date">{formattedDate}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Status</span>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800" data-testid="account-status">
                     <CheckCircle size={12} className="mr-1" />
                     active
                   </span>
@@ -309,10 +311,12 @@ console.log(user)
             </div>
             
             {/* Subscription Overview */}
-            <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div className="bg-white rounded-xl shadow-sm p-6 mb-6" data-testid="subscription-section">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold">Your Plan</h2>
-                <button className="text-purple-700 hover:text-purple-800 text-sm font-medium" onClick={() => {navigate('/subscriptiondetails')}}>
+                <button className="text-purple-700 hover:text-purple-800 text-sm font-medium" 
+                  onClick={() => {navigate('/subscriptiondetails')}}
+                  data-testid="view-all-plans-button">
                   View All Plans
                 </button>
               </div>
@@ -323,23 +327,23 @@ console.log(user)
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 mb-2">
                       Current Plan
                     </span>
-                    <h3 className="text-lg font-bold text-purple-900">{currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1)}</h3>
-                    <p className="text-purple-700 text-sm mt-1">
+                    <h3 className="text-lg font-bold text-purple-900" data-testid="current-plan">{currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1)}</h3>
+                    <p className="text-purple-700 text-sm mt-1" data-testid="plan-expiry-date">
                       {user.autoRenew ? 'Auto-renews on ' : 'Expires on '} {endDate}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-purple-900">₹{planPrice}</p>
-                    <p className="text-purple-700 text-sm">per {currentBillingCycle === 'monthly' ? 'month' : 'year'}</p>
+                    <p className="text-2xl font-bold text-purple-900" data-testid="plan-price">₹{planPrice}</p>
+                    <p className="text-purple-700 text-sm" data-testid="billing-cycle">{currentBillingCycle === 'monthly' ? 'per month' : 'per year'}</p>
                   </div>
                 </div>
               </div>
 
               <div className="border-t border-gray-100 pt-4">
                 <h3 className="font-medium mb-4">Plan Features</h3>
-                <ul className="space-y-3">
+                <ul className="space-y-3" data-testid="plan-features-list">
                   {planFeatures.map((feature, index) => (
-                    <li key={index} className="flex items-start">
+                    <li key={index} className="flex items-start" data-testid={`feature-item-${index}`}>
                       <CheckCircle size={16} className="text-green-500 mt-1 mr-2 flex-shrink-0" />
                       <span>{feature}</span>
                     </li>
@@ -349,19 +353,19 @@ console.log(user)
             </div>
 
             {/* Payment Information */}
-            <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div className="bg-white rounded-xl shadow-sm p-6 mb-6" data-testid="payment-info-section">
               <h2 className="text-xl font-bold mb-6">Payment Information</h2>
 
               <div className="mb-6">
                 <h3 className="font-medium mb-4">Billing Cycle</h3>
-                <div className="flex items-center justify-between border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center justify-between border border-gray-200 rounded-lg p-4" data-testid="billing-cycle-info">
                   <div className="flex items-center">
                     <div className="bg-purple-50 rounded-lg p-2 mr-4">
                       <Calendar size={20} className="text-purple-700" />
                     </div>
                     <div>
                       <p className="font-medium">{currentBillingCycle === 'monthly' ? 'Monthly' : 'Annual'}</p>
-                      <p className="text-gray-500 text-sm">Next billing on {endDate}</p>
+                      <p className="text-gray-500 text-sm" data-testid="next-billing-date">Next billing on {endDate}</p>
                     </div>
                   </div>
                   
@@ -372,7 +376,7 @@ console.log(user)
             <>
             {/* Pending Payment Mode Change Banner */}
             {hasPendingChange && (
-                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start text-blue-700">
+                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start text-blue-700" data-testid="pending-change-banner">
                   <div className="flex items-start">
                     <Clock className="w-5 h-5 mt-0.5 mr-2 flex-shrink-0" />
                     <div>
@@ -384,31 +388,32 @@ console.log(user)
                     </div>
                   </div>
                   <button
-                    onClick={handleCancelManualChange}
-                    disabled={isCancelling}
-                    className={`inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ${
-                      isCancelling ? 'cursor-not-allowed opacity-50' : ''
-                    }`}
-                  >
-                    {isCancelling ? 'Cancelling...' : 'Cancel Change'}
-                  </button>
+                    onClick={handleCancelManualChange}
+                    disabled={isCancelling}
+                    className={`inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ${
+                      isCancelling ? 'cursor-not-allowed opacity-50' : ''
+                    }`}
+                    data-testid="cancel-change-button"
+                  >
+                    {isCancelling ? 'Cancelling...' : 'Cancel Change'}
+                  </button>
                 </div>
               )}
               {cancelSuccess && (
-                    <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center text-green-700">
-                      <CheckCircle className="w-5 h-5 mr-2" />
-                      <span>Payment mode change cancelled and reverted to automatic.</span>
-                </div>
-              )}
+                    <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center text-green-700" data-testid="cancel-success-message">
+                      <CheckCircle className="w-5 h-5 mr-2" />
+                      <span>Payment mode change cancelled and reverted to automatic.</span>
+                </div>
+              )}
               {/* Cancellation Error Message */}
-                {cancelError && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200  rounded-lg flex items-center text-red-700">
-                  <AlertCircle className="w-5 h-5 mr-2" />
-                  <span>{cancelError}</span>
-                </div>
-              )}
+                {cancelError && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200  rounded-lg flex items-center text-red-700" data-testid="cancel-error-message">
+                  <AlertCircle className="w-5 h-5 mr-2" />
+                  <span>{cancelError}</span>
+                </div>
+              )}
               {/* Payment Mode Selection */}
-              <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+              <div className="bg-white rounded-2xl shadow-sm p-6 mb-6" data-testid="payment-mode-section">
                 <h2 className="text-lg font-semibold mb-4">Payment Mode</h2>
                 
                 <div className="space-y-4">
@@ -418,6 +423,7 @@ console.log(user)
                       (paymentMode === 'automatic' && !hasPendingChange) ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'
                     }`}
                     onClick={hasPendingChange ? undefined : () => handlePaymentModeChange('automatic')}
+                    data-testid="automatic-payment-option"
                   >
                     <div className="flex items-center">
                       <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
@@ -450,6 +456,7 @@ console.log(user)
                       (paymentMode === 'manual' ) ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'
                     }`}
                     onClick={hasPendingChange ? undefined : () => handlePaymentModeChange('manual')}
+                    data-testid="manual-payment-option"
                   >
                     <div className="flex items-center">
                       <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
@@ -480,7 +487,7 @@ console.log(user)
               
               {/* Success message */}
               {success && (
-                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center text-green-700">
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center text-green-700" data-testid="payment-mode-success">
                   <CheckCircle className="w-5 h-5 mr-2" />
                   <span>
                     {paymentMode === 'manual' && user?.subscription?.paymentMode === 'automatic'
@@ -493,7 +500,7 @@ console.log(user)
               
               {/* Error message */}
               {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center text-red-700">
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center text-red-700" data-testid="payment-mode-error">
                   <AlertCircle className="w-5 h-5 mr-2" />
                   <span>{error}</span>
                 </div>
@@ -508,6 +515,7 @@ console.log(user)
                     className={` flex items-center justify-center py-3 px-4 rounded-xl text-white font-medium ${
                       loading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
                     }`}
+                    data-testid="save-payment-mode-button"
                   >
                     <Save className="w-5 h-5 mr-2" />
                     {loading ? 'Saving...' : 'Save Changes'}
@@ -518,13 +526,14 @@ console.log(user)
           )}
 
           {user?.subscription?.status !== 'active' && (
-            <div className="bg-gray-50 rounded-2xl p-6 text-center">
+            <div className="bg-gray-50 rounded-2xl p-6 text-center" data-testid="inactive-subscription-message">
               <p className="text-gray-600 mb-4">
                 You need an active subscription to manage payment settings.
               </p>
               <button
                 onClick={() => navigate('/subscriptiondetails')}
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                data-testid="view-subscription-plans-button"
               >
                 View Subscription Plans
               </button>
@@ -532,13 +541,14 @@ console.log(user)
           )}
 
 {showAlertModal && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50" data-testid="payment-mode-alert-modal">
           <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Change Payment Mode</h3>
               <button 
                 onClick={cancelManualMode}
                 className="text-gray-500 hover:text-gray-700"
+                data-testid="close-alert-modal"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -563,12 +573,14 @@ console.log(user)
               <button
                 onClick={cancelManualMode}
                 className="flex-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                data-testid="keep-automatic-button"
               >
                 Keep Automatic
               </button>
               <button
                 onClick={confirmManualMode}
                 className="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                data-testid="switch-to-manual-button"
               >
                 Switch to Manual
               </button>
@@ -581,12 +593,13 @@ console.log(user)
             
 
             {/* Account Management */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="bg-white rounded-xl shadow-sm p-6" data-testid="account-management-section">
               <h2 className="text-xl font-bold mb-6">Account Management</h2>
               {showNotification && (
                 <div className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg max-w-md z-50 
                                   ${notificationType === 'success' ? 'bg-green-50 border-l-4 border-green-500' : 
-                                  'bg-red-50 border-l-4 border-red-500'}`}>
+                                  'bg-red-50 border-l-4 border-red-500'}`}
+                     data-testid="notification-alert">
                   <div className="flex">
                     <div className="flex-shrink-0">
                       {notificationType === 'success' ? (
@@ -610,26 +623,28 @@ console.log(user)
                         className={`inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2 
                                     ${notificationType === 'success' ? 'text-green-500 hover:bg-green-100 focus:ring-green-600' : 
                                     'text-red-500 hover:bg-red-100 focus:ring-red-600'}`}
+                        data-testid="close-notification"
                       >
                         <X size={16} />
                       </button>
                     </div>
                   </div>
                 </div>
-              )}
-                    {/* Active subscription component */}
+              )}  
+                   {/* Active subscription component */}
                   {subscriptionStatus === 'active' && (
-                    <div className="border border-gray-200 rounded-lg p-4">
+                    <div className="border border-gray-200 rounded-lg p-4" data-testid="active-subscription-container">
                       <div className="flex justify-between items-center">
                         <div>
-                          <h3 className="font-medium">Cancel Subscription</h3>
-                          <p className="text-gray-500 text-sm mt-1">
+                          <h3 className="font-medium" data-testid="cancel-subscription-title">Cancel Subscription</h3>
+                          <p className="text-gray-500 text-sm mt-1" data-testid="subscription-info-text">
                             Your subscription will remain active until the end of your current billing period.
                           </p>
                         </div>
                         <button 
                           onClick={() => setShowCancelSubscriptionModal(true)}
                           className="text-amber-700 hover:text-amber-800 text-sm font-medium"
+                          data-testid="cancel-subscription-button"
                         >
                           Cancel Subscription
                         </button>
@@ -637,141 +652,146 @@ console.log(user)
                     </div>
                   )}
 
-                
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="font-medium" aria-label='delete-button'>Delete Account</h3>
-                      <p className="text-gray-500 text-sm mt-1">
-                        Permanently remove your account and all associated data.
-                      </p>
-                    </div>
-                    <button 
-                      onClick={() => setShowDeactivateModal(true)}
-                      className="text-red-600 hover:text-red-700 text-sm font-medium"
-                    >
-                      Delete Account
-                    </button>
-                  </div>
-                </div>
-              </div>
-          </div>
+<div className="border border-gray-200 rounded-lg p-4" data-testid="delete-account-container">
+  <div className="flex justify-between items-center">
+    <div>
+      <h3 className="font-medium" aria-label='delete-button' data-testid="delete-account-title">Delete Account</h3>
+      <p className="text-gray-500 text-sm mt-1" data-testid="delete-account-info-text">
+        Permanently remove your account and all associated data.
+      </p>
+    </div>
+    <button 
+      onClick={() => setShowDeactivateModal(true)}
+      className="text-red-600 hover:text-red-700 text-sm font-medium"
+      data-testid="delete-account-button"
+    >
+      Delete Account
+    </button>
+  </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+ 
+
+{showDeactivateModal && (
+  <div className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex justify-center items-center" data-testid="deactivate-modal-overlay">
+    <div className="bg-white p-6 rounded-lg" data-testid="deactivate-account-modal">
+      <DeactivateAccount
+        user={user}
+        userEmail={email}
+        onDeactivationSuccess={handleDeactivationSuccess}
+        onCancel={() => setShowDeactivateModal(false)}
+      />
+    </div>
+  </div>
+)}
+
+{/* Cancel Subscription Modal */}
+{showCancelSubscriptionModal && (
+  <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4" data-testid="cancel-subscription-modal-overlay">
+    <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6" data-testid="cancel-subscription-modal">
+      <div className="flex justify-between items-start mb-4">
+        <h3 className="text-xl font-bold text-gray-900" aria-label='cancel-button' data-testid="cancel-subscription-modal-title">Cancel Subscription</h3>
+        <button 
+          onClick={() => setShowCancelSubscriptionModal(false)} 
+          className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100"
+          data-testid="close-cancel-modal-button"
+        >
+          <X size={20} />
+        </button>
+      </div>
+      <div className="mb-6">
+        <div className="bg-amber-50 border-l-4 border-amber-400 p-4 flex items-start rounded-r-md mb-4" data-testid="subscription-alert">
+          <AlertCircle size={20} className="text-amber-500 mr-3 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-amber-700" data-testid="subscription-end-date-text">
+            Your subscription will remain active until {endDate}.
+          </p>
+        </div>
+        <p className="text-gray-600 mb-4" data-testid="cancellation-note">
+          Before cancelling, please note:
+        </p>
+        <ul className="space-y-2 text-sm text-gray-600 mb-4" data-testid="cancellation-points">
+          <li className="flex items-start" data-testid="cancellation-point-1">
+            <ChevronRight size={16} className="mr-2 mt-1 text-amber-500 flex-shrink-0" />
+            You'll lose access to all premium features after {endDate}
+          </li>
+          <li className="flex items-start" data-testid="cancellation-point-2">
+            <ChevronRight size={16} className="mr-2 mt-1 text-amber-500 flex-shrink-0" />
+            No refunds are provided for partial periods
+          </li>
+          <li className="flex items-start" data-testid="cancellation-point-3">
+            <ChevronRight size={16} className="mr-2 mt-1 text-amber-500 flex-shrink-0" />
+            You can resubscribe at any time
+          </li>
+        </ul>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1" data-testid="reason-label">
+            Please tell us why you're cancelling:
+          </label>
+          <select 
+            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            data-testid="cancellation-reason-select"
+          >
+            <option value="Too expensive" data-testid="reason-option-expensive">Too expensive</option>
+            <option value="Not using the service enough" data-testid="reason-option-not-using">Not using the service enough</option>
+            <option value="Missing features I need" data-testid="reason-option-missing-features">Missing features I need</option>
+            <option value="Found a better alternative" data-testid="reason-option-alternative">Found a better alternative</option>
+            <option value="Technical issues" data-testid="reason-option-tech-issues">Technical issues</option>
+            <option value="Other" data-testid="reason-option-other">Other</option>
+          </select>
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1" data-testid="feedback-label">
+            Feedback (optional):
+          </label>
+          <textarea
+            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+            rows={3}
+            placeholder="Tell us how we can improve..."
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+            data-testid="cancellation-feedback-textarea"
+          ></textarea>
         </div>
       </div>
-       
-
-        {showDeactivateModal && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg" data-testid="deactivate-account">
-            <DeactivateAccount
-              user={user}
-              userEmail={email}
-              onDeactivationSuccess={handleDeactivationSuccess}
-              onCancel={() => setShowDeactivateModal(false)}
-              
-            />
-            
-          </div>
-        </div>
-      )}
-      {/* Cancel Subscription Modal */}
-      {showCancelSubscriptionModal && (
-        <div className="fixed inset-0  bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-            <div className="flex justify-between items-start mb-4">
-              <h3 className="text-xl font-bold text-gray-900" aria-label='cancel-button'>Cancel Subscription</h3>
-              <button 
-                onClick={() => setShowCancelSubscriptionModal(false)} 
-                className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100"
-                data-testid="cancel-subscription-btn"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <div className="mb-6">
-              <div className="bg-amber-50 border-l-4 border-amber-400 p-4 flex items-start rounded-r-md mb-4">
-                <AlertCircle size={20} className="text-amber-500 mr-3 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-amber-700">
-                  Your subscription will remain active until {endDate}.
-                </p>
-              </div>
-              <p className="text-gray-600 mb-4">
-                Before cancelling, please note:
-              </p>
-              <ul className="space-y-2 text-sm text-gray-600 mb-4">
-                <li className="flex items-start">
-                  <ChevronRight size={16} className="mr-2 mt-1 text-amber-500 flex-shrink-0" />
-                  You'll lose access to all premium features after {endDate}
-                </li>
-                <li className="flex items-start">
-                  <ChevronRight size={16} className="mr-2 mt-1 text-amber-500 flex-shrink-0" />
-                  No refunds are provided for partial periods
-                </li>
-                <li className="flex items-start">
-                  <ChevronRight size={16} className="mr-2 mt-1 text-amber-500 flex-shrink-0" />
-                  You can resubscribe at any time
-                </li>
-              </ul>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Please tell us why you're cancelling:
-                </label>
-                <select className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md"
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                >
-                  <option>Too expensive</option>
-                  <option>Not using the service enough</option>
-                  <option>Missing features I need</option>
-                  <option>Found a better alternative</option>
-                  <option>Technical issues</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Feedback (optional):
-                </label>
-                <textarea
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-                  rows={3}
-                  placeholder="Tell us how we can improve..."
-                  value={feedback}
-                  onChange={(e) => setFeedback(e.target.value)}
-                ></textarea>
-              </div>
-            </div>
-            <div className="flex flex-col space-y-3">
-              <button className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium flex items-center justify-center"
-              onClick={handleCancelSubscription}
-              disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Processing...
-                  </span>
-                ) : (
-                  <>
-                    <Trash2 size={16} className="mr-2" />
-                    Cancel Subscription
-                  </>
-                )}
-              </button>
-              <button 
-                onClick={() => setShowCancelSubscriptionModal(false)} 
-                className="w-full px-4 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
-              >
-                Keep Subscription
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
+      <div className="flex flex-col space-y-3">
+        <button 
+          className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium flex items-center justify-center"
+          onClick={handleCancelSubscription}
+          disabled={isSubmitting}
+          data-testid="confirm-cancel-subscription-button"
+        >
+          {isSubmitting ? (
+            <span className="flex items-center" data-testid="submitting-spinner">
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Processing...
+            </span>
+          ) : (
+            <>
+              <Trash2 size={16} className="mr-2" />
+              Cancel Subscription
+            </>
+          )}
+        </button>
+        <button 
+          onClick={() => setShowCancelSubscriptionModal(false)} 
+          className="w-full px-4 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
+          data-testid="keep-subscription-button"
+        >
+          Keep Subscription
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+<Footer data-testid="footer" />
       </Suspense>
     </div>
   );

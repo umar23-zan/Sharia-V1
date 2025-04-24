@@ -11,6 +11,7 @@ import profile from '../images/Blog-pics/profile.png'
 import accountSettings from '../images/Blog-pics/accountSettings.png'
 import paymentMethods from '../images/Blog-pics/paymentMethods.png'
 import subscription from '../images/Blog-pics/subscriptionDetails.png'
+import Footer from '../components/Footer'
 
 
 
@@ -655,6 +656,7 @@ function HowItWorks() {
       </p>
     </section>
     </section>
+    <Footer />
     </main>
     </div>
     )

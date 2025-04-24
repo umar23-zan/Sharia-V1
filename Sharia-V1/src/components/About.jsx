@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 
 import logo from '../images/ShariaStocks-logo/logo1.jpeg';
+import Footer from './Footer';
 
 const About = () => {
   const navigate = useNavigate();
@@ -314,32 +315,7 @@ const About = () => {
         </main>
 
         {/* Footer */}
-        <footer className="mt-16 text-center text-gray-500 text-sm border-t border-gray-100 pt-6 pb-8 px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-              <div className="mb-4 md:mb-0">
-                <img 
-                  src={logo} 
-                  alt="ShariaStocks Logo" 
-                  className="h-10 mx-auto md:mx-0" 
-                  onError={(e) => { e.target.src = "https://via.placeholder.com/40x40?text=Logo" }}
-                />
-              </div>
-              
-              <div className="flex space-x-4">
-                {['About', 'Privacy', 'Terms'].map((item, index) => (
-                  <Link key={index} to={`/${item.toLowerCase()}`} className="text-gray-600 hover:text-indigo-600 transition-colors">
-                    {item}
-                  </Link>
-                ))}
-              </div>
-            </div>
-            
-            <div className="border-t border-gray-100 pt-4">
-              <p>© 2025 ShariaStocks. All rights reserved.</p>
-            </div>
-          </div>
-        </footer>
+        <Footer />
       </Suspense>
     </div>
   );

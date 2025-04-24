@@ -4,6 +4,7 @@ import { ArrowLeft, Camera, UserRound, Loader2 } from 'lucide-react';
 import { getUserData, updateUserData, uploadProfilePicture } from '../api/auth';
 import account from '../images/account-icon.svg';
 import logo from '../images/ShariaStocks-logo/logo1.jpeg';
+import Footer from './Footer';
 const Header = lazy(() => import('./Header'));
 
 const EditProfile = () => {
@@ -175,7 +176,7 @@ const EditProfile = () => {
           <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
         </div>
       }>
-        <Header />
+        <Header showLogo={true}/>
         <div className="max-w-3xl mx-auto p-4">
           <div className="flex items-center gap-4 mb-6">
             <button 
@@ -314,6 +315,7 @@ const EditProfile = () => {
             )}
           </div>
         </div>
+        <Footer />
       </Suspense>
     </div>
   );

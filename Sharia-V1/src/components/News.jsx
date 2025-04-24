@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowLeft, Bell, Search, LoaderCircle } from 'lucide-react';
 import logo from '../images/ShariaStocks-logo/logo1.jpeg'
+import Footer from './Footer';
 const Header = lazy(() => import('./Header'));
 
 const News = () => {
@@ -171,6 +172,7 @@ const News = () => {
           </button>
         </div>
       </div>
+      <Footer />
       </Suspense>
     </div>
   );

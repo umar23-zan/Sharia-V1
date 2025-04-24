@@ -22,11 +22,11 @@ router.get('/plans', async (req, res) => {
       },
       basic: {
         monthly: planMap.basic?.prices?.monthly || 299,
-        annual: planMap.basic?.prices?.annual || 2512,
+        annual: planMap.basic?.prices?.annual || 1999,
       },
       premium: {
         monthly: planMap.premium?.prices?.monthly || 499,
-        annual: planMap.premium?.prices?.annual || 4192,
+        annual: planMap.premium?.prices?.annual || 2999,
       }
     };
 

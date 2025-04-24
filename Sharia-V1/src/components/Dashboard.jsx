@@ -80,28 +80,31 @@ const Dashboard = () => {
   };
 
   const trendingStocks = [
-    { symbol: 'RELIANCE', name: 'Reliance Industries Ltd', change: '+2.3%', price: '₹2,842.35', trend: 'up' },
-    { symbol: 'HDFCBANK', name: 'HDFC Bank Ltd', change: '+1.5%', price: '₹1,678.90', trend: 'up' },
-    { symbol: 'TCS', name: 'Tata Consultancy Services', change: '-0.8%', price: '₹3,452.15', trend: 'down' },
-    { symbol: 'INFY', name: 'Infosys Ltd', change: '+1.2%', price: '₹1,345.70', trend: 'up' },
-    { symbol: 'ICICIBANK', name: 'ICICI Bank Ltd', change: '+0.7%', price: '₹958.40', trend: 'up' },
-    { symbol: 'SBIN', name: 'State Bank of India', change: '-0.3%', price: '₹640.15', trend: 'down' },
-    { symbol: 'TATAMOTORS', name: 'Tata Motors Ltd', change: '+3.1%', price: '₹745.20', trend: 'up' },
-    { symbol: 'BAJFINANCE', name: 'Bajaj Finance Ltd', change: '-1.4%', price: '₹6,890.55', trend: 'down' }
+    { symbol: 'RELIANCE', name: 'Reliance Industries Ltd', change: '+2.3%', price: '₹2,842.35', trend: 'up', logo: 'https://logo.clearbit.com/ril.com' },
+    { symbol: 'HDFCBANK', name: 'HDFC Bank Ltd', change: '+1.5%', price: '₹1,678.90', trend: 'up', logo: 'https://logo.clearbit.com/hdfcbank.com' },
+    { symbol: 'TCS', name: 'Tata Consultancy Services', change: '-0.8%', price: '₹3,452.15', trend: 'down', logo: 'https://logo.clearbit.com/tcs.com' },
+    { symbol: 'INFY', name: 'Infosys Ltd', change: '+1.2%', price: '₹1,345.70', trend: 'up', logo: 'https://logo.clearbit.com/infosys.com' },
+    { symbol: 'ICICIBANK', name: 'ICICI Bank Ltd', change: '+0.7%', price: '₹958.40', trend: 'up', logo: 'https://logo.clearbit.com/icicibank.com' },
+    { symbol: 'SBIN', name: 'State Bank of India', change: '-0.3%', price: '₹640.15', trend: 'down', logo: 'https://logo.clearbit.com/sbi.co.in' },
+    { symbol: 'TATAMOTORS', name: 'Tata Motors Ltd', change: '+3.1%', price: '₹745.20', trend: 'up', logo: 'https://logo.clearbit.com/tatamotors.com' },
+    { symbol: 'BAJFINANCE', name: 'Bajaj Finance Ltd', change: '-1.4%', price: '₹6,890.55', trend: 'down', logo: 'https://logo.clearbit.com/bajajfinserv.in' }
   ];
+  
 
   const halalStocks = [
-    { symbol: 'TATAMOTORS', name: 'Tata Motors Ltd', price: '₹745.20', change: '+3.1%', trend: 'up', marketCap: '₹245,621 Cr', complianceScore: 98 },
-    { symbol: 'TCS', name: 'Tata Consultancy Services', price: '₹3,452.15', change: '-0.8%', trend: 'down', marketCap: '₹1,265,430 Cr', complianceScore: 97 },
-    { symbol: 'HCLTECH', name: 'HCL Technologies Ltd', price: '₹1,245.30', change: '+0.5%', trend: 'up', marketCap: '₹337,845 Cr', complianceScore: 96 },
-    { symbol: 'TITAN', name: 'Titan Company Ltd', price: '₹3,125.40', change: '+1.8%', trend: 'up', marketCap: '₹277,556 Cr', complianceScore: 95 },
-    { symbol: 'WIPRO', name: 'Wipro Ltd', price: '₹452.75', change: '-0.3%', trend: 'down', marketCap: '₹248,721 Cr', complianceScore: 94 },
-    { symbol: 'ASIANPAINT', name: 'Asian Paints Ltd', price: '₹2,875.60', change: '+0.9%', trend: 'up', marketCap: '₹276,124 Cr', complianceScore: 93 },
-    { symbol: 'ULTRACEMCO', name: 'UltraTech Cement Ltd', price: '₹9,845.25', change: '-1.2%', trend: 'down', marketCap: '₹284,332 Cr', complianceScore: 92 },
-    { symbol: 'NESTLEIND', name: 'Nestle India Ltd', price: '₹23,456.50', change: '+0.6%', trend: 'up', marketCap: '₹226,189 Cr', complianceScore: 91 },
-    { symbol: 'HINDUNILVR', name: 'Hindustan Unilever Ltd', price: '₹2,456.20', change: '-0.4%', trend: 'down', marketCap: '₹576,890 Cr', complianceScore: 90 },
-    { symbol: 'INFY', name: 'Infosys Ltd', price: '₹1,345.70', change: '+1.2%', trend: 'up', marketCap: '₹556,432 Cr', complianceScore: 89 }
+    { symbol: 'TATAMOTORS', name: 'Tata Motors Ltd', price: '₹745.20', change: '+3.1%', trend: 'up', marketCap: '₹245,621 Cr', complianceScore: 98, logo: 'https://logo.clearbit.com/tatamotors.com' },
+    { symbol: 'TCS', name: 'Tata Consultancy Services', price: '₹3,452.15', change: '-0.8%', trend: 'down', marketCap: '₹1,265,430 Cr', complianceScore: 97, logo: 'https://logo.clearbit.com/tcs.com' },
+    { symbol: 'HCLTECH', name: 'HCL Technologies Ltd', price: '₹1,245.30', change: '+0.5%', trend: 'up', marketCap: '₹337,845 Cr', complianceScore: 96, logo: 'https://logo.clearbit.com/hcltech.com' },
+    { symbol: 'ASIANPAINT', name: 'Asian Paints Ltd', price: '₹2,875.60', change: '+0.9%', trend: 'up', marketCap: '₹276,124 Cr', complianceScore: 93, logo: 'https://logo.clearbit.com/asianpaints.com' },
+    { symbol: 'ULTRACEMCO', name: 'UltraTech Cement Ltd', price: '₹9,845.25', change: '-1.2%', trend: 'down', marketCap: '₹284,332 Cr', complianceScore: 92, logo: 'https://logo.clearbit.com/ultratechcement.com' },
+    { symbol: 'NESTLEIND', name: 'Nestle India Ltd', price: '₹23,456.50', change: '+0.6%', trend: 'up', marketCap: '₹226,189 Cr', complianceScore: 91, logo: 'https://logo.clearbit.com/nestle.in' },
+    { symbol: 'HINDUNILVR', name: 'Hindustan Unilever Ltd', price: '₹2,456.20', change: '-0.4%', trend: 'down', marketCap: '₹576,890 Cr', complianceScore: 90, logo: 'https://logo.clearbit.com/hul.co.in' },
+    { symbol: 'INFY', name: 'Infosys Ltd', price: '₹1,345.70', change: '+1.2%', trend: 'up', marketCap: '₹556,432 Cr', complianceScore: 89, logo: 'https://logo.clearbit.com/infosys.com' },
+    { symbol: 'DRREDDY', name: "Dr. Reddy's Laboratories Ltd", price: '₹6,024.80', change: '+0.7%', trend: 'up', marketCap: '₹100,234 Cr', complianceScore: 95, logo: 'https://logo.clearbit.com/drreddys.com' },
+    { symbol: 'DIVISLAB', name: "Divi's Laboratories Ltd", price: '₹3,824.60', change: '+0.4%', trend: 'up', marketCap: '₹101,546 Cr', complianceScore: 94, logo: 'https://logo.clearbit.com/divislabs.com' }
   ];
+  
+  
 
   const categories = [
     { name: 'Technology', icon: 'laptop', count: '42' },
@@ -292,7 +295,21 @@ const Dashboard = () => {
                       >
                         <div className="flex items-center mb-3">
                           <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center font-bold text-indigo-700 group-hover:scale-110 transition-transform">
-                            {stock.symbol.substring(0, 2)}
+                            <img 
+                              src={stock.logo} 
+                              alt={stock.symbol} 
+                              className="w-8 h-8 object-contain"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.nextElementSibling.style.display = 'block';
+                              }}
+                            />
+                            <span 
+                              className="hidden"
+                              style={{ display: 'none' }}
+                            >
+                              {stock.symbol.substring(0, 2)}
+                            </span>
                           </div>
                           
                           <div className="ml-3 flex-1">
@@ -440,7 +457,7 @@ const Dashboard = () => {
                           key={stock.symbol}
                           className={`flex items-center py-3 ${index !== 9 ? 'border-b border-gray-100' : ''} ${shouldBlur ? 'filter blur-sm' : ''} hover:bg-gray-50 cursor-pointer transition-colors rounded-lg px-3`}
                           onClick={() => {
-                            // Only navigate if not blurred oruser has premium access
+                            // Only navigate if not blurred or user has premium access
                             if (!shouldBlur) {
                               navigate(`/stockresults/${stock.symbol}`, { state: { user } });
                             } else {
@@ -450,7 +467,21 @@ const Dashboard = () => {
                         >
                           <div className="w-1/2 md:w-2/5 flex items-center">
                             <div className="hidden sm:flex w-10 h-10 rounded-lg bg-gradient-to-br from-green-50 to-teal-50 items-center justify-center font-bold text-green-700 mr-3">
-                              {stock.symbol.substring(0, 2)}
+                              <img 
+                                src={stock.logo} 
+                                alt={stock.symbol} 
+                                className="w-7 h-7 object-contain"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.nextElementSibling.style.display = 'block';
+                                }}
+                              />
+                              <span 
+                                className="hidden"
+                                style={{ display: 'none' }}
+                              >
+                                {stock.symbol.substring(0, 2)}
+                              </span>
                             </div>
                             <div>
                               <div className="font-medium">{stock.symbol}</div>
@@ -625,6 +656,7 @@ const Dashboard = () => {
                         key={index} 
                         className="flex items-center p-3 rounded-xl border border-gray-100 hover:border-indigo-200 hover:bg-indigo-50/30 transition-all"
                         onClick={item.action}
+                        data-testid={`quick-action-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
                       >
                         <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center mr-3">
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-600">
@@ -709,7 +741,7 @@ const Dashboard = () => {
                 </div>
                 
                 <div className="flex space-x-4">
-                  {['About', 'Privacy', 'Terms', 'Blogs'].map((item, index) => (
+                  {['About', 'Privacy', 'Terms', 'Blogs', 'FAQ'].map((item, index) => (
                     <a key={index} href={`/${item.toLowerCase()}`} className="text-gray-600 hover:text-indigo-600 transition-colors">
                       {item}
                     </a>
@@ -718,7 +750,7 @@ const Dashboard = () => {
               </div>
               
               <div className="border-t border-gray-100 pt-4 pb-8">
-                <p>© 2025 ShariaStocks. All rights reserved.</p>
+                <p>© 2025 Zansphere Private Limited. All rights reserved.</p>
               </div>
             </div>
           </footer>

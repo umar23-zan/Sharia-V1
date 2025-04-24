@@ -10,6 +10,7 @@ import axios from "axios";
 import { getUserData } from '../api/auth';
 const Header = lazy(() => import('./Header'));
 import PaymentModeSelector from './PaymentModeSelector';
+import Footer from './Footer';
 
 const SubscriptionDetails = () => {
     const email = localStorage.getItem('userEmail');
@@ -23,8 +24,8 @@ const SubscriptionDetails = () => {
     const [showUpgradeConfirmation, setShowUpgradeConfirmation] = useState(false);
     const [planPrices, setPlanPrices] = useState({
         free: { monthly: 0, annual: 0 },
-        basic: { monthly: 299, annual: 2512 },
-        premium: { monthly: 499, annual: 4192 }
+        basic: { monthly: 299, annual: 1999 },
+        premium: { monthly: 499, annual: 2999 }
     });
     const [planFeatures, setPlanFeatures] = useState({});
     const [loading, setLoading] = useState(true);
@@ -332,11 +333,11 @@ const SubscriptionDetails = () => {
     };
 
     if (loading) {
-        return <div className="p-12 text-center">Loading subscription plans...</div>;
+        return <div className="p-12 text-center" data-testid="loading-state">Loading subscription plans...</div>;
     }
 
     if (error) {
-        return <div className="p-12 text-center text-red-500">{error}</div>;
+        return <div className="p-12 text-center text-red-500" data-testid="error-state">{error}</div>;
     }
 
     const cancelSubscription = async () => {
@@ -397,21 +398,22 @@ const SubscriptionDetails = () => {
     console.log(paymentMode)
 
     return (
-        <div className="min-h-screen font-sans text-slate-900">
-            <Suspense fallback={<div>Loading...</div>}>
+        <div className="min-h-screen font-sans text-slate-900" data-testid="subscription-details-container">
+            <Suspense fallback={<div data-testid="header-loading">Loading...</div>}>
            <Header />
 
             {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-6 py-12">
+            <main className="max-w-7xl mx-auto px-6 py-12" data-testid="subscription-main-content">
                 <div className="mb-10">
-                    <h2 className="text-3xl font-bold text-slate-900 mb-2">Choose your plan</h2>
-                    <p className="text-slate-600 max-w-2xl">Select the perfect plan to enhance your Islamic investment journey. All plans come with Shariah compliance verification.</p>
+                    <h2 className="text-3xl font-bold text-slate-900 mb-2" data-testid="page-title">Choose your plan</h2>
+                    <p className="text-slate-600 max-w-2xl" data-testid="page-description">Select the perfect plan to enhance your Islamic investment journey. All plans come with Shariah compliance verification.</p>
                 </div>
 
                 {/* Billing Toggle */}
-                <div className="flex justify-center mb-12">
+                <div className="flex justify-center mb-12" data-testid="billing-toggle-container">
                     <div className="inline-flex items-center bg-white rounded-full p-1 shadow-sm border border-slate-200">
                         <button
+                            data-testid="monthly-billing-button"
                             className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${billingCycle === 'monthly' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
                                 }`}
                             onClick={() => setBillingCycle('monthly')}
@@ -419,19 +421,21 @@ const SubscriptionDetails = () => {
                             Monthly
                         </button>
                         <button
+                            data-testid="annual-billing-button"
                             className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${billingCycle === 'annual' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
                                 }`}
                             onClick={() => setBillingCycle('annual')}
                         >
-                            Annual <span className="text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full text-xs ml-1 font-bold">Save 30%</span>
+                            Annual 
                         </button>
                     </div>
                 </div>
 
                 {/* Plan Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16" data-testid="plan-cards-container">
                     {/* Free Plan */}
                     <div
+                        data-testid="free-plan-card"
                         className={`bg-white rounded-2xl overflow-hidden transition-all duration-300 ${selectedPlan === 'free'
                             ? 'ring-2 ring-purple-500 shadow-lg transform scale-[1.02]'
                             : 'border border-slate-200 shadow-sm hover:shadow-md'
@@ -442,18 +446,18 @@ const SubscriptionDetails = () => {
                         <div className={`h-2 ${selectedPlan === 'free' ? 'bg-purple-500' : 'bg-slate-200'}`}></div>
                         <div className="p-8">
                             <div className="mb-6">
-                                <h3 className="text-xl font-bold text-slate-900 mb-2">Free</h3>
-                                <p className="text-slate-600 text-sm">Basic features for starting investors</p>
+                                <h3 className="text-xl font-bold text-slate-900 mb-2" data-testid="free-plan-title">Free</h3>
+                                <p className="text-slate-600 text-sm" data-testid="free-plan-description">Basic features for starting investors</p>
                             </div>
                             <div className="mb-6">
                                 <div className="flex items-end">
-                                    <p className="text-4xl font-bold">₹{getPlanPrice('free').toFixed(0)}</p>
-                                    <p className="text-slate-500 ml-2 mb-1">/forever</p>
+                                    <p className="text-4xl font-bold" data-testid="free-plan-price">₹{getPlanPrice('free').toFixed(0)}</p>
+                                    <p className="text-slate-500 ml-2 mb-1" data-testid="free-plan-billing-period">/forever</p>
                                 </div>
                             </div>
-                            <div className="space-y-4 mb-8">
+                            <div className="space-y-4 mb-8" data-testid="free-plan-features">
                                 {planFeatures.free && planFeatures.free.map((feature, index) => (
-                                    <div key={index} className="flex items-start">
+                                    <div key={index} className="flex items-start" data-testid={`free-plan-feature-${index}`}>
                                         {feature.includes('No ') ? (
                                             <X size={18} className="text-slate-300 mt-0.5 mr-3 flex-shrink-0" />
                                         ) : (
@@ -466,6 +470,7 @@ const SubscriptionDetails = () => {
                                 ))}
                             </div>
                             <button
+                                data-testid="select-free-plan-button"
                                 onClick={() => handlePlanSelect('free')}
                                 className={`w-full py-3 rounded-xl font-medium transition-all ${selectedPlan === 'free'
                                     ? 'bg-purple-600 text-white hover:bg-purple-700'
@@ -480,6 +485,7 @@ const SubscriptionDetails = () => {
 
                     {/* Basic Plan */}
                     <div
+                        data-testid="basic-plan-card"
                         className={`bg-white rounded-2xl overflow-hidden transition-all duration-300 ${selectedPlan === 'basic'
                             ? 'ring-2 ring-purple-500 shadow-lg transform scale-[1.02]'
                             : 'border border-slate-200 shadow-sm hover:shadow-md'
@@ -490,24 +496,25 @@ const SubscriptionDetails = () => {
                         <div className={`h-2 ${selectedPlan === 'basic' ? 'bg-purple-500' : 'bg-slate-200'}`}></div>
                         <div className="p-8">
                             <div className="mb-6">
-                                <h3 className="text-xl font-bold text-slate-900 mb-2">Basic</h3>
-                                <p className="text-slate-600 text-sm">Essential features for active investors</p>
+                                <h3 className="text-xl font-bold text-slate-900 mb-2" data-testid="basic-plan-title">Basic</h3>
+                                <p className="text-slate-600 text-sm" data-testid="basic-plan-description">Essential features for active investors</p>
                             </div>
                             <div className="mb-6">
                                 <div className="flex items-end">
-                                    <p className="text-4xl font-bold">₹{getPlanPrice('basic').toFixed(0)}</p>
-                                    <p className="text-slate-500 ml-2 mb-1">/{billingCycle === 'monthly' ? 'month' : 'year'}</p>
+                                    <p className="text-4xl font-bold" data-testid="basic-plan-price">₹{getPlanPrice('basic').toFixed(0)}</p>
+                                    <p className="text-slate-500 ml-2 mb-1" data-testid="basic-plan-billing-period">/{billingCycle === 'monthly' ? 'month' : 'year'}</p>
                                 </div>
                             </div>
-                            <div className="space-y-4 mb-8">
+                            <div className="space-y-4 mb-8" data-testid="basic-plan-features">
                                 {planFeatures.basic && planFeatures.basic.map((feature, index) => (
-                                    <div key={index} className="flex items-start">
+                                    <div key={index} className="flex items-start" data-testid={`basic-plan-feature-${index}`}>
                                         <CheckCircle size={18} className="text-purple-500 mt-0.5 mr-3 flex-shrink-0" />
                                         <span className="text-slate-700">{feature}</span>
                                     </div>
                                 ))}
                             </div>
                             <button
+                                data-testid="select-basic-plan-button"
                                 onClick={() => {
                                     handlePlanSelect('basic');
                                 }}
@@ -524,37 +531,39 @@ const SubscriptionDetails = () => {
 
                     {/* Premium Plan */}
                     <div
+                        data-testid="premium-plan-card"
                         className={`bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl overflow-hidden transition-all duration-300 relative ${selectedPlan === 'premium'
                             ? 'ring-2 ring-purple-500 shadow-lg transform scale-[1.02]'
                             : 'border border-slate-200 shadow-sm hover:shadow-md'
                             }`}
                     >
                         <div className="absolute top-0 right-0">
-                            <div className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white text-xs px-6 py-1 font-medium transform rotate-45 translate-x-6 translate-y-3 shadow-sm">
+                            <div className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white text-xs px-6 py-1 font-medium transform rotate-45 translate-x-6 translate-y-3 shadow-sm" data-testid="premium-plan-badge">
                                 Popular
                             </div>
                         </div>
                         <div className={`h-2 ${selectedPlan === 'premium' ? 'bg-purple-500' : 'bg-indigo-300'}`}></div>
                         <div className="p-8">
                             <div className="mb-6">
-                                <h3 className="text-xl font-bold text-slate-900 mb-2">Premium</h3>
-                                <p className="text-slate-600 text-sm">Advanced features for serious investors</p>
+                                <h3 className="text-xl font-bold text-slate-900 mb-2" data-testid="premium-plan-title">Premium</h3>
+                                <p className="text-slate-600 text-sm" data-testid="premium-plan-description">Advanced features for serious investors</p>
                             </div>
                             <div className="mb-6">
                                 <div className="flex items-end">
-                                    <p className="text-4xl font-bold">₹{getPlanPrice('premium').toFixed(0)}</p>
-                                    <p className="text-slate-500 ml-2 mb-1">/{billingCycle === 'monthly' ? 'month' : 'year'}</p>
+                                    <p className="text-4xl font-bold" data-testid="premium-plan-price">₹{getPlanPrice('premium').toFixed(0)}</p>
+                                    <p className="text-slate-500 ml-2 mb-1" data-testid="premium-plan-billing-period">/{billingCycle === 'monthly' ? 'month' : 'year'}</p>
                                 </div>
                             </div>
-                            <div className="space-y-4 mb-8">
+                            <div className="space-y-4 mb-8" data-testid="premium-plan-features">
                                 {planFeatures.premium && planFeatures.premium.map((feature, index) => (
-                                    <div key={index} className="flex items-start">
+                                    <div key={index} className="flex items-start" data-testid={`premium-plan-feature-${index}`}>
                                         <CheckCircle size={18} className="text-purple-500 mt-0.5 mr-3 flex-shrink-0" />
                                         <span className="text-slate-700">{feature}</span>
                                     </div>
                                 ))}
                             </div>
                             <button
+                                data-testid="select-premium-plan-button"
                                 onClick={() => {
                                     handlePlanSelect('premium');
                                 }}
@@ -570,282 +579,292 @@ const SubscriptionDetails = () => {
                     </div>
                 </div>
 
-                {/* Features Comparison */}
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-16">
-                    <div className="p-8 pb-0">
-                        <h3 className="text-xl font-bold text-slate-900 mb-2">Plan Comparison</h3>
-                        <p className="text-slate-600 mb-6">Compare features across all plans to find the best fit for your needs</p>
-                    </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="border-b border-slate-200">
-                                    <th className="p-8 text-left font-medium text-slate-600 w-1/3">Feature</th>
-                                    <th className="p-8 text-center font-medium text-slate-600">Free</th>
-                                    <th className="p-8 text-center font-medium text-slate-600">Basic</th>
-                                    <th className="p-8 text-center font-medium text-slate-600">Premium</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr className="border-b border-slate-100">
-                                    <td className="px-8 py-6 text-slate-800 flex items-center">
-                                        <Search size={16} className="mr-3 text-purple-300" />
-                                        Stock search limit
-                                    </td>
-                                    <td className="px-8 py-6 text-center text-slate-800">3 stocks</td>
-                                    <td className="px-8 py-6 text-center text-slate-800">Unlimited</td>
-                                    <td className="px-8 py-6 text-center text-slate-800">Unlimited</td>
-                                </tr>
-                                <tr className="border-b border-slate-100 bg-slate-50">
-                                    <td className="px-8 py-6 text-slate-800 flex items-center">
-                                        <Database size={16} className="mr-3 text-purple-300" />
-                                        Stock storage
-                                    </td>
-                                    <td className="px-8 py-6 text-center text-slate-800">—</td>
-                                    <td className="px-8 py-6 text-center text-slate-800">10 stocks</td>
-                                    <td className="px-8 py-6 text-center text-slate-800">25 stocks</td>
-                                </tr>
-                                <tr className="border-b border-slate-100">
-                                    <td className="px-8 py-6 text-slate-800 flex items-center">
-                                        <Bell size={16} className="mr-3 text-purple-300" />
-                                        News notifications
-                                    </td>
-                                    <td className="px-8 py-6 text-center text-slate-800">—</td>
-                                    <td className="px-8 py-6 text-center text-slate-800">Basic</td>
-                                    <td className="px-8 py-6 text-center text-slate-800">Priority</td>
-                                </tr>
-                                <tr className="border-b border-slate-100 bg-slate-50">
-                                    <td className="px-8 py-6 text-slate-800 flex items-center">
-                                        <Shield size={16} className="mr-3 text-purple-300" />
-                                        Shariah compliance details
-                                    </td>
-                                    <td className="px-8 py-6 text-center text-slate-800">Basic</td>
-                                    <td className="px-8 py-6 text-center text-slate-800">Detailed</td>
-                                    <td className="px-8 py-6 text-center text-slate-800">Expert</td>
-                                </tr>
-                                
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+               {/* Features Comparison */}
+<div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-16" data-testid="plan-comparison-container">
+    <div className="p-8 pb-0">
+        <h3 className="text-xl font-bold text-slate-900 mb-2" data-testid="comparison-title">Plan Comparison</h3>
+        <p className="text-slate-600 mb-6" data-testid="comparison-description">Compare features across all plans to find the best fit for your needs</p>
+    </div>
+    <div className="overflow-x-auto">
+        <table className="w-full" data-testid="plan-comparison-table">
+            <thead>
+                <tr className="border-b border-slate-200">
+                    <th className="p-8 text-left font-medium text-slate-600 w-1/3" data-testid="table-header-feature">Feature</th>
+                    <th className="p-8 text-center font-medium text-slate-600" data-testid="table-header-free">Free</th>
+                    <th className="p-8 text-center font-medium text-slate-600" data-testid="table-header-basic">Basic</th>
+                    <th className="p-8 text-center font-medium text-slate-600" data-testid="table-header-premium">Premium</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr className="border-b border-slate-100" data-testid="feature-row-search">
+                    <td className="px-8 py-6 text-slate-800 flex items-center">
+                        <Search size={16} className="mr-3 text-purple-300" />
+                        Stock search limit
+                    </td>
+                    <td className="px-8 py-6 text-center text-slate-800" data-testid="free-search-limit">3 stocks</td>
+                    <td className="px-8 py-6 text-center text-slate-800" data-testid="basic-search-limit">Unlimited</td>
+                    <td className="px-8 py-6 text-center text-slate-800" data-testid="premium-search-limit">Unlimited</td>
+                </tr>
+                <tr className="border-b border-slate-100 bg-slate-50" data-testid="feature-row-storage">
+                    <td className="px-8 py-6 text-slate-800 flex items-center">
+                        <Database size={16} className="mr-3 text-purple-300" />
+                        Stock storage
+                    </td>
+                    <td className="px-8 py-6 text-center text-slate-800" data-testid="free-storage">—</td>
+                    <td className="px-8 py-6 text-center text-slate-800" data-testid="basic-storage">10 stocks</td>
+                    <td className="px-8 py-6 text-center text-slate-800" data-testid="premium-storage">25 stocks</td>
+                </tr>
+                <tr className="border-b border-slate-100" data-testid="feature-row-notifications">
+                    <td className="px-8 py-6 text-slate-800 flex items-center">
+                        <Bell size={16} className="mr-3 text-purple-300" />
+                        News notifications
+                    </td>
+                    <td className="px-8 py-6 text-center text-slate-800" data-testid="free-notifications">—</td>
+                    <td className="px-8 py-6 text-center text-slate-800" data-testid="basic-notifications">Basic</td>
+                    <td className="px-8 py-6 text-center text-slate-800" data-testid="premium-notifications">Priority</td>
+                </tr>
+                <tr className="border-b border-slate-100 bg-slate-50" data-testid="feature-row-compliance">
+                    <td className="px-8 py-6 text-slate-800 flex items-center">
+                        <Shield size={16} className="mr-3 text-purple-300" />
+                        Shariah compliance details
+                    </td>
+                    <td className="px-8 py-6 text-center text-slate-800" data-testid="free-compliance">Basic</td>
+                    <td className="px-8 py-6 text-center text-slate-800" data-testid="basic-compliance">Detailed</td>
+                    <td className="px-8 py-6 text-center text-slate-800" data-testid="premium-compliance">Expert</td>
+                </tr>
+                
+            </tbody>
+        </table>
+    </div>
+</div>
 
-                {/* Bottom CTA */}
-                <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl overflow-hidden">
-                    <div className="p-12 flex flex-col md:flex-row md:items-center justify-between text-white">
-                        <div className="mb-8 md:mb-0 md:mr-8 max-w-xl">
-                            <h3 className="text-2xl font-bold mb-4">Ready to enhance your Islamic investment journey?</h3>
-                            <p className="text-purple-100 text-lg">Get started with our Basic or Premium plan today and make more informed, Shariah-compliant investment decisions.</p>
-                        </div>
-                        <button
-                            onClick={handleUpgrade}
-                            className={`px-8 py-4 bg-white text-purple-600 rounded-xl font-medium hover:bg-purple-50 flex items-center justify-center flex-shrink-0 shadow-lg transition-all transform hover:scale-105 ${
-                                currentPlan === 'premium' ? 'opacity-50 cursor-not-allowed' : ''
-                            }`}
-                            disabled={currentPlan === 'premium'}
-                        >
-                            {currentPlan === 'premium' ? 'You Have Premium' : 'Upgrade Now'}
-                            <ArrowRight size={18} className="ml-2" />
-                        </button>
-                    </div>
-                </div>
-            </main>
-            {showSuccessModal && (
-                <div className="fixed inset-0  bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 transform transition-all">
-                        <div className="flex justify-end">
-                            <button onClick={handleSuccessModalClose} className="text-slate-400 hover:text-slate-600">
-                                <X size={20} />
-                            </button>
-                        </div>
-                        <div className="flex flex-col items-center justify-center text-center mb-6">
-                            <div className="h-20 w-20 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                                <CheckCircle size={40} className="text-green-500" />
-                            </div>
-                            <h3 className="text-2xl font-bold text-slate-900 mb-2">Payment Successful!</h3>
-                            <p className="text-slate-600">
-                                Your subscription has been updated to the {selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} plan.
-                                You now have access to all {selectedPlan} features.
-                            </p>
-                        </div>
-                        <div className="bg-purple-50 border-l-4 border-purple-400 p-4 flex items-start rounded-r-md mb-6">
-                            <div className="text-purple-500 mr-3 flex-shrink-0 mt-0.5">
-                                <Bell size={18} />
-                            </div>
-                            <p className="text-sm text-purple-700">
-                                Your subscription will automatically renew each {billingCycle}. You can manage your subscription anytime from your account settings.
-                            </p>
-                        </div>
-                        <button
-                            onClick={handleSuccessModalClose}
-                            className="w-full px-6 py-3 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 flex items-center justify-center"
-                        >
-                            Got it, thanks!
-                        </button>
-                    </div>
-                </div>
-            )}
-
-
-            {showUpgradeConfirmation && (
-            <div className="fixed inset-0  bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 transform transition-all">
-                <div className="flex justify-between items-start mb-6">
-                    <h3 className="text-xl font-bold text-slate-900">Upgrade Confirmation</h3>
-                    <button onClick={handleUpgradeConfirmationClose} className="text-slate-400 hover:text-slate-600">
+{/* Bottom CTA */}
+<div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl overflow-hidden" data-testid="cta-container">
+    <div className="p-12 flex flex-col md:flex-row md:items-center justify-between text-white">
+        <div className="mb-8 md:mb-0 md:mr-8 max-w-xl">
+            <h3 className="text-2xl font-bold mb-4" data-testid="cta-heading">Ready to enhance your Islamic investment journey?</h3>
+            <p className="text-purple-100 text-lg" data-testid="cta-description">Get started with our Basic or Premium plan today and make more informed, Shariah-compliant investment decisions.</p>
+        </div>
+        <button
+            onClick={handleUpgrade}
+            className={`px-8 py-4 bg-white text-purple-600 rounded-xl font-medium hover:bg-purple-50 flex items-center justify-center flex-shrink-0 shadow-lg transition-all transform hover:scale-105 ${
+                currentPlan === 'premium' ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+            disabled={currentPlan === 'premium'}
+            data-testid="upgrade-button"
+        >
+            {currentPlan === 'premium' ? 'You Have Premium' : 'Upgrade Now'}
+            <ArrowRight size={18} className="ml-2" />
+        </button>
+    </div>
+</div>
+</main>
+{showSuccessModal && (
+    <div className="fixed inset-0 bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50 p-4" data-testid="success-modal">
+        <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 transform transition-all">
+            <div className="flex justify-end">
+                <button onClick={handleSuccessModalClose} className="text-slate-400 hover:text-slate-600" data-testid="success-modal-close">
                     <X size={20} />
-                    </button>
-                </div>
-                
-                <div className="mb-8">
-                    <p className="text-slate-700 mb-4">
-                    You are currently subscribed to the <span className="font-medium capitalize">{currentPlan}</span> plan.
-                    Are you sure you want to upgrade to the <span className="font-medium capitalize">{selectedPlan}</span> plan?
-                    </p>
-                    
-                    <div className="bg-purple-50 border-l-4 border-purple-400 p-4 flex items-start rounded-r-md">
-                    <div className="text-purple-500 mr-3 flex-shrink-0 mt-0.5">ℹ️</div>
-                    <p className="text-sm text-purple-700">
-                        Your current billing cycle will be canceled and you'll be charged the full amount for the new plan immediately.
-                    </p>
-                    </div>
-                </div>
-                
-                <div className="flex flex-col space-y-3">
-                    <button
-                    onClick={handleConfirmUpgrade}
-                    className="px-6 py-3 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 flex items-center justify-center"
-                    >
-                    Confirm Upgrade
-                    </button>
-                    <button
-                    onClick={handleUpgradeConfirmationClose}
-                    className="px-6 py-3 border border-slate-200 text-slate-700 rounded-xl font-medium hover:bg-slate-50"
-                    >
-                    Cancel
-                    </button>
-                </div>
-                </div>
+                </button>
             </div>
-            )}
+            <div className="flex flex-col items-center justify-center text-center mb-6">
+                <div className="h-20 w-20 bg-green-100 rounded-full flex items-center justify-center mb-4" data-testid="success-icon-container">
+                    <CheckCircle size={40} className="text-green-500" />
+                </div>
+                <h3 className="text-2xl font-bold text-slate-900 mb-2" data-testid="success-title">Payment Successful!</h3>
+                <p className="text-slate-600" data-testid="success-message">
+                    Your subscription has been updated to the {selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} plan.
+                    You now have access to all {selectedPlan} features.
+                </p>
+            </div>
+            <div className="bg-purple-50 border-l-4 border-purple-400 p-4 flex items-start rounded-r-md mb-6" data-testid="success-info-banner">
+                <div className="text-purple-500 mr-3 flex-shrink-0 mt-0.5">
+                    <Bell size={18} />
+                </div>
+                <p className="text-sm text-purple-700">
+                    Your subscription will automatically renew each {billingCycle}. You can manage your subscription anytime from your account settings.
+                </p>
+            </div>
+            <button
+                onClick={handleSuccessModalClose}
+                className="w-full px-6 py-3 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 flex items-center justify-center"
+                data-testid="success-modal-confirm"
+            >
+                Got it, thanks!
+            </button>
+        </div>
+    </div>
+)}
 
-            {/* Confirmation Modal */}
-            {showConfirmation && (
-                <div className="fixed inset-0  bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 overflow-hidden">
-                <div className="bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] flex flex-col">
-                  {/* Header - Fixed at top */}
-                  <div className="flex justify-between items-center p-4 sm:p-6 border-b border-slate-100 sticky top-0 bg-white z-10 rounded-t-2xl">
-                    <h3 className="text-xl font-bold text-slate-900">Confirm Subscription</h3>
-                    <button 
-                      onClick={handleConfirmationClose} 
-                      className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100"
-                      aria-label="Close"
+
+{showUpgradeConfirmation && (
+<div className="fixed inset-0 bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50 p-4" data-testid="upgrade-confirmation-modal">
+    <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 transform transition-all">
+    <div className="flex justify-between items-start mb-6">
+        <h3 className="text-xl font-bold text-slate-900" data-testid="upgrade-confirmation-title">Upgrade Confirmation</h3>
+        <button onClick={handleUpgradeConfirmationClose} className="text-slate-400 hover:text-slate-600" data-testid="upgrade-confirmation-close">
+        <X size={20} />
+        </button>
+    </div>
+    
+    <div className="mb-8">
+        <p className="text-slate-700 mb-4" data-testid="upgrade-confirmation-message">
+        You are currently subscribed to the <span className="font-medium capitalize">{currentPlan}</span> plan.
+        Are you sure you want to upgrade to the <span className="font-medium capitalize">{selectedPlan}</span> plan?
+        </p>
+        
+        <div className="bg-purple-50 border-l-4 border-purple-400 p-4 flex items-start rounded-r-md" data-testid="upgrade-confirmation-info">
+        <div className="text-purple-500 mr-3 flex-shrink-0 mt-0.5">ℹ️</div>
+        <p className="text-sm text-purple-700">
+            Your current billing cycle will be canceled and you'll be charged the full amount for the new plan immediately.
+        </p>
+        </div>
+    </div>
+    
+    <div className="flex flex-col space-y-3">
+        <button
+        onClick={handleConfirmUpgrade}
+        className="px-6 py-3 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 flex items-center justify-center"
+        data-testid="confirm-upgrade-button"
+        >
+        Confirm Upgrade
+        </button>
+        <button
+        onClick={handleUpgradeConfirmationClose}
+        className="px-6 py-3 border border-slate-200 text-slate-700 rounded-xl font-medium hover:bg-slate-50"
+        data-testid="cancel-upgrade-button"
+        >
+        Cancel
+        </button>
+    </div>
+    </div>
+</div>
+)}
+
+{/* Confirmation Modal */}
+{showConfirmation && (
+    <div className="fixed inset-0 bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 overflow-hidden" data-testid="subscription-confirmation-modal">
+    <div className="bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] flex flex-col">
+      {/* Header - Fixed at top */}
+      <div className="flex justify-between items-center p-4 sm:p-6 border-b border-slate-100 sticky top-0 bg-white z-10 rounded-t-2xl">
+        <h3 className="text-xl font-bold text-slate-900" data-testid="subscription-confirmation-title">Confirm Subscription</h3>
+        <button 
+          onClick={handleConfirmationClose} 
+          className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100"
+          aria-label="Close"
+          data-testid="subscription-confirmation-close"
+        >
+          <X size={20} />
+        </button>
+      </div>
+
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6" data-testid="subscription-confirmation-content">
+        {/* Subscription details */}
+        <div className="mb-6">
+          <p className="text-slate-700 mb-4" data-testid="subscription-details">
+            You're about to subscribe to the <span className="font-medium">{selectedPlan === 'basic' ? 'Basic' : 'Premium'}</span> plan at
+            <span className="font-medium"> ₹{getPlanPrice(selectedPlan).toFixed(0)}</span> per {billingCycle}.
+          </p>
+          
+          {/* Payment error message */}
+          {paymentError && (
+            <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded mb-4" data-testid="payment-error-container">
+              <div className="flex flex-col sm:flex-row sm:items-start">
+                <div className="text-red-500 mr-3 flex-shrink-0 mt-0.5">⚠️</div>
+                <div className="flex-1">
+                  <p className="text-sm text-red-700" data-testid="payment-error-message">{paymentError}</p>
+                  {showCancelPendingPayment && (
+                    <button
+                      className="mt-2 px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 text-sm"
+                      onClick={handleCancelPendingPayment}
+                      disabled={paymentLoading}
+                      data-testid="cancel-pending-payment-button"
                     >
-                      <X size={20} />
+                      Cancel Pending Payment
                     </button>
-                  </div>
-          
-                  {/* Scrollable Content */}
-                  <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-                    {/* Subscription details */}
-                    <div className="mb-6">
-                      <p className="text-slate-700 mb-4">
-                        You're about to subscribe to the <span className="font-medium">{selectedPlan === 'basic' ? 'Basic' : 'Premium'}</span> plan at
-                        <span className="font-medium"> ₹{getPlanPrice(selectedPlan).toFixed(0)}</span> per {billingCycle}.
-                      </p>
-                      
-                      {/* Payment error message */}
-                      {paymentError && (
-                        <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded mb-4">
-                          <div className="flex flex-col sm:flex-row sm:items-start">
-                            <div className="text-red-500 mr-3 flex-shrink-0 mt-0.5">⚠️</div>
-                            <div className="flex-1">
-                              <p className="text-sm text-red-700">{paymentError}</p>
-                              {showCancelPendingPayment && (
-                                <button
-                                  className="mt-2 px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 text-sm"
-                                  onClick={handleCancelPendingPayment}
-                                  disabled={paymentLoading}
-                                >
-                                  Cancel Pending Payment
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Warning notice */}
-                      <div className="bg-purple-50 border-l-4 border-purple-400 p-4 rounded">
-                        <div className="flex items-start">
-                          <div className="text-purple-500 mr-3 flex-shrink-0 mt-0.5">ℹ️</div>
-                          <p className="text-sm text-purple-700">
-                            Your card will be charged immediately, and your subscription will renew automatically each {billingCycle}.
-                            You can cancel anytime from your account settings.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-          
-                    {/* Payment Mode Selector */}
-                    <PaymentModeSelector 
-                      selected={paymentMode}
-                      onChange={setPaymentMode}
-                    />
-          
-                    {/* Price breakdown */}
-                    <div className="border-t border-slate-100 pt-6 mt-6">
-                      <div className="flex justify-between items-center mb-3">
-                        <span className="text-slate-600">Subtotal</span>
-                        <span className="font-medium">₹{getPlanPrice(selectedPlan).toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between items-center mb-3">
-                        <span className="text-slate-600">Tax (18% GST)</span>
-                        <span className="font-medium">₹{getTax(getPlanPrice(selectedPlan)).toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between items-center font-bold border-t border-slate-100 pt-4 mt-4">
-                        <span>Total</span>
-                        <span className="text-xl">₹{getTotalPrice(selectedPlan).toFixed(2)}</span>
-                      </div>
-                    </div>
-                  </div>
-          
-                  {/* Action buttons - Fixed at bottom */}
-                  <div className="p-4 sm:p-6 border-t border-slate-100 sticky bottom-0 bg-white z-10 rounded-b-2xl">
-                    <div className="flex flex-col space-y-3">
-                      <button
-                        onClick={handlePayment}
-                        disabled={paymentLoading}
-                        className={`px-6 py-3 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 flex items-center justify-center transition ${
-                          paymentLoading ? 'opacity-70 cursor-not-allowed' : ''
-                        }`}
-                      >
-                        {paymentLoading ? (
-                          <>
-                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Processing...
-                          </>
-                        ) : (
-                          <>
-                            <CreditCard size={18} className="mr-2" />
-                            Confirm Payment
-                          </>
-                        )}
-                      </button>
-                      <button
-                        onClick={handleConfirmationClose}
-                        className="px-6 py-3 border border-slate-200 text-slate-700 rounded-xl font-medium hover:bg-slate-50 transition"
-                        disabled={paymentLoading}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
+            </div>
+          )}
+          
+          {/* Warning notice */}
+          <div className="bg-purple-50 border-l-4 border-purple-400 p-4 rounded" data-testid="subscription-warning">
+            <div className="flex items-start">
+              <div className="text-purple-500 mr-3 flex-shrink-0 mt-0.5">ℹ️</div>
+              <p className="text-sm text-purple-700">
+                Your card will be charged immediately, and your subscription will renew automatically each {billingCycle}.
+                You can cancel anytime from your account settings.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Payment Mode Selector */}
+        <PaymentModeSelector 
+          selected={paymentMode}
+          onChange={setPaymentMode}
+          
+        />
+
+        {/* Price breakdown */}
+        <div className="border-t border-slate-100 pt-6 mt-6" data-testid="price-breakdown">
+          <div className="flex justify-between items-center mb-3">
+            <span className="text-slate-600">Subtotal</span>
+            <span className="font-medium" data-testid="subtotal-price">₹{getPlanPrice(selectedPlan).toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between items-center mb-3">
+            <span className="text-slate-600">Tax (18% GST)</span>
+            <span className="font-medium" data-testid="tax-amount">₹{getTax(getPlanPrice(selectedPlan)).toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between items-center font-bold border-t border-slate-100 pt-4 mt-4">
+            <span>Total</span>
+            <span className="text-xl" data-testid="total-price">₹{getTotalPrice(selectedPlan).toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Action buttons - Fixed at bottom */}
+      <div className="p-4 sm:p-6 border-t border-slate-100 sticky bottom-0 bg-white z-10 rounded-b-2xl">
+        <div className="flex flex-col space-y-3">
+          <button
+            onClick={handlePayment}
+            disabled={paymentLoading}
+            className={`px-6 py-3 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 flex items-center justify-center transition ${
+              paymentLoading ? 'opacity-70 cursor-not-allowed' : ''
+            }`}
+            data-testid="confirm-payment-button"
+          >
+            {paymentLoading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processing...
+              </>
+            ) : (
+              <>
+                <CreditCard size={18} className="mr-2" />
+                Confirm Payment
+              </>
             )}
+          </button>
+          <button
+            onClick={handleConfirmationClose}
+            className="px-6 py-3 border border-slate-200 text-slate-700 rounded-xl font-medium hover:bg-slate-50 transition"
+            disabled={paymentLoading}
+            data-testid="cancel-payment-button"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+                <Footer />
             </Suspense>
         </div>
     );

@@ -6,6 +6,7 @@ import Card from './Card';
 const PriceChart = lazy(() => import('./PriceChart'));
 const Header = lazy(() => import('./Header'));
 import { getUserData } from '../api/auth';
+import Footer from './Footer';
 
 const PriceChartSkeleton = () => (
     <div data-testid="price-chart-skeleton" className="animate-pulse bg-gray-100 h-64 w-full rounded-lg">
@@ -561,6 +562,7 @@ const StockResults = () => {
                     </div>
                 </div>
             </div>
+            <Footer />
             </Suspense>
         </div>
     );

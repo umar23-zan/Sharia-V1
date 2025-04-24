@@ -88,6 +88,7 @@ const DeactivateAccount = ({ user, userEmail, onDeactivationSuccess, onCancel })
             <button
               onClick={onCancel}
               className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              data-testid="close-deactivate-modal-button"
             >
               Cancel
             </button>

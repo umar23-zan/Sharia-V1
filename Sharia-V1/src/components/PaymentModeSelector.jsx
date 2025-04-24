@@ -3,7 +3,7 @@ import { CreditCard, AlertCircle, CheckCircle } from 'lucide-react';
 
 const PaymentModeSelector = ({ selected, onChange }) => {
   return (
-    <div className="mt-6">
+    <div className="mt-6" data-testid="payment-mode-selector">
       <h3 className="text-lg font-medium mb-4">Payment Method</h3>
       
       <div className="space-y-4">
@@ -45,6 +45,7 @@ const PaymentModeSelector = ({ selected, onChange }) => {
             selected === 'manual' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'
           }`}
           onClick={() => onChange('manual')}
+          data-testid="manual-payment-option"
         >
           <div className="flex items-center">
             <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${

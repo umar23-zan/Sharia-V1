@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Book, Briefcase, CheckCircle, ChevronDown, ChevronUp, Clock, Coffee, DollarSign, FileText, Filter, Globe, HelpCircle, Home, Info, List, Pen, Search, Shield, Star, Users, XCircle } from "lucide-react";
+import Footer from '../components/Footer'
 
 function HalalStockblog() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -603,6 +604,7 @@ function HalalStockblog() {
             ))}
           </div>
         </section>
+        <Footer />
       </main>
 
     
