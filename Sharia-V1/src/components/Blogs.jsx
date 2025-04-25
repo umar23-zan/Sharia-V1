@@ -429,7 +429,7 @@ function Blogs() {
             </div>
           </div>
           <div className="mt-8 border-t border-gray-700 pt-6 text-gray-400 text-sm">
-            <p>&copy; 2025 ShariaStocks. All rights reserved.</p>
+            <p>&copy; 2025 Zansphere Private Limited. All rights reserved.</p>
           </div>
         </div>
       </footer>

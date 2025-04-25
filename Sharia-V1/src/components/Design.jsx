@@ -862,7 +862,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.8 }}
           >
-            © 2025 ShariaStocks. All rights reserved.
+            © 2025 Zansphere Private Limited. All rights reserved.
           </motion.div>
         </div>
       </footer>
