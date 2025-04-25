@@ -26,7 +26,7 @@ const Footer = () => {
               </div>
               
               <div className="border-t border-gray-100 pt-4 pb-8">
-                <p>© 2025 Zansphere Private Limited. All rights reserved.</p>
+                <p>© 2025 Zansphere Private Limited. All rights reserved. </p>
               </div>
             </div>
           </footer>
