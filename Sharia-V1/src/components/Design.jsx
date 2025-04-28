@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../images/ShariaStocks-logo/ShariaStocks.svg';
 import logo1 from '../images/ShariaStocks-logo/logo.png';
 import land from '../images/land.png';
+import { Helmet } from 'react-helmet';
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -36,19 +37,19 @@ export default function LandingPage() {
   const faqs = [
     {
       question: "What makes a stock halal or Sharia-compliant?",
-      answer: "Sharia-compliant stocks must meet specific criteria related to the company's business activities and financial ratios. Companies involved in prohibited activities like alcohol, gambling, or interest-based financial services are excluded. Additionally, financial ratios related to debt, interest income, and cash/receivables must meet certain thresholds."
+      answer: "Sharia-compliant stocks must meet specific criteria related to the company's business activities and financial ratios. Companies involved in prohibited activities like alcohol, gambling, conventional banking, or interest-based financial services are excluded. Additionally, financial ratios related to debt, interest income, and cash/receivables must meet certain thresholds established in Islamic finance."
     },
     {
-      question: "How often is the compliance data updated?",
-      answer: "Our compliance data is updated quarterly, following companies' financial reporting. We also conduct real-time monitoring for significant business changes that might affect compliance status."
+      question: "How often is your Sharia compliance data updated?",
+      answer: "Our Sharia compliance data is updated quarterly, following companies' financial reporting. We also conduct real-time monitoring for significant business changes that might affect compliance status, ensuring you always have the most current information for your halal investment decisions."
     },
     {
       question: "Can I use this platform for my retirement investments?",
       answer: "Yes, many of our users utilize HalalStocks for retirement planning. We offer guidance on creating Sharia-compliant retirement portfolios and can help you evaluate existing retirement accounts for compliance."
     },
     {
-      question: "What financial ratios do you use for screening?",
-      answer: "We analyze several key financial ratios including: Debt to Total Assets (must be less than 33%), Interest Income to Total Revenue (must be less than 5%), and Non-compliant Income to Total Revenue (must be less than 5%)."
+      question: "What Islamic financial ratios do you use for screening?",
+      answer: "We analyze several key financial ratios according to Islamic finance principles including: Debt to Total Assets (must be less than 33%), Interest Income to Total Revenue (must be less than 5%), Non-compliant Income to Total Revenue (must be less than 5%), and Cash and Receivables to Market Cap (must be less than 33%)."
     },
   ];
 
@@ -151,6 +152,11 @@ export default function LandingPage() {
 
   return (
     <div className="flex flex-col min-h-screen font-sans overflow-x-hidden">
+      <Helmet>
+        <title>ShariaStocks | Halal Stock Screening for Islamic Investors</title>
+        <meta name="description" content="Find Sharia-compliant stocks for ethical Islamic investing. Screen stocks according to Islamic principles with ShariaStocks' comprehensive halal investment platform." />
+        <meta name="keywords" content="halal stocks, Sharia-compliant investing, Islamic finance, halal investment, ethical investing, Islamic principles, halal screening" />
+      </Helmet>
       {/* Header - Fixed position with better mobile handling */}
       <header className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'py-2 bg-white shadow-md' : 'py-3 bg-white/90'}`}>
         <div className="container mx-auto px-4 sm:px-6 flex justify-between items-center">
@@ -236,12 +242,10 @@ export default function LandingPage() {
           {/* Left Content */}
           <div className="w-full md:w-1/2 mb-8 md:mb-0 pr-0 md:pr-6 lg:pr-8">
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent">Ethical Investing Made Simple</span>
+              <span className="bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent">Halal Stock Screening for Islamic Investors</span>
             </h1>
             <p className="text-gray-700 mb-6 sm:mb-8 text-sm sm:text-base md:text-lg max-w-lg">
-              Build your halal investment portfolio with confidence. Screen 
-              stocks according to Islamic principles and make informed 
-              investment decisions.
+            Discover Sharia-compliant stocks and build your ethical investment portfolio according to Islamic principles with India's trusted halal stock screening platform.
             </p>
             <div className="flex flex-wrap gap-3 sm:gap-4">
               <button 
@@ -326,9 +330,9 @@ export default function LandingPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
           </svg>
         </div>
-        <h3 className="font-bold text-lg mb-2 text-gray-800">Halal Screening</h3>
+        <h3 className="font-bold text-lg mb-2 text-gray-800">Sharia Compliance Screening</h3>
         <p className="text-gray-600">
-          Screen stocks according to Islamic principles including financial ratios and business activities.
+        Comprehensive halal stock screening according to Islamic finance principles, including financial ratios and business activities verification.
         </p>
       </motion.div>
 
@@ -361,9 +365,9 @@ export default function LandingPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
         </div>
-        <h3 className="font-bold text-lg mb-2 text-gray-800">Financial Analytics</h3>
+        <h3 className="font-bold text-lg mb-2 text-gray-800">Islamic Financial Analytics</h3>
         <p className="text-gray-600">
-          Access detailed financial analysis and performance metrics for informed decisions.
+        Access detailed Sharia-compliant financial analysis and performance metrics for informed halal investment decisions.
         </p>
       </motion.div>
 
@@ -563,6 +567,112 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* About Islamic Investing Section */}
+<section className="py-16 px-6 bg-white">
+  <div className="max-w-6xl mx-auto">
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+      variants={containerVariants}
+      className="text-center mb-12"
+    >
+      <motion.h2 
+        variants={itemVariants} 
+        className="text-3xl font-bold mb-6 bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent"
+      >
+        Islamic Investing Principles
+      </motion.h2>
+      <motion.p 
+        variants={itemVariants} 
+        className="text-lg text-gray-600 max-w-3xl mx-auto"
+      >
+        Understanding the Sharia guidelines that govern halal investments
+      </motion.p>
+    </motion.div>
+
+    <div className="grid md:grid-cols-2 gap-8">
+      <motion.div 
+        variants={itemVariants}
+        className="bg-gradient-to-r from-teal-50 to-blue-50 p-8 rounded-xl"
+      >
+        <h3 className="font-bold text-xl mb-4 text-gray-800">What Makes Investments Halal?</h3>
+        <p className="text-gray-600">
+          Sharia-compliant investments adhere to Islamic principles that prohibit riba (interest), gharar (excessive uncertainty), and investments in haram business activities. Our platform applies rigorous financial screening to ensure stocks meet these requirements.
+        </p>
+        <ul className="mt-4 space-y-2">
+          <li className="flex items-start">
+            <svg className="h-5 w-5 text-teal-500 mr-2 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span>Business Activity Screening - Avoiding prohibited industries</span>
+          </li>
+          <li className="flex items-start">
+            <svg className="h-5 w-5 text-teal-500 mr-2 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span>Financial Ratio Analysis - Monitoring debt and interest levels</span>
+          </li>
+          <li className="flex items-start">
+            <svg className="h-5 w-5 text-teal-500 mr-2 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span>Revenue Purification - Calculating zakat-eligible investments</span>
+          </li>
+        </ul>
+      </motion.div>
+      
+      <motion.div 
+        variants={itemVariants}
+        className="bg-gradient-to-r from-teal-50 to-blue-50 p-8 rounded-xl"
+      >
+        <h3 className="font-bold text-xl mb-4 text-gray-800">Our Sharia Screening Methodology</h3>
+        <p className="text-gray-600">
+          ShariaStocks employs a comprehensive screening methodology based on established Islamic finance standards to identify truly halal investment opportunities.
+        </p>
+        <div className="mt-4 space-y-4">
+          <div className="flex flex-col">
+            <span className="font-medium text-gray-800">Debt to Total Assets</span>
+            <p className="text-sm text-gray-600">Must be less than 33% to qualify as Sharia-compliant</p>
+            <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+              <div className="bg-teal-500 h-2 rounded-full" style={{ width: "33%" }}></div>
+            </div>
+          </div>
+          <div className="flex flex-col">
+            <span className="font-medium text-gray-800">Interest Income Ratio</span>
+            <p className="text-sm text-gray-600">Must be less than 5% of total revenue</p>
+            <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+              <div className="bg-teal-500 h-2 rounded-full" style={{ width: "5%" }}></div>
+            </div>
+          </div>
+          <div className="flex flex-col">
+            <span className="font-medium text-gray-800">Cash and Receivables</span>
+            <p className="text-sm text-gray-600">Must be less than 33% of market capitalization</p>
+            <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+              <div className="bg-teal-500 h-2 rounded-full" style={{ width: "33%" }}></div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+    
+    <motion.div 
+      className="text-center mt-12"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      viewport={{ once: true }}
+    >
+      <button
+        onClick={handleSignupClick}
+        className="bg-gradient-to-r from-teal-600 to-blue-600 text-white px-8 py-3 rounded-full font-medium hover:shadow-lg transition-all transform hover:-translate-y-1"
+      >
+        Start Halal Investing Today
+      </button>
+    </motion.div>
+  </div>
+</section>
+
       <section id='pricing' className="py-12 md:py-20 bg-white">
         <motion.div 
           className="max-w-6xl mx-auto px-4 md:px-6"
@@ -682,6 +792,115 @@ export default function LandingPage() {
           </motion.button>
         </div>
       </motion.section>
+
+      {/* Testimonials Section */}
+<section className="py-20 px-6 bg-[#f0f7ff]">
+  <div className="max-w-6xl mx-auto">
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+      variants={containerVariants}
+      className="text-center mb-16"
+    >
+      <motion.h2 
+        variants={itemVariants} 
+        className="text-3xl font-bold mb-4 bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent"
+      >
+        What Muslim Investors Say
+      </motion.h2>
+      <motion.p 
+        variants={itemVariants} 
+        className="text-lg text-gray-600 max-w-2xl mx-auto"
+      >
+        Join thousands of investors building their halal investment portfolios with ShariaStocks
+      </motion.p>
+    </motion.div>
+
+    <div className="grid md:grid-cols-3 gap-8">
+      {/* Testimonial 1 */}
+      <motion.div 
+        className="bg-white p-6 rounded-xl shadow-md border border-gray-100"
+        variants={itemVariants}
+        whileHover={{ y: -5, transition: { duration: 0.2 } }}
+      >
+        <div className="flex items-center mb-4">
+          <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl">
+            A
+          </div>
+          <div className="ml-4">
+            <h4 className="font-bold">Ahmed S.</h4>
+            <p className="text-sm text-gray-500">Long-term Investor</p>
+          </div>
+        </div>
+        <p className="text-gray-600 italic">
+          "ShariaStocks has transformed my approach to halal investing. The detailed Sharia compliance reports give me confidence that my portfolio truly adheres to Islamic principles."
+        </p>
+        <div className="mt-4 flex text-yellow-400">
+          {[1,2,3,4,5].map(star => (
+            <svg key={star} xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Testimonial 2 */}
+      <motion.div 
+        className="bg-white p-6 rounded-xl shadow-md border border-gray-100"
+        variants={itemVariants}
+        whileHover={{ y: -5, transition: { duration: 0.2 } }}
+      >
+        <div className="flex items-center mb-4">
+          <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-xl">
+            F
+          </div>
+          <div className="ml-4">
+            <h4 className="font-bold">Fatima R.</h4>
+            <p className="text-sm text-gray-500">New Investor</p>
+          </div>
+        </div>
+        <p className="text-gray-600 italic">
+          "As someone new to investing, finding truly halal stocks was overwhelming until I discovered ShariaStocks. Now I can build my investment portfolio with complete peace of mind about Sharia compliance."
+        </p>
+        <div className="mt-4 flex text-yellow-400">
+          {[1,2,3,4,5].map(star => (
+            <svg key={star} xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Testimonial 3 */}
+      <motion.div 
+        className="bg-white p-6 rounded-xl shadow-md border border-gray-100"
+        variants={itemVariants}
+        whileHover={{ y: -5, transition: { duration: 0.2 } }}
+      >
+        <div className="flex items-center mb-4">
+          <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-xl">
+            M
+          </div>
+          <div className="ml-4">
+            <h4 className="font-bold">Mohammed K.</h4>
+            <p className="text-sm text-gray-500">Financial Advisor</p>
+          </div>
+        </div>
+        <p className="text-gray-600 italic">
+          "I recommend ShariaStocks to all my Muslim clients. The comprehensive halal screening methodology aligns perfectly with Islamic finance principles and makes my job easier when creating Sharia-compliant portfolios."
+        </p>
+        <div className="mt-4 flex text-yellow-400">
+          {[1,2,3,4,5].map(star => (
+            <svg key={star} xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  </div>
+</section>
 
       <section id='faq' className="py-20 bg-[#f0f7ff]">
         <motion.div 
@@ -810,26 +1029,26 @@ export default function LandingPage() {
             </motion.div>
 
             {/* Resources */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              <h3 className="text-lg font-bold mb-6">Resources</h3>
-              <ul className="space-y-3">
-              {[
-                  { title: 'Blog', path: '/blog-catalogue' },
-                  { title: 'About', path: '/about' },
-                  { title: 'Terms & Conditions', path: '/terms' },
-                  { title: 'Privacy Policy', path: '/privacy' }
-                ].map((link, i) => (
-                  <motion.li key={i} whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 400 }}>
-                    <a href={`${link.path}`} className="text-gray-300 hover:text-white transition-colors duration-300">{link.title}</a>
-                  </motion.li>
-                ))}
-              </ul>
-            </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                <h3 className="text-lg font-bold mb-6">Resources</h3>
+                <ul className="space-y-3">
+                {[
+                    { title: 'Halal Investment Blog', path: '/blogs' },
+                    { title: 'About', path: '/about' },
+                    { title: 'Terms & Conditions', path: '/terms' },
+                    { title: 'Privacy Policy', path: '/privacy' }
+                  ].map((link, i) => (
+                    <motion.li key={i} whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 400 }}>
+                      <a href={`${link.path}`} className="text-gray-300 hover:text-white transition-colors duration-300">{link.title}</a>
+                    </motion.li>
+                  ))}
+                </ul>
+              </motion.div>
 
             {/* Contact - Adjusted for mobile */}
             <motion.div
