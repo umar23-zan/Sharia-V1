@@ -67,7 +67,7 @@ const HeaderDash = () => {
               >
                 <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-r from-indigo-500 to-purple-600 p-0.5 transition-all duration-300 hover:from-purple-600 hover:to-indigo-500">
                   <div className="bg-white rounded-full w-full h-full flex items-center justify-center overflow-hidden">
-                    <img src={user.profilePicture || account} alt="profile" className="w-8 h-8 object-cover" />
+                    <img src={user.profilePicture || account} alt="profile" className="w-8 h-8 object-cover rounded-full" />
                   </div>
                 </div>
               </div>
@@ -109,7 +109,7 @@ const HeaderDash = () => {
               >
                 <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-r from-indigo-500 to-purple-600 p-0.5 transition-all duration-300 hover:from-purple-600 hover:to-indigo-500">
                   <div className="bg-white rounded-full w-full h-full flex items-center justify-center overflow-hidden">
-                    <img src={user.profilePicture || account} alt="profile" className="w-8 h-8 object-cover" />
+                    <img src={user.profilePicture || account} alt="profile" className="w-8 h-8 object-cover rounded-full" />
                   </div>
                 </div>
                 <span className="text-sm font-medium">My Profile</span>

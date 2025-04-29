@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Camera, Settings, LogOut, ChevronLeft, AlertTriangle, Loader2, ClockIcon, EditIcon, UserIcon } from 'lucide-react';
+import { ArrowLeft, Camera, Settings, LogOut, ChevronLeft, AlertTriangle, Loader2, ClockIcon, EditIcon, UserIcon, Save, X, Edit  } from 'lucide-react';
 import account from '../images/account-icon.svg'
 import logo from '../images/ShariaStocks-logo/logo1.jpeg'
 const Header = lazy(() => import('./Header'));
@@ -60,6 +60,7 @@ const Profile = () => {
   const [error, setError] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [isHovering, setIsHovering] = useState(false);
   const navigate = useNavigate();
 
   const fetchUserData = useCallback(async () => {
@@ -173,11 +174,13 @@ const Profile = () => {
             {/* Left Column - Profile Info */}
             <div className="lg:col-span-1" data-testid="profile-info-section">
               <div className="bg-white rounded-2xl shadow-sm p-6 text-center">
-                <div className="relative w-32 h-32 mx-auto mb-4 group">
+                <div className="relative w-32 h-32 mx-auto mb-4 group"  onMouseEnter={() => setIsHovering(true)}
+                onMouseLeave={() => setIsHovering(false)}
+                >
                   <img 
                     src={previewUrl || user.profilePicture || account} 
                     alt="profile" 
-                    className="w-full h-full rounded-full object-cover group-hover:opacity-70 transition"
+                    className={`w-full h-full rounded-full object-cover border-4 border-blue-100 shadow-md transition-all duration-300 ${isHovering ? "opacity-80" : ""}`}
                     data-testid="profile-image" 
                   />
                   <input 
@@ -189,46 +192,49 @@ const Profile = () => {
                     data-testid="profile-picture-input"
                   />
                   <label 
-                    htmlFor="profilePicture"
-                    className="absolute bottom-0 right-0 p-2 bg-blue-600 rounded-full text-white hover:bg-blue-700 cursor-pointer"
-                    aria-label="Upload Profile Picture"
-                    data-testid="upload-picture-button"
-                  >
-                    <Camera className="w-5 h-5" />
-                  </label>
+                      htmlFor="profilePicture"
+                      className={`absolute bottom-0 right-0 p-2.5 bg-blue-600 rounded-full text-white hover:bg-blue-700 shadow-lg cursor-pointer transform transition-all duration-300 ${isHovering ? "scale-110" : ""}`}
+                      aria-label="Upload Profile Picture"
+                      data-testid="upload-picture-button"
+                    >
+                      <Camera className="w-5 h-5" />
+                    </label>
                 </div>
                 {selectedFile && (
-                  <div className="flex justify-center gap-2 mt-2" data-testid="image-action-buttons">
+                  <div className="flex justify-center gap-4 mb-6" data-testid="image-action-buttons">
                     <button 
                       onClick={uploadPicture}
-                      className="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600"
+                      className="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full hover:from-blue-600 hover:to-blue-700 shadow-md flex items-center justify-center gap-2 transition-all duration-300 transform hover:scale-105"
                       data-testid="save-button"
-                      aria-label='Save'
                     >
-                      Save
+                      <Save className="w-4 h-4" />
+                      <span className="font-medium">Apply</span>
                     </button>
+                    
                     <button 
                       onClick={() => {
                         setSelectedFile(null);
                         setPreviewUrl(null);
                       }}
-                      className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
-                      aria-label='Cancel'
+                      className="px-5 py-2.5 bg-transparent text-gray-600 border border-gray-300 rounded-full hover:bg-gray-50 hover:border-gray-400 flex items-center justify-center gap-2 transition-all duration-300"
+                      aria-label="Cancel"
                       data-testid="cancel-button"
                     >
-                      Cancel
+                      <X className="w-4 h-4" />
+                      <span className="font-medium">Cancel</span>
                     </button>
                   </div>
                 )}
                 <h2 className="text-2xl font-semibold mb-1" data-testid="user-name">{user?.name || 'User Name'}</h2>
                 <p className="text-gray-500 mb-4" data-testid="user-email">{user?.email || 'user@example.com'}</p>
                 <button 
-                  className="w-full py-2.5 px-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors cursor-pointer" 
+                  className="w-full py-3.5 px-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 flex items-center justify-center gap-2 font-medium shadow-lg transform hover:translate-y-px"
                   onClick={() => navigate('/editprofile')}
                   aria-label="Edit Profile"
                   data-testid="edit-profile-button"
                 >
-                  Edit Profile
+                  <Edit className="w-5 h-5" />
+                  <span>Edit Profile</span>
                 </button>
               </div>
 
