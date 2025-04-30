@@ -3,11 +3,11 @@ import { Shield, Sparkles, Heart, TrendingUp, ArrowLeft, X, Search, Star, StarOf
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import Footer from "./Footer";
+import { getUserData } from '../api/auth';
 
 const WatchList = () => {
     const [activeTab, setActiveTab] = useState("all");
-    const location = useLocation();
-    const user = location.state?.user;
+    const [user, setUser] = useState({});
     const [stocks, setStocks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -16,6 +16,7 @@ const WatchList = () => {
     const [showFilters, setShowFilters] = useState(false);
     const [view, setView] = useState("grid"); // grid or list view
     const userId = localStorage.getItem('userId');
+    const email = localStorage.getItem('userEmail')
     const navigate = useNavigate();
     const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
     const isFreePlan = user?.subscription?.plan === 'free';
@@ -25,6 +26,7 @@ const WatchList = () => {
     const [modalType, setModalType] = useState(""); // "confirm" or "success"
     const [modalMessage, setModalMessage] = useState("");
     const [stockToRemove, setStockToRemove] = useState(null);
+    
 
     useEffect(() => {
         const handleResize = () => {
@@ -47,7 +49,6 @@ const WatchList = () => {
             setError("User ID is missing. Please log in again.");
             return;
         }
-
         const fetchWatchlist = async () => {
             try {
                 const response = await axios.get(`/api/watchlist/${userId}`);
@@ -89,8 +90,21 @@ const WatchList = () => {
 
         fetchWatchlist();
     }, [userId]);
+
+    useEffect(() => {
+        if (email) {
+          fetchUserData();
+        }
+      }, [email]);
     
-    
+    const fetchUserData = async () => {
+        try {
+          const userData = await getUserData(email);
+          setUser(userData);
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      };
 
     // Show confirmation modal for removing a stock
     const showRemoveConfirmation = (stockSymbol, e) => {

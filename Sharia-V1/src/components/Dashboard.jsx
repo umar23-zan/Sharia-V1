@@ -6,8 +6,7 @@ import { Helmet } from 'react-helmet';
 const HeaderDash = lazy(() => import('./HeaderDash'));
 import logo from '../images/ShariaStocks-logo/logo1.jpeg';
 import { getUserData } from '../api/auth';
-import PaymentAlertModal from './PaymentAlertModal';
-import usePaymentAlert from './usePaymentAlert';
+
 
 const Dashboard = () => {
   const [searchSymbol, setSearchSymbol] = useState('');
@@ -20,7 +19,7 @@ const Dashboard = () => {
   const sliderRef = useRef(null);
   const [companies, setCompanies] = useState([]);
   const email = localStorage.getItem('userEmail');
-  const { isOpen, type, daysRemaining, amount, closeAlert } = usePaymentAlert(user);
+ 
 
   useEffect(() => {
     setCompanies(niftyCompanies);
@@ -147,13 +146,6 @@ const Dashboard = () => {
       </div>}>
         <HeaderDash />
         <main className="max-w-7xl mx-auto pb-16">
-          <PaymentAlertModal
-            isOpen={isOpen}
-            onClose={closeAlert}
-            type={type}
-            daysRemaining={daysRemaining}
-            amount={amount}
-          />
 
           {/* Hero Section with Search */}
           <section className="relative px-4 py-8 md:py-16 ">
@@ -366,54 +358,6 @@ const Dashboard = () => {
             </div>
           </section>
 
-          {/* Categories Section */}
-          {/* <section className="w-full max-w-6xl mx-auto px-4 mt-12">
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-              <div className="p-6">
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-6">
-                  Browse by Categories
-                </h2>
-                
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {categories.map((category, index) => (
-                    <div 
-                      key={index}
-                      className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 cursor-pointer hover:shadow-md transition-all"
-                      onClick={() => navigate(`/category/${category.name.toLowerCase().replace(' ', '-')}`)}
-                    >
-                      <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-600">
-                            {category.icon === 'laptop' && <>
-                              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                              <line x1="8" y1="21" x2="16" y2="21"></line>
-                              <line x1="12" y1="17" x2="12" y2="21"></line>
-                            </>}
-                            {category.icon === 'activity' && <>
-                              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                            </>}
-                            {category.icon === 'shopping-bag' && <>
-                              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                              <line x1="3" y1="6" x2="21" y2="6"></line>
-                              <path d="M16 10a4 4 0 0 1-8 0"></path>
-                            </>}
-                            {category.icon === 'zap' && <>
-                              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                            </>}
-                          </svg>
-                        </div>
-                        <div className="ml-3">
-                          <div className="font-medium">{category.name}</div>
-                          <div className="text-xs text-indigo-600">{category.count} stocks</div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section> */}
-
           {/* Top 10 Halal Stocks Section - With Conditional Blur Based on User Plan */}
           <section className="w-full max-w-6xl mx-auto px-4 mt-12">
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
@@ -461,7 +405,7 @@ const Dashboard = () => {
                             if (!shouldBlur) {
                               navigate(`/stockresults/${stock.symbol}`, { state: { user } });
                             } else {
-                              navigate('/pricing');
+                              navigate('/subscriptiondetails');
                             }
                           }}
                         >
@@ -524,28 +468,6 @@ const Dashboard = () => {
                             {stock.marketCap}
                           </div>
                           
-                          {/* Compliance Score Indicator (Only for Premium) */}
-                          {/* {!shouldBlur && (
-                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 hidden lg:flex items-center">
-                              <div className="w-8 h-8">
-                                <svg viewBox="0 0 36 36" className="w-full h-full">
-                                  <path 
-                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                    fill="none"
-                                    stroke="#eee"
-                                    strokeWidth="3"
-                                  />
-                                  <path 
-                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                    fill="none"
-                                    stroke="#10b981"
-                                    strokeWidth="3"
-                                    strokeDasharray={`${stock.complianceScore}, 100`}
-                                  />
-                                </svg>
-                              </div>
-                            </div>
-                          )} */}
                         </div>
                       );
                     })}
@@ -607,47 +529,6 @@ const Dashboard = () => {
               </div>
             </div>
           </section>
-
-
-          {/* Newsletter Section */}
-          {/* <section className="w-full max-w-5xl mx-auto px-4 mt-12">
-            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-lg overflow-hidden relative">
-              <div className="absolute top-0 left-0 w-full h-full opacity-10">
-                <svg width="100%" height="100%" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <pattern id="grid" width="8" height="8" patternUnits="userSpaceOnUse">
-                      <path d="M 8 0 L 0 0 0 8" fill="none" stroke="white" strokeWidth="0.5" />
-                    </pattern>
-                  </defs>
-                  <rect width="100%" height="100%" fill="url(#grid)" />
-                </svg>
-              </div>
-              
-              <div className="p-8 md:p-10 text-white relative z-10 flex flex-col md:flex-row items-center justify-between">
-                <div className="mb-6 md:mb-0 md:mr-6">
-                  <h2 className="text-2xl md:text-3xl font-bold mb-2">Stay Updated</h2>
-                  <p className="opacity-90 max-w-md">Get weekly insights on Shariah-compliant stocks and market trends delivered to your inbox.</p>
-                </div>
-                
-                <div className="w-full md:w-auto">
-                  <form className="flex flex-col sm:flex-row gap-3">
-                    <input 
-                      type="email" 
-                      placeholder="Your email address" 
-                      className="px-4 py-3 rounded-lg text-white w-full sm:w-64 outline-none ring-2 ring-white bg-transparent"
-                    />
-                    <button 
-                      type="submit" 
-                      className="px-6 py-3 bg-white text-indigo-600 font-medium rounded-lg hover:bg-opacity-90 transition-colors"
-                    >
-                      Subscribe
-                    </button>
-                  </form>
-                  <p className="text-xs opacity-80 mt-2">We respect your privacy. Unsubscribe at any time.</p>
-                </div>
-              </div>
-            </div>
-          </section> */}
 
           {/* Footer */}
           <footer className="mt-16 text-center text-gray-500 text-sm border-t border-gray-100 pt-6 px-4">

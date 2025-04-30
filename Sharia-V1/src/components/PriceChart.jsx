@@ -53,7 +53,7 @@ const PriceChart = ({ symbol }) => {
   };
 
   return (
-    <div className="bg-white">
+    <div className="bg-white" >
        <div className="text-xs text-gray-500 p-2">
         Last Updated: {getPreviousHour()}
       </div>
