@@ -222,6 +222,7 @@ const WatchList = () => {
                 className="bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition cursor-pointer border border-gray-100"
                 onClick={() => {navigate(`/stockresults/${stock.symbol}`)}}
                 data-testid={`stock-card-${stock.symbol}`}
+                
             >
                 <div className="flex justify-between items-start mb-3">
                     <div className="flex-1">

@@ -1,7 +1,8 @@
 // src/components/FAQPage.jsx
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, ChevronUp, Search, Book, DollarSign, Users, Award, HelpCircle } from 'lucide-react';
+import { ChevronDown, ChevronUp, Search, Book, DollarSign, Users, Award, HelpCircle, ChevronLeft } from 'lucide-react';
 import Footer from './Footer';
+import { useNavigate } from 'react-router-dom';
 
 const FAQPage = () => {
   const [faqs, setFaqs] = useState([]);
@@ -10,6 +11,7 @@ const FAQPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [expandedFaqs, setExpandedFaqs] = useState({});
+  const navigate = useNavigate()
 
   useEffect(() => {
     loadSampleData();
@@ -129,6 +131,15 @@ const FAQPage = () => {
       {/* Header */}
       <div className="bg-emerald-800 text-white py-12">
         <div className="container mx-auto px-4">
+        <button 
+              className="group flex items-center text-white hover:text-purple-700 mb-6 transition duration-200" 
+              onClick={() => navigate(-1)}
+              aria-label="Go Back"
+              data-testid="go-back-button"
+            >
+              <ChevronLeft className="w-5 h-5 mr-1 group-hover:transform group-hover:-translate-x-1 transition-transform duration-200" />
+              <span className="font-medium">Go Back</span>
+            </button>
           <h1 className="text-3xl md:text-4xl font-bold mb-4 text-center">Frequently Asked Questions</h1>
           <p className="text-lg text-center max-w-2xl mx-auto">
             Find answers to common questions about Islamic investing and ShariaStocks services

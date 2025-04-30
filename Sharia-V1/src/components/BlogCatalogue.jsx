@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, BookOpen, TrendingUp, Filter, Users, FileText, ArrowRight } from 'lucide-react';
+import { Search, BookOpen, TrendingUp, Filter, Users, FileText, ArrowRight, ChevronLeft } from 'lucide-react';
 import ratios from '../images/Blog-pics/ratios.png'
 import haram from '../images/Blog-pics/understand_haram.jpg'
 import ai from '../images/Blog-pics/ai_role.png'
@@ -7,12 +7,13 @@ import halalHaram from '../images/Blog-pics/halal_haram.png'
 import halal from '../images/Blog-pics/halal.png'
 import sharia from '../images/Blog-pics/sharia.png'
 import top10 from '../images/Blog-pics/ai_role.png'
-import logo1 from '../images/ShariaStocks-logo/logo.png';
 import Footer from './Footer';
+import { useNavigate } from 'react-router-dom';
 
 function BlogCatalogue() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
+  const navigate = useNavigate();
 
   const categories = [
     { id: 'all', name: 'All Articles', icon: BookOpen },
@@ -154,6 +155,15 @@ function BlogCatalogue() {
       {/* Header */}
       <header className="bg-gradient-to-r from-green-900 to-green-700 text-white py-12 px-4 md:px-8" data-testid="blog-header">
         <div className="max-w-6xl mx-auto">
+          <button 
+              className="group flex items-center text-white hover:text-purple-700 mb-6 transition duration-200" 
+              onClick={() => navigate(-1)}
+              aria-label="Go Back"
+              data-testid="go-back-button"
+            >
+              <ChevronLeft className="w-5 h-5 mr-1 group-hover:transform group-hover:-translate-x-1 transition-transform duration-200" />
+              <span className="font-medium">Go Back</span>
+            </button>
           <h1 className="text-4xl font-bold mb-4" data-testid="blog-title">Islamic Finance Blog</h1>
           <p className="text-xl max-w-3xl" data-testid="blog-subtitle">
             Insights, guides, and resources for Muslim investors seeking to build wealth while adhering to Shariah principles

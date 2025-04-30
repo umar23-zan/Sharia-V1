@@ -2,6 +2,7 @@ import React, { Suspense, useEffect, useState } from 'react';
 import { ArrowLeft, Shield, Scale, FileText, CreditCard, AlertCircle, Clock, Globe, MessageSquare } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
+import Footer from './Footer';
 
 
 
@@ -304,6 +305,7 @@ const navigate = useNavigate();
               </div>
             </div>
           </section>
+          <Footer />
         </main>
       </Suspense>
     </div>

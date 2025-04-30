@@ -33,6 +33,8 @@ Sharia-V1/E2ETests
 Sharia-V1/playwright.config.js
 Sharia-V1/test-examples
 Sharia-V1/mocks
+Sharia-V1/*.png
+
 
 
 # Backend-Specific Files

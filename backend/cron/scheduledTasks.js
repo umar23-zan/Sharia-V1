@@ -2,7 +2,13 @@ const cron = require('node-cron');
 const User = require('../models/User');
 const nodemailer = require('nodemailer');
 const { sendEmail } = require('../service/emailService')
-const mongoose = require('mongoose')
+const Transaction = require('../models/Transaction');
+const Razorpay = require('razorpay');
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET
+});
+
 
 console.log('Scheduler started. Waiting for scheduled jobs.');
 
@@ -46,6 +52,87 @@ cron.schedule('0 0 * * *', async () => {
         { $set: { 'subscription.paymentReminderSent': true } }
       );
       console.log(`Auto-renewal reminder sent to ${user.email}`);
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Part 1: Process manual payment mode changes
+    const usersForPaymentModeChange = await User.find({
+      'subscription.status': 'active',
+      'subscription.pendingPaymentMode': 'manual',
+      'subscription.paymentModeChangeDate': { $lte: today }
+    });
+    
+    for (const user of usersForPaymentModeChange) {
+      try {
+        // Cancel the subscription in Razorpay
+        await razorpay.subscriptions.cancel(user.subscription.subscriptionId);
+        
+        // Update user record
+        await User.findByIdAndUpdate(
+          user._id,
+          {
+            $set: {
+               'subscription.paymentMode': 'manual',
+              'subscription.status': 'inactive',
+              'subscription.plan': 'free'
+             },
+            $unset: { 
+              'subscription.pendingPaymentMode': 1, 
+              'subscription.paymentModeChangeDate': 1 
+            }
+          }
+        );
+        
+        console.log(`Subscription ${user.subscription.subscriptionId} canceled for user ${user._id} due to payment mode change`);
+      } catch (error) {
+        console.error(`Failed to cancel subscription for user ${user._id}:`, error);
+      }
+    }
+
+     // Part 2: Process subscription status changes from cancelling to inactive
+     const usersWithCancelledSubscriptions = await User.find({
+      'subscription.status': 'cancelling',
+      'subscription.endDate': { $lt: today }
+    });
+    
+    for (const user of usersWithCancelledSubscriptions) {
+      try {
+        await User.findByIdAndUpdate(
+          user._id,
+          { $set: { 
+            'subscription.status': 'inactive',
+            'subscription.plan':'free',
+           } }
+        );
+        
+        console.log(`Updated subscription status to inactive for user ${user._id}`);
+      } catch (error) {
+        console.error(`Failed to update subscription status for user ${user._id}:`, error);
+      }
+    }
+
+     // Part 3: Process subscription status changes from active to inactive
+     const usersWithExpiredSubscriptions = await User.find({
+      'subscription.status': 'active',
+      'subscription.endDate': { $lt: today }
+    });
+    
+    for (const user of usersWithExpiredSubscriptions) {
+      try {
+        await User.findByIdAndUpdate(
+          user._id,
+          { $set: { 
+            'subscription.status': 'expired',
+            'subscription.plan': 'free',
+           } }
+        );
+        
+        console.log(`Updated subscription status to inactive for user ${user._id}`);
+      } catch (error) {
+        console.error(`Failed to update subscription status for user ${user._id}:`, error);
+      }
     }
   } catch (error) {
     console.error('Error processing automatic renewal reminders:', error);

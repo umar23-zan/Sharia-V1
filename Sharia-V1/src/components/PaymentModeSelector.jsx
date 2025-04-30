@@ -9,6 +9,7 @@ const PaymentModeSelector = ({ selected, onChange }) => {
       <div className="space-y-4">
         {/* Automatic Payment Option */}
         <div 
+          data-testid="automatic-payment-option"
           className={`p-4 border rounded-xl cursor-pointer transition-colors ${
             selected === 'automatic' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'
           }`}
