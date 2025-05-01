@@ -134,6 +134,128 @@ cron.schedule('0 0 * * *', async () => {
         console.error(`Failed to update subscription status for user ${user._id}:`, error);
       }
     }
+    // Part 4: Process subscription status changes from active to inactive for failed automatic payments
+    const usersWithPaymentIssues = await User.find({
+
+        'subscription.status': 'past_due' ,
+        'subscription.status': 'active', 'subscription.paymentMode': 'automatic', 'subscription.subscriptionId': { $exists: true, $ne: null }
+      
+    }).select('_id email name subscription razorpayCustomerId');
+    console.log(`Found ${usersWithPaymentIssues.length} users with potential payment issues.`);
+    
+    const processedUsers = [];
+    
+    for (const user of usersWithPaymentIssues) {
+      try {
+        // For users with active status, check subscription in Razorpay
+        if (user.subscription.status === 'active' && user.subscription.subscriptionId) {
+          const subscriptionData = await razorpay.subscriptions.fetch(user.subscription.subscriptionId);
+          
+          // Check if subscription status indicates payment issues
+          if (subscriptionData.status === 'halted' || subscriptionData.status === 'pending') {
+            // Update user status to reflect payment issues
+            await User.findByIdAndUpdate(
+              user._id,
+              { $set: { 'subscription.status': 'past_due' } }
+            );
+            
+            // Find the most recent transaction for this subscription
+            const latestTransaction = await Transaction.findOne({
+              userId: user._id,
+              subscriptionId: user.subscription.subscriptionId
+            }).sort({ createdAt: -1 });
+            
+            if (latestTransaction) {
+              latestTransaction.status = subscriptionData.status;
+              await latestTransaction.save();
+            }
+            
+            // Add user to the processed list
+            user.subscription.status = 'past_due'; // Update for email purposes
+            processedUsers.push(user);
+          }
+        }
+                // For users already marked as past_due, send payment failure notification
+                if (user.subscription.status === 'past_due') {
+                  const subject = 'Action Required: Subscription Payment Failed';
+                  const html = `
+                    <h1>Subscription Payment Issue</h1>
+                    <p>Hello ${user.name || 'User'},</p>
+                    <p>We were unable to process the automatic payment for your <strong>${user.subscription.plan} (${user.subscription.billingCycle})</strong> subscription.</p>
+                    <p>To keep your subscription active, please:</p>
+                    <ol>
+                      <li>Update your payment details in your account settings</li>
+                      <li>Contact our support team if you need assistance</li>
+                    </ol>
+                    <p>If the payment issue is not resolved within 7 days, your subscription benefits may be suspended.</p>
+                    <p>Thank you for your prompt attention to this matter.</p>
+                  `;
+                  
+                  await sendEmail(user.email, subject, html);
+                  console.log(`Payment failure notification sent to ${user.email}`);
+                  
+                  // Track when the payment reminder was sent
+                  await User.findByIdAndUpdate(
+                    user._id,
+                    { $set: { 'subscription.lastPaymentReminder': new Date() } }
+                  );
+                  
+                  processedUsers.push(user);
+                }
+              } catch (error) {
+                console.error(`Error processing payment issues for user ${user._id}:`, error);
+              }
+            }
+            
+            // Check for subscriptions that have been in past_due state for too long (e.g., 15 days)
+            const threeDaysAgo = new Date();
+            threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+            
+            const longOverdueUsers = await User.find({
+              'subscription.status': 'past_due',
+              'subscription.lastPaymentReminder': { $lt: threeDaysAgo }
+            });
+            
+            for (const user of longOverdueUsers) {
+              try {
+                // Cancel subscription in Razorpay if it exists
+                if (user.subscription.subscriptionId) {
+                  await razorpay.subscriptions.cancel(user.subscription.subscriptionId);
+                }
+                
+                // Update user record
+                await User.findByIdAndUpdate(
+                  user._id,
+                  { 
+                    $set: { 
+                      'subscription.status': 'inactive',
+                      'subscription.plan': 'free',
+                      'subscription.autoRenew': false,
+                      'subscription.cancelledAt': new Date(),
+                      'subscription.cancellationReason': 'Payment failure'
+                    }
+                  }
+                );
+                
+                // Send cancellation email
+                const subject = 'Subscription Cancelled: Payment Issues';
+                const html = `
+                  <h1>Subscription Cancelled</h1>
+                  <p>Hello ${user.name || 'User'},</p>
+                  <p>Due to ongoing payment issues, your <strong>${user.subscription.plan} (${user.subscription.billingCycle})</strong> subscription has been cancelled.</p>
+                  <p>Your account has been downgraded to the free plan.</p>
+                  <p>If you would like to reactivate your premium features, please visit your account settings to set up a new subscription.</p>
+                  <p>Thank you for your understanding.</p>
+                `;
+                
+                await sendEmail(user.email, subject, html);
+                console.log(`Subscription cancellation notice sent to ${user.email}`);
+              } catch (error) {
+                console.error(`Error cancelling overdue subscription for user ${user._id}:`, error);
+              }
+            }
+        
+
   } catch (error) {
     console.error('Error processing automatic renewal reminders:', error);
   }
@@ -188,7 +310,6 @@ cron.schedule('5 8 * * *', async () => {
             <p>Hello ${user.name || 'User'},</p>
             <p>Your <strong>${plan} (${billingCycle})</strong> plan will expire on <strong>${formatDate(endDate)}</strong> (in 7 days).</p>
             <p>To continue enjoying the benefits, please renew your plan manually before the expiry date.</p>
-            <p>[Link to Renewal Page]</p>
             <p>Thank you!</p>
          `;
          updatePayload = { 'subscription.firstReminderSent': true };
@@ -202,7 +323,6 @@ cron.schedule('5 8 * * *', async () => {
             <p>Hello ${user.name || 'User'},</p>
             <p>Just a reminder that your <strong>${plan} (${billingCycle})</strong> plan will expire on <strong>${formatDate(endDate)}</strong> (in 3 days).</p>
             <p>Renew now to avoid any interruption in service.</p>
-            <p>[Link to Renewal Page]</p>
             <p>Thank you!</p>
          `;
          updatePayload = { 'subscription.secondReminderSent': true };
@@ -216,7 +336,6 @@ cron.schedule('5 8 * * *', async () => {
             <p>Hello ${user.name || 'User'},</p>
             <p>Your <strong>${plan} (${billingCycle})</strong> plan expires tomorrow, <strong>${formatDate(endDate)}</strong>.</p>
             <p>This is your last chance to renew manually and keep your access.</p>
-            <p>[Link to Renewal Page]</p>
             <p>Thank you!</p>
          `;
          updatePayload = { 'subscription.finalReminderSent': true };
