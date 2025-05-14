@@ -249,6 +249,7 @@ function BlogCatalogue() {
                         className="text-green-600 font-medium flex items-center hover:text-green-700"
                         data-testid={`featured-read-more-${post.id}`}
                         aria-label={`Read more about ${post.title}`}
+                        
                       >
                         Read More <ArrowRight className="ml-1 h-4 w-4" data-testid={`featured-read-more-icon-${post.id}`} />
                       </a>

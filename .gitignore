@@ -26,14 +26,14 @@ Sharia-V1/node_modules/
 Sharia-V1/dist/
 Sharia-V1/.vite/
 Sharia-V1/.cache/
-Sharia-V1/tests
-Sharia-V1/test-results
-Sharia-V1/e2e
-Sharia-V1/E2ETests
-Sharia-V1/playwright.config.js
-Sharia-V1/test-examples
-Sharia-V1/mocks
-Sharia-V1/*.png
+# Sharia-V1/tests
+# Sharia-V1/test-results
+# Sharia-V1/e2e
+# Sharia-V1/E2ETests
+# Sharia-V1/playwright.config.js
+# Sharia-V1/test-examples
+# Sharia-V1/mocks
+# Sharia-V1/*.png
 
 
 
