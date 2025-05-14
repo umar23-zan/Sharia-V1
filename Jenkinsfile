@@ -8,14 +8,14 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/umar23-zan/Sharia-V1.git'
+                git branch: 'master', url: 'https://github.com/umar23-zan/Sharia-V1.git'
             }
         }
 
         stage('Install Dependencies') {
             steps {
                 dir('Sharia-V1') {
-                    bat 'npm ci'
+                    bat 'npm install'
                 }
             }
         }
@@ -31,7 +31,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 dir('Sharia-V1') {
-                    bat 'npm test'
+                    bat 'npx playwright test'
                 }
             }
         }
